@@ -7004,6 +7004,8 @@ MonoBehaviour:
   _lobbyLayout: {fileID: 1527647078}
   _lobbyLayoutButtonOnlineCoop: {fileID: 1160628549}
   _lobbyLayoutButtonBack: {fileID: 1452254117}
+  _lobbyOnline: {fileID: 1658531360}
+  _lobbyOnlineButtonBack: {fileID: 2143199569}
   _buttonOptions: {fileID: 949889476}
   _popupOptions: {fileID: 1685049294}
   _popupOptionsButtonBack: {fileID: 1473799289}

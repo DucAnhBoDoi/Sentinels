@@ -10,7 +10,6 @@ public class SteamLobby : MonoBehaviour
     private const string HostAddressKey = "HostAddress";
     private CSteamID currentLobbyID;
 
-    // Callbacks
     protected Callback<LobbyCreated_t> lobbyCreated;
     protected Callback<GameLobbyJoinRequested_t> gameLobbyJoinRequested;
     protected Callback<LobbyEnter_t> lobbyEntered;
@@ -20,28 +19,18 @@ public class SteamLobby : MonoBehaviour
     public GameObject lobbyLayout;
     public GameObject lobbyOnline;
 
-    // Cờ kiểm soát trạng thái để tránh bấm liên tục
-    private bool isLeavingLobby = false;
-
     private void Awake()
     {
-        if (Instance == null)
-        {
-            Instance = this;
-            DontDestroyOnLoad(gameObject);
-        }
-        else if (Instance != this)
-        {
-            Destroy(gameObject);
-            return;
-        }
+        // Xử lý Singleton đơn giản
+        if (Instance == null) Instance = this;
+        else if (Instance != this) Destroy(gameObject);
 
         networkManager = GetComponent<NetworkManager>();
     }
 
     private void Start()
     {
-        if (!SteamManager.Initialized) return;
+        if (!SteamManager.Initialized) { return; }
         lobbyCreated = Callback<LobbyCreated_t>.Create(OnLobbyCreated);
         gameLobbyJoinRequested = Callback<GameLobbyJoinRequested_t>.Create(OnGameLobbyJoinRequested);
         lobbyEntered = Callback<LobbyEnter_t>.Create(OnLobbyEntered);
@@ -49,11 +38,7 @@ public class SteamLobby : MonoBehaviour
 
     public void HostLobby()
     {
-        // Chặn nếu đang thoát hoặc mạng đang chạy
-        if (isLeavingLobby || NetworkServer.active) return;
-
-        if (mainLayout != null) mainLayout.SetActive(false);
-        
+        mainLayout.SetActive(false);
         networkManager.maxConnections = 2;
         SteamMatchmaking.CreateLobby(ELobbyType.k_ELobbyTypeFriendsOnly, networkManager.maxConnections);
     }
@@ -64,18 +49,15 @@ public class SteamLobby : MonoBehaviour
         SteamFriends.ActivateGameOverlayInviteDialog(currentLobbyID);
     }
 
-    // --- HÀM THOÁT PHÒNG SẠCH SẼ ---
+    // --- HÀM THOÁT PHÒNG ---
     public void LeaveLobby()
     {
-        if (isLeavingLobby) return;
-        isLeavingLobby = true;
-
         // 1. Ngắt kết nối Mirror
         if (NetworkServer.active && NetworkClient.isConnected)
         {
             networkManager.StopHost();
         }
-        else if (NetworkClient.isConnected)
+        else
         {
             networkManager.StopClient();
         }
@@ -87,30 +69,22 @@ public class SteamLobby : MonoBehaviour
             currentLobbyID = new CSteamID(0);
         }
 
-        // 3. Về Menu chính
+        // 3. Reset UI về Main Menu
         ReturnToMainMenu();
-
-        // 4. Mở khóa sau 0.5s để cho phép Host lại
-        Invoke(nameof(ResetLeavingFlag), 0.5f);
-    }
-
-    private void ResetLeavingFlag()
-    {
-        isLeavingLobby = false;
     }
 
     private void OnLobbyCreated(LobbyCreated_t callback)
     {
         if (callback.m_eResult != EResult.k_EResultOK)
         {
-            if (mainLayout != null) mainLayout.SetActive(true);
+            mainLayout.SetActive(true);
             return;
         }
 
         currentLobbyID = new CSteamID(callback.m_ulSteamIDLobby);
         networkManager.StartHost();
+
         SteamMatchmaking.SetLobbyData(currentLobbyID, HostAddressKey, SteamUser.GetSteamID().ToString());
-        
         ShowOnlineLobbyUI();
     }
 
@@ -121,14 +95,13 @@ public class SteamLobby : MonoBehaviour
 
     private void OnLobbyEntered(LobbyEnter_t callback)
     {
-        if (NetworkServer.active) return;
+        if (NetworkServer.active) { return; }
 
         currentLobbyID = new CSteamID(callback.m_ulSteamIDLobby);
         string hostAddress = SteamMatchmaking.GetLobbyData(currentLobbyID, HostAddressKey);
 
         networkManager.networkAddress = hostAddress;
         networkManager.StartClient();
-        
         ShowOnlineLobbyUI();
     }
 
@@ -140,7 +113,7 @@ public class SteamLobby : MonoBehaviour
         if (lobbyOnline) 
         {
             lobbyOnline.SetActive(true);
-            // GỌI RESET NGAY LẬP TỨC KHI BẬT UI
+            // FIX: Gọi Reset UI ngay khi bật lên để xóa trạng thái cũ
             if(LobbyUIManager.Instance != null) LobbyUIManager.Instance.ResetUI();
         }
     }

@@ -19,11 +19,12 @@ public class MainMenuController : MonoBehaviour
     private GameObject _mainLayout;
 
     [Header("New Game")]
+
     [SerializeField]
     private Button _buttonNewGame;
 
     [SerializeField]
-    private GameObject _lobbyLayout; // Menu chọn Online/Offline
+    private GameObject _lobbyLayout;
 
     [SerializeField]
     private Button _lobbyLayoutButtonOnlineCoop;
@@ -31,11 +32,14 @@ public class MainMenuController : MonoBehaviour
     [SerializeField]
     private Button _lobbyLayoutButtonBack;
 
-    // --- ĐÃ XÓA: _lobbyOnline và _lobbyOnlineButtonBack ---
-    // Lý do: MainMenu không được phép can thiệp vào bên trong phòng Online.
-    // Việc tắt/bật phòng Online là việc của SteamLobby.cs
+    [SerializeField]
+    private GameObject _lobbyOnline;
+
+    [SerializeField]
+    private Button _lobbyOnlineButtonBack;
 
     [Header("Options")]
+
     [SerializeField]
     private Button _buttonOptions;
 
@@ -49,6 +53,7 @@ public class MainMenuController : MonoBehaviour
     private Button _popupOptionsButtonSave;
 
     [Header("Exit")]
+
     [SerializeField]
     private Button _buttonExit;
 
@@ -69,7 +74,7 @@ public class MainMenuController : MonoBehaviour
         if (!_buttonContinue.interactable)
         {
             TMP_Text btnText = _buttonContinue.GetComponentInChildren<TMP_Text>();
-            if (btnText) btnText.color = Color.grey;
+            btnText.color = Color.grey;
         }
         else
         {
@@ -84,13 +89,9 @@ public class MainMenuController : MonoBehaviour
         AddHoverEffect(_lobbyLayoutButtonBack);
 
         _buttonNewGame.onClick.AddListener(OnNewGameButtonClick);
-
-        // FIX: Hàm bấm nút Online Coop sẽ gọi lệnh khác
         _lobbyLayoutButtonOnlineCoop.onClick.AddListener(OnLobbyLayoutButtonOnlineCoopClick);
-
         _lobbyLayoutButtonBack.onClick.AddListener(OnLobbyLayoutButtonBackClick);
-
-        // --- ĐÃ XÓA Listener của _lobbyOnlineButtonBack ---
+        _lobbyOnlineButtonBack.onClick.AddListener(OnLobbyOnlineButtonBackClick);
 
         _buttonOptions.onClick.AddListener(OnOptionsButtonClick);
         _popupOptionsButtonBack.onClick.AddListener(OnPopupOptionsButtonBackClick);
@@ -105,40 +106,45 @@ public class MainMenuController : MonoBehaviour
     {
         _mainLayout.SetActive(false);
         _lobbyLayout.SetActive(true);
-        KillTweensIn(_mainLayout); // Tối ưu code gom vào hàm
+
+        foreach (TMP_Text text in _mainLayout.GetComponentsInChildren<TMP_Text>())
+        {
+            DOTween.Kill(text);
+            text.rectTransform.anchoredPosition = Vector2.zero;
+        }
     }
 
-    // --- FIX QUAN TRỌNG NHẤT Ở ĐÂY ---
     private void OnLobbyLayoutButtonOnlineCoopClick()
     {
-        // Thay vì MainMenu tự bật UI Lobby lên (sai), 
-        // nó sẽ bảo thằng SteamLobby: "Ê, tạo phòng Host đi!"
-        if (SteamLobby.Instance != null)
-        {
-            // SteamLobby sẽ tự lo việc ẩn MainMenu và hiện LobbyOnline
-            SteamLobby.Instance.HostLobby();
+        _txtTitle.gameObject.SetActive(false);
+        _lobbyLayout.SetActive(false);
+        _lobbyOnline.SetActive(true);
 
-            // Ẩn cái menu chọn chế độ đi
-            _lobbyLayout.SetActive(false);
-            _txtTitle.gameObject.SetActive(false);
-        }
-        else
+        foreach (TMP_Text text in _lobbyLayout.GetComponentsInChildren<TMP_Text>())
         {
-            Debug.LogError("Không tìm thấy SteamLobby Instance!");
+            DOTween.Kill(text);
+            text.rectTransform.anchoredPosition = Vector2.zero;
         }
-
-        KillTweensIn(_lobbyLayout);
     }
 
     private void OnLobbyLayoutButtonBackClick()
     {
         _mainLayout.SetActive(true);
         _lobbyLayout.SetActive(false);
-        KillTweensIn(_lobbyLayout);
+
+        foreach (TMP_Text text in _lobbyLayout.GetComponentsInChildren<TMP_Text>())
+        {
+            DOTween.Kill(text);
+            text.rectTransform.anchoredPosition = Vector2.zero;
+        }
     }
 
-    // --- ĐÃ XÓA hàm OnLobbyOnlineButtonBackClick ---
-    // Nút Back trong Lobby Online giờ đây hoàn toàn do LobbyUIManager quản lý.
+    private void OnLobbyOnlineButtonBackClick()
+    {
+        _txtTitle.gameObject.SetActive(true);
+        _lobbyLayout.SetActive(true);
+        _lobbyOnline.SetActive(false);
+    }
 
     private void OnOptionsButtonClick()
     {
@@ -174,25 +180,10 @@ public class MainMenuController : MonoBehaviour
 #endif
     }
 
-    // Hàm hỗ trợ để code gọn hơn
-    private void KillTweensIn(GameObject container)
-    {
-        foreach (TMP_Text text in container.GetComponentsInChildren<TMP_Text>())
-        {
-            DOTween.Kill(text);
-            text.rectTransform.anchoredPosition = Vector2.zero;
-        }
-    }
-
     private void AddHoverEffect(Button button)
     {
-        if (button == null) return;
-
-        EventTrigger trigger = button.gameObject.GetComponent<EventTrigger>();
-        if (trigger == null) trigger = button.gameObject.AddComponent<EventTrigger>();
-
+        EventTrigger trigger = button.gameObject.AddComponent<EventTrigger>();
         TMP_Text btnText = button.GetComponentInChildren<TMP_Text>();
-        if (btnText == null) return;
 
         EventTrigger.Entry pointerEnterEntry = new()
         {

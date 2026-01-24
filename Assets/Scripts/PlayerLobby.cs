@@ -12,33 +12,41 @@ public class PlayerLobby : NetworkBehaviour
 
     public override void OnStartClient()
     {
+        // Tìm và hiện UI
         SteamLobby steamLobby = FindObjectOfType<SteamLobby>();
         if (steamLobby != null) steamLobby.ShowOnlineLobbyUI();
         
-        // Cập nhật UI ngay khi vào
-        if (LobbyUIManager.Instance != null) LobbyUIManager.Instance.UpdateUI();
+        // Gọi UpdateUI ngay lập tức
+        if (LobbyUIManager.Instance != null) 
+        {
+            LobbyUIManager.Instance.UpdateUI();
+        }
     }
 
     public override void OnStartAuthority()
     {
         if (SteamManager.Initialized)
         {
-            CmdSetDisplayName(SteamFriends.GetPersonaName());
+            string steamName = SteamFriends.GetPersonaName();
+            CmdSetDisplayName(steamName);
         }
     }
 
     public override void OnStopClient()
     {
-        // Nếu mình thoát -> Về Menu
+        // Nếu là máy mình thì tắt UI về menu
         if (isLocalPlayer)
         {
             SteamLobby steamLobby = FindObjectOfType<SteamLobby>();
             if (steamLobby != null) steamLobby.ReturnToMainMenu();
         }
         
-        // Cập nhật UI sau 0.1s để xóa slot
+        // Cập nhật lại UI để xóa slot của người vừa thoát
         if (LobbyUIManager.Instance != null) 
+        {
+            // Delay cực nhỏ để object kịp hủy trước khi UI vẽ lại
             LobbyUIManager.Instance.Invoke(nameof(LobbyUIManager.Instance.UpdateUI), 0.1f);
+        }
     }
 
     [Command]
