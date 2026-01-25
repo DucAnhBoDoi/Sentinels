@@ -70,9 +70,6 @@ public class LobbyUIManager : MonoBehaviour
 
     public void UpdateUI()
     {
-        // --- FIX WARNING Ở ĐÂY ---
-        // Thay FindObjectsOfType bằng FindObjectsByType(FindObjectsSortMode.None)
-        // Nó nhanh hơn vì không cần sắp xếp mặc định của Unity, ta sẽ tự sort theo netId bên dưới
         List<PlayerLobby> players = FindObjectsByType<PlayerLobby>(FindObjectsSortMode.None)
                                     .OrderBy(x => x.netId)
                                     .ToList();

@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.UI;
 using Mirror;
 using Steamworks;
 
@@ -10,8 +11,9 @@ public class SteamLobby : MonoBehaviour
     private const string HostAddressKey = "HostAddress";
     private CSteamID currentLobbyID;
 
-    // Callbacks
-    protected Callback<LobbyCreated_t> lobbyCreated;
+    
+    private CallResult<LobbyCreated_t> lobbyCreatedCallResult;
+    
     protected Callback<GameLobbyJoinRequested_t> gameLobbyJoinRequested;
     protected Callback<LobbyEnter_t> lobbyEntered;
 
@@ -25,35 +27,48 @@ public class SteamLobby : MonoBehaviour
         if (Instance == null)
         {
             Instance = this;
-            DontDestroyOnLoad(gameObject); // Giữ lại Object này khi chuyển Scene
+            DontDestroyOnLoad(gameObject);
         }
         else if (Instance != this)
         {
-            // Nếu phát hiện Object trùng (do load lại Scene), hủy cái mới đi
             Destroy(gameObject);
             return;
         }
-        // ----------------------------
 
         networkManager = GetComponent<NetworkManager>();
     }
 
-    // --- FIX: Hàm cập nhật UI mới từ MainMenuController ---
     public void SetUIPanels(GameObject main, GameObject lobby, GameObject online)
     {
         mainLayout = main;
         lobbyLayout = lobby;
         lobbyOnline = online;
+
+        if (lobbyOnline != null)
+        {
+            Button[] buttons = lobbyOnline.GetComponentsInChildren<Button>(true);
+            foreach (var btn in buttons)
+            {
+                if (btn.name.Contains("Invite") || btn.name.Contains("invite")) 
+                {
+                    btn.onClick.RemoveAllListeners(); 
+                    btn.onClick.AddListener(InviteFriends); 
+                    
+                    break; 
+                }
+            }
+        }
     }
 
     private void Start()
     {
         if (!SteamManager.Initialized) { return; }
-        
-        // Chỉ đăng ký Callback nếu chưa đăng ký
-        if (lobbyCreated == null)
+
+        // Khởi tạo CallResult
+        lobbyCreatedCallResult = CallResult<LobbyCreated_t>.Create(OnLobbyCreated);
+
+        if (gameLobbyJoinRequested == null)
         {
-            lobbyCreated = Callback<LobbyCreated_t>.Create(OnLobbyCreated);
             gameLobbyJoinRequested = Callback<GameLobbyJoinRequested_t>.Create(OnGameLobbyJoinRequested);
             lobbyEntered = Callback<LobbyEnter_t>.Create(OnLobbyEntered);
         }
@@ -61,22 +76,34 @@ public class SteamLobby : MonoBehaviour
 
     public void HostLobby()
     {
-        // FIX: Kiểm tra null trước khi dùng
         if (mainLayout != null) mainLayout.SetActive(false);
 
+        // Đảm bảo không còn ở trong lobby cũ trước khi tạo mới
+        if (currentLobbyID.m_SteamID != 0)
+        {
+            LeaveLobby();
+        }
+
         networkManager.maxConnections = 2;
-        SteamMatchmaking.CreateLobby(ELobbyType.k_ELobbyTypeFriendsOnly, networkManager.maxConnections);
+
+        // Gọi Steam tạo phòng và đợi kết quả qua CallResult
+        SteamAPICall_t handle = SteamMatchmaking.CreateLobby(ELobbyType.k_ELobbyTypeFriendsOnly, networkManager.maxConnections);
+        lobbyCreatedCallResult.Set(handle);
     }
 
     public void InviteFriends()
     {
-        if (currentLobbyID.m_SteamID == 0) return;
+
+        if (currentLobbyID.m_SteamID == 0)
+        {
+            Debug.LogError("Chưa có Lobby ID! Có thể việc tạo phòng đã thất bại.");
+            return;
+        }
         SteamFriends.ActivateGameOverlayInviteDialog(currentLobbyID);
     }
 
     public void LeaveLobby()
     {
-        // 1. Ngắt kết nối Mirror
         if (NetworkServer.active && NetworkClient.isConnected)
         {
             networkManager.StopHost();
@@ -86,7 +113,6 @@ public class SteamLobby : MonoBehaviour
             networkManager.StopClient();
         }
 
-        // 2. Rời Steam Lobby
         if (currentLobbyID.m_SteamID != 0)
         {
             SteamMatchmaking.LeaveLobby(currentLobbyID);
@@ -94,9 +120,9 @@ public class SteamLobby : MonoBehaviour
         }
     }
 
-    private void OnLobbyCreated(LobbyCreated_t callback)
+    private void OnLobbyCreated(LobbyCreated_t callback, bool bIOFailure)
     {
-        if (callback.m_eResult != EResult.k_EResultOK)
+        if (bIOFailure || callback.m_eResult != EResult.k_EResultOK)
         {
             if (mainLayout != null) mainLayout.SetActive(true);
             return;
@@ -130,20 +156,18 @@ public class SteamLobby : MonoBehaviour
 
     public void ShowOnlineLobbyUI()
     {
-        // FIX: Kiểm tra null an toàn
         if (mainLayout != null) mainLayout.SetActive(false);
         if (lobbyLayout != null) lobbyLayout.SetActive(false);
 
         if (lobbyOnline != null)
         {
             lobbyOnline.SetActive(true);
-            // Reset UI Manager để xóa thông tin cũ
-            if (LobbyUIManager.Instance != null) LobbyUIManager.Instance.ResetUI();
         }
     }
 
     public void ReturnToMainMenu()
     {
+        LeaveLobby();
         if (lobbyOnline != null) lobbyOnline.SetActive(false);
         if (mainLayout != null) mainLayout.SetActive(true);
     }
