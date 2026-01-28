@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -19,6 +20,9 @@ public class MainMenuMainLayoutController : MonoBehaviour
     private Button _btnExit;
 
     [SerializeField]
+    private Button _btnAuth;
+
+    [SerializeField]
     private GameObject _mainLayout;
 
     [SerializeField]
@@ -30,11 +34,15 @@ public class MainMenuMainLayoutController : MonoBehaviour
     [SerializeField]
     private GameObject _popupExit;
 
+    [SerializeField]
+    private GameObject _popupAuth;
+
     private void Start()
     {
         _btnNewGame.onClick.AddListener(OnBtnNewGameClick);
         _btnOptions.onClick.AddListener(OnBtnOptionsClick);
         _btnExit.onClick.AddListener(OnBtnExitClick);
+        _btnAuth.onClick.AddListener(OnBtnAuthClick);
     }
 
     private void OnBtnNewGameClick()
@@ -51,5 +59,10 @@ public class MainMenuMainLayoutController : MonoBehaviour
     private void OnBtnExitClick()
     {
         _popupExit.SetActive(true);
+    }
+
+    private void OnBtnAuthClick()
+    {
+        _popupAuth.SetActive(true);
     }
 }
