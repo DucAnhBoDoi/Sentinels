@@ -33,7 +33,6 @@ public class MenuMainLayoutController : MonoBehaviour
     private void Start()
     {
         _btnNewGame.onClick.AddListener(OnBtnNewGameClick);
-        _btnJoinRoom.onClick.AddListener(OnBtnJoinRoomClick);
         _btnShop.onClick.AddListener(OnBtnShopClick);
         _btnOptions.onClick.AddListener(OnBtnOptionsClick);
         _btnExit.onClick.AddListener(OnBtnExitClick);
@@ -69,9 +68,5 @@ public class MenuMainLayoutController : MonoBehaviour
     private void OnBtnLogoutClick()
     {
         _utils.ShowPopupLogout();
-    }
-    private void OnBtnJoinRoomClick()
-    {
-        _utils.ShowPopupRoom();
     }
 }
