@@ -27,7 +27,7 @@ public class MenuSceneUtils : MonoBehaviour
     private GameObject _popupShop;
 
     [SerializeField]
-    private GameObject _lobbyOnline;
+    private LobbyCoop _lobbyCoop;
 
     private GameObject _activeLayout;
     private GameObject _activePopup;
@@ -71,12 +71,14 @@ public class MenuSceneUtils : MonoBehaviour
     public void ShowMainLayout()
     {
         _mainGroup.SetActive(true);
+        _lobbyCoop.gameObject.SetActive(false);
         SetActiveLayout(_mainLayout);
     }
 
     public void ShowCoopLayout()
     {
         _mainGroup.SetActive(true);
+        _lobbyCoop.gameObject.SetActive(false);
         SetActiveLayout(_coopLayout);
     }
 
@@ -110,9 +112,29 @@ public class MenuSceneUtils : MonoBehaviour
         SetActivePopup(null);
     }
 
-    public void ShowLobbyOnline()
+    public void ShowLobbyCoop()
     {
         _mainGroup.SetActive(false);
-        _lobbyOnline.SetActive(true);
+        _lobbyCoop.gameObject.SetActive(true);
+    }
+
+    public void LobbyCoopSetCoopModeLocal()
+    {
+        _lobbyCoop.SetCoopModeLocal();
+    }
+
+    public void LobbyCoopSetCoopModeOnline()
+    {
+        _lobbyCoop.SetCoopModeOnline();
+    }
+
+    public void LobbyCoopSetLobbyActionJoin()
+    {
+        _lobbyCoop.SetLobbyActionJoin();
+    }
+
+    public void LobbyCoopSetLobbyActionCreate()
+    {
+        _lobbyCoop.SetLobbyActionCreate();
     }
 }

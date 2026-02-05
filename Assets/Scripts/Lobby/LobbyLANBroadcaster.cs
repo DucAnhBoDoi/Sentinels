@@ -42,11 +42,6 @@ public class LobbyLANBroadcaster : MonoBehaviour
         _transport = NetworkManager.Singleton.GetComponent<UnityTransport>();
     }
 
-    private void Start()
-    {
-        NetworkManager.Singleton.StartHost();
-    }
-
     private void Update()
     {
         if (_udpClient == null)

@@ -21,6 +21,8 @@ public class MenuPopupLogoutController : MonoBehaviour
     private void OnBtnYesClick()
     {
         PlayerPrefs.DeleteKey(nameof(PlayerPrefsKeys.S_UserId));
+        PlayerPrefs.DeleteKey(nameof(PlayerPrefsKeys.S_UserName));
+        PlayerPrefs.DeleteKey(nameof(PlayerPrefsKeys.I_Coin));
         _utils.HidePopup();
     }
 

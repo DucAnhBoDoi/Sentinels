@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -33,6 +34,7 @@ public class MenuMainLayoutController : MonoBehaviour
     private void Start()
     {
         _btnNewGame.onClick.AddListener(OnBtnNewGameClick);
+        _btnJoinRoom.onClick.AddListener(OnBtnJoinRoomClick);
         _btnShop.onClick.AddListener(OnBtnShopClick);
         _btnOptions.onClick.AddListener(OnBtnOptionsClick);
         _btnExit.onClick.AddListener(OnBtnExitClick);
@@ -42,7 +44,15 @@ public class MenuMainLayoutController : MonoBehaviour
 
     private void OnBtnNewGameClick()
     {
+        _utils.LobbyCoopSetLobbyActionCreate();
         _utils.ShowCoopLayout();
+    }
+
+    private void OnBtnJoinRoomClick()
+    {
+        _utils.LobbyCoopSetLobbyActionJoin();
+        // NOTE: temporary
+        _utils.ShowLobbyCoop();
     }
 
     private void OnBtnShopClick()

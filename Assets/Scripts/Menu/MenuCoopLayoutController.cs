@@ -24,12 +24,14 @@ public class MenuCoopLayoutController : MonoBehaviour
 
     private void OnBtnOnlineClick()
     {
-        _utils.ShowLobbyOnline();
+        _utils.LobbyCoopSetCoopModeOnline();
+        _utils.ShowLobbyCoop();
     }
 
     private void OnBtnLocalClick()
     {
-        _utils.ShowLobbyOnline();
+        _utils.LobbyCoopSetCoopModeLocal();
+        _utils.ShowLobbyCoop();
     }
 
     private void OnBtnBackClick()

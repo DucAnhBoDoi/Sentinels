@@ -6,7 +6,7 @@ using UnityEngine.UI;
 public class LobbyPlayer : NetworkBehaviour
 {
     [HideInInspector]
-    public NetworkVariable<bool> IsReady = new(false, writePerm: NetworkVariableWritePermission.Owner);
+    public NetworkVariable<bool> NetIsReady = new(false, writePerm: NetworkVariableWritePermission.Owner);
 
     [SerializeField]
     private TMP_Text _txtPlayerName;
@@ -32,28 +32,26 @@ public class LobbyPlayer : NetworkBehaviour
 
     private void Update()
     {
-        if (IsReady.Value && _imgBtnPlayerReady.color != _colorReady)
+        if (NetIsReady.Value && _imgBtnPlayerReady.color != _colorReady)
         {
             _imgBtnPlayerReady.color = _colorReady;
         }
-        else if (!IsReady.Value && _imgBtnPlayerReady.color != _colorNotReady)
+        else if (!NetIsReady.Value && _imgBtnPlayerReady.color != _colorNotReady)
         {
             _imgBtnPlayerReady.color = _colorNotReady;
         }
     }
 
+    public override void OnNetworkSpawn()
+    {
+        _btnPlayerReady.interactable = IsOwner;
+    }
+
     private void OnBtnPlayerReadyClick()
     {
-        IsReady.Value = !IsReady.Value;
-    }
-
-    public override void OnGainedOwnership()
-    {
-        _btnPlayerReady.interactable = true;
-    }
-
-    public override void OnLostOwnership()
-    {
-        _btnPlayerReady.interactable = false;
+        if (IsOwner)
+        {
+            NetIsReady.Value = !NetIsReady.Value;
+        }
     }
 }
