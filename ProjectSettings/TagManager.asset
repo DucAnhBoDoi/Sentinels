@@ -3,7 +3,9 @@
 --- !u!78 &1
 TagManager:
   serializedVersion: 3
-  tags: []
+  tags:
+  - Enemy
+  - TheCore
   layers:
   - Default
   - TransparentFX
@@ -58,6 +60,8 @@ TagManager:
     locked: 0
   - name: WalkBehind
     uniqueID: 2715252765
+  - name: UI
+    uniqueID: 1685065063
     locked: 0
   m_RenderingLayers:
   - Default

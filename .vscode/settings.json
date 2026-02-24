@@ -67,5 +67,5 @@
         "*.sln": "*.csproj",
         "*.slnx": "*.csproj"
     },
-    "dotnet.defaultSolution": "KLTN_Sentinels.slnx"
+    "dotnet.defaultSolution": "Sentinels.slnx"
 }

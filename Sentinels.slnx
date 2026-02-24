@@ -1,2 +1,4 @@
 ﻿<Solution>
+  <Project Path="Game.csproj" />
+  <Project Path="DOTween.Modules.csproj" />
 </Solution>
