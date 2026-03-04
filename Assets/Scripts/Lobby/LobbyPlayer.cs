@@ -27,6 +27,13 @@ public class LobbyPlayer : NetworkBehaviour
 
     private void Start()
     {
+        string playerName = "Default Player";
+        if (PlayerPrefs.HasKey(nameof(PlayerPrefsKeys.S_UserName)))
+        {
+            playerName = PlayerPrefs.GetString(nameof(PlayerPrefsKeys.S_UserName));
+        }
+
+        _txtPlayerName.SetText(playerName);
         _btnPlayerReady.onClick.AddListener(OnBtnPlayerReadyClick);
     }
 

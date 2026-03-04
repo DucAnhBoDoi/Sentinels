@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using Unity.Netcode;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public class LobbyCoop : MonoBehaviour
@@ -16,8 +17,6 @@ public class LobbyCoop : MonoBehaviour
         Join,
         Create,
     }
-
-    private const int MaxPlayerCount = 2;
 
     [SerializeField]
     private MenuSceneUtils _utils;
@@ -44,7 +43,7 @@ public class LobbyCoop : MonoBehaviour
 
     private void Awake()
     {
-        _lobbyPlayers = new(MaxPlayerCount);
+        _lobbyPlayers = new(GameNetworkManager.MAX_PLAYER_COUNT);
     }
 
     private void Start()
@@ -56,7 +55,7 @@ public class LobbyCoop : MonoBehaviour
     private void Update()
     {
         if ((NetworkManager.Singleton != null && !NetworkManager.Singleton.IsHost) ||
-                _lobbyPlayers.Count != MaxPlayerCount)
+                _lobbyPlayers.Count != GameNetworkManager.MAX_PLAYER_COUNT)
         {
             if (_btnStartGame.interactable)
             {
@@ -75,11 +74,11 @@ public class LobbyCoop : MonoBehaviour
             }
         }
 
-        if (readyCount == MaxPlayerCount && !_btnStartGame.interactable)
+        if (readyCount == GameNetworkManager.MAX_PLAYER_COUNT && !_btnStartGame.interactable)
         {
             _btnStartGame.interactable = true;
         }
-        else if (readyCount != MaxPlayerCount && _btnStartGame.interactable)
+        else if (readyCount != GameNetworkManager.MAX_PLAYER_COUNT && _btnStartGame.interactable)
         {
             _btnStartGame.interactable = false;
         }
@@ -122,7 +121,7 @@ public class LobbyCoop : MonoBehaviour
     {
         if (NetworkManager.Singleton.IsHost)
         {
-            NetworkManager.Singleton.SceneManager.LoadScene(nameof(SceneNames.GamePlayFloor1), UnityEngine.SceneManagement.LoadSceneMode.Single);
+            NetworkManager.Singleton.SceneManager.LoadScene(nameof(SceneNames.GamePlayFloor1), LoadSceneMode.Single);
         }
     }
 
@@ -130,12 +129,6 @@ public class LobbyCoop : MonoBehaviour
     {
         if (!NetworkManager.Singleton.IsHost)
         {
-            return;
-        }
-
-        if (NetworkManager.Singleton.ConnectedClients.Count > MaxPlayerCount)
-        {
-            NetworkManager.Singleton.Shutdown();
             return;
         }
 

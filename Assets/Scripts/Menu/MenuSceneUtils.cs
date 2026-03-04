@@ -27,6 +27,9 @@ public class MenuSceneUtils : MonoBehaviour
     private GameObject _popupShop;
 
     [SerializeField]
+    private GameObject _popupRoom;
+
+    [SerializeField]
     private LobbyCoop _lobbyCoop;
 
     private GameObject _activeLayout;
@@ -105,6 +108,11 @@ public class MenuSceneUtils : MonoBehaviour
     public void ShowPopupShop()
     {
         SetActivePopup(_popupShop);
+    }
+
+    public void ShowPopupRoom()
+    {
+        SetActivePopup(_popupRoom);
     }
 
     public void HidePopup()

@@ -51,8 +51,7 @@ public class MenuMainLayoutController : MonoBehaviour
     private void OnBtnJoinRoomClick()
     {
         _utils.LobbyCoopSetLobbyActionJoin();
-        // NOTE: temporary
-        _utils.ShowLobbyCoop();
+        _utils.ShowPopupRoom();
     }
 
     private void OnBtnShopClick()
