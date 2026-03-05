@@ -15,6 +15,10 @@ public class LobbyNetworkDiscovery : NetworkDiscovery<DiscoveryBroadcastData, Di
         {
             playerName = PlayerPrefs.GetString(nameof(PlayerPrefsKeys.S_UserName));
         }
+        if (NetworkManager.Singleton == null)
+        {
+            return "[ERROR]";
+        }
         return $"[LAN] - {playerName} - [{NetworkManager.Singleton.ConnectedClients.Count}/{GameNetworkManager.MAX_PLAYER_COUNT}]";
     }
 

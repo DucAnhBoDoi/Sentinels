@@ -167,10 +167,6 @@ public class LobbyCoop : MonoBehaviour
 
         if (removeIdx != -1)
         {
-            if (_lobbyPlayers[removeIdx].IsSpawned)
-            {
-                _lobbyPlayers[removeIdx].NetworkObject.Despawn();
-            }
             _lobbyPlayers.RemoveAt(removeIdx);
         }
     }

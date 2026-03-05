@@ -1,4 +1,3 @@
-using System;
 using System.Net;
 using UnityEngine;
 using UnityEngine.UI;
@@ -55,8 +54,15 @@ public class PopupRoomController : MonoBehaviour
         _networkDiscovery.OnServerFound += OnLocalDiscoveryServerFound;
     }
 
+    private void Update()
+    {
+        _btnOnline.interactable = _mode != RoomMode.Online;
+        _btnLocal.interactable = _mode != RoomMode.Local;
+    }
+
     private void OnBtnJoinRoomClick()
     {
+        ClearRooms();
         DiscoverRooms(_mode);
     }
 

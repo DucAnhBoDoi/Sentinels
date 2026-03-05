@@ -10394,6 +10394,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9ac40f89ac1092be39ccd3a737615355, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Game::GameNetworkManager
+  _utils: {fileID: 817125202}
 --- !u!1 &1310849198
 GameObject:
   m_ObjectHideFlags: 0
@@ -13649,7 +13650,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: baf8136e0037fef36aea69f9a14b9218, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Game::LobbyCoop
-  _networkDiscovery: {fileID: 0}
   _utils: {fileID: 817125202}
   _lobbyPlayerPrefab: {fileID: 6589945512264897453, guid: 363bce2c01aff661dab498698659805d, type: 3}
   _player1SpawnPoint: {fileID: 4670063721654559581}
