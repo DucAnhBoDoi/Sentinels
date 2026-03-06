@@ -9,7 +9,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2c9182e9a9b84ef31ab0c2ade2a5b94c, type: 3}
-  m_Name: LANBroadcastConfigSO
-  m_EditorClassIdentifier: Game::LANBroadcastConfigSO
-  <BroadcastPort>k__BackingField: 47777
+  m_Script: {fileID: 11500000, guid: e7bbc632adde64632a5c1d193c4d2347, type: 3}
+  m_Name: PlayerStatsSO
+  m_EditorClassIdentifier: Game::PlayerStatsSO
+  <MovementSpeed>k__BackingField: 15
