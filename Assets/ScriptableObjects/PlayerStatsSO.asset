@@ -13,3 +13,11 @@ MonoBehaviour:
   m_Name: PlayerStatsSO
   m_EditorClassIdentifier: Game::PlayerStatsSO
   <MovementSpeed>k__BackingField: 15
+  <FlashLightColors>k__BackingField:
+  - {r: 1, g: 1, b: 1, a: 1}
+  - {r: 1, g: 0, b: 0, a: 1}
+  - {r: 0, g: 1, b: 0, a: 1}
+  - {r: 0, g: 0, b: 1, a: 1}
+  - {r: 1, g: 1, b: 0, a: 1}
+  - {r: 1, g: 0, b: 1, a: 1}
+  - {r: 0, g: 1, b: 1, a: 1}

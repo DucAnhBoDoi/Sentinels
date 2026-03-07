@@ -5,4 +5,7 @@ public class PlayerStatsSO : ScriptableObject
 {
     [field: SerializeField]
     public float MovementSpeed { get; private set; }
+
+    [field: SerializeField]
+    public Color[] FlashLightColors { get; private set; }
 }
