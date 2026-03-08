@@ -5,6 +5,8 @@ TagManager:
   serializedVersion: 3
   tags:
   - Flashlight
+  - RobotWaypoint
+  - RobotEscort
   layers:
   - Default
   - TransparentFX
@@ -59,6 +61,12 @@ TagManager:
     locked: 0
   - name: WalkBehind
     uniqueID: 2715252765
+    locked: 0
+  - name: RobotEscort
+    uniqueID: 3146002283
+    locked: 0
+  - name: Ui
+    uniqueID: 1994503901
     locked: 0
   m_RenderingLayers:
   - Default

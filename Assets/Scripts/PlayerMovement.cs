@@ -1,6 +1,12 @@
-// ══════════════════════════════════════════════════════
-// FILE: PlayerMovement.cs
-// ══════════════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════════
+// FILE: Assets/Scripts/PlayerMovement.cs  (EXISTING FILE — MODIFIED)
+// ══════════════════════════════════════════════════════════════
+// CHANGE LOG:
+//   - Added _bypassQuestGate flag for Floor3 compatibility
+//   - Floor1 logic untouched — QuestPopupManager gate preserved
+//   - Set "Bypass Quest Gate" = true on Floor3 player prefabs
+// ══════════════════════════════════════════════════════════════
+
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -17,6 +23,10 @@ public class PlayerMovement : MonoBehaviour
     public float attackRange = 1.5f;
     public float interactRange = 1.5f;
 
+    [Header("Floor3 Compatibility")]
+    [Tooltip("Enable this on Floor3 players. Bypasses QuestPopupManager gate.")]
+    [SerializeField] private bool _bypassQuestGate = false;
+
     void Start()
     {
         if (!rb) rb = GetComponent<Rigidbody2D>();
@@ -26,31 +36,32 @@ public class PlayerMovement : MonoBehaviour
 
     void Update()
     {
-        if (!QuestPopupManager.isGameStarted) return;
-        
+        // ── Gate check ───────────────────────────────────────────────────
+        // Floor1: blocked until QuestPopupManager.isGameStarted == true
+        // Floor3: bypassed via _bypassQuestGate flag in Inspector
+        if (!_bypassQuestGate && !QuestPopupManager.isGameStarted) return;
+
         movement = Vector2.zero;
         var keyboard = Keyboard.current;
         if (keyboard == null) return;
 
         if (playerType == PlayerType.PlayerA)
         {
-            if (keyboard.wKey.isPressed) movement.y = 1f;
-            else if (keyboard.sKey.isPressed) movement.y = -1f;
-            if (keyboard.dKey.isPressed) movement.x = 1f;
-            else if (keyboard.aKey.isPressed) movement.x = -1f;
+            if (keyboard.wKey.isPressed)         movement.y =  1f;
+            else if (keyboard.sKey.isPressed)    movement.y = -1f;
+            if (keyboard.dKey.isPressed)         movement.x =  1f;
+            else if (keyboard.aKey.isPressed)    movement.x = -1f;
         }
         else if (playerType == PlayerType.PlayerB)
         {
-            if (keyboard.upArrowKey.isPressed) movement.y = 1f;
+            if (keyboard.upArrowKey.isPressed)       movement.y =  1f;
             else if (keyboard.downArrowKey.isPressed) movement.y = -1f;
-            if (keyboard.rightArrowKey.isPressed) movement.x = 1f;
+            if (keyboard.rightArrowKey.isPressed)    movement.x =  1f;
             else if (keyboard.leftArrowKey.isPressed) movement.x = -1f;
 
             if (keyboard.spaceKey.wasPressedThisFrame) PerformAttack();
-            if (keyboard.eKey.wasPressedThisFrame) PerformRepair();
+            if (keyboard.eKey.wasPressedThisFrame)     PerformRepair();
 
-            // Broadcast trạng thái sửa điện cho TẤT CẢ robot mỗi frame
-            // → Utility Score của Robot sẽ nhảy vọt khi B đang giữ E sửa điện
             bool repairing = keyboard.eKey.isPressed;
             foreach (var robot in UtilityRobotAI.allRobots)
                 robot.isPlayerBRepairing = repairing;
