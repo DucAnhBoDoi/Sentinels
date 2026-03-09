@@ -1,12 +1,12 @@
 // ============================================================
 // FILE: Assets/Scripts/Floor3/Core/Floor3Brain.cs
 // Namespace: Scripts.Floor3.Core
-// ── UPDATED DAY 2 ──────────────────────────────────────────
-// Changes from Day 1:
-//   - QuizManager reference wired in (was commented out)
-//   - HandleCheckpointReached now calls _quizManager.StartQuiz()
-//   - Debug auto-resume REMOVED (QuizManager handles resume flow)
-//   - OnCorrectAnswer / OnWrongAnswer now fully connected
+// ── UPDATED DAY 3 ──────────────────────────────────────────
+// Changes:
+//   - Stores _lastCheckpointPosition when checkpoint fires
+//   - OnWrongAnswer() passes that position to SpawnWave()
+//     so viruses spawn NEAR the failed checkpoint, not randomly
+//   - VirusSpawner.ClearAllViruses() on robot death / escort done
 // ============================================================
 
 using UnityEngine;
@@ -19,9 +19,12 @@ namespace Scripts.Floor3.Core
         [Header("Scene References")]
         [SerializeField] private RobotController _robotController;
         [SerializeField] private QuizManager     _quizManager;
+        [SerializeField] private VirusSpawner    _virusSpawner;
+        // [SerializeField] private DifficultyManager _difficultyManager; // Day 4
 
-        // DifficultyManager added Day 4
-        // [SerializeField] private DifficultyManager _difficultyManager;
+        // World position of the last checkpoint waypoint reached.
+        // Used to localize wrong-answer virus spawns.
+        private Vector3 _lastCheckpointPosition;
 
         // ── Lifecycle ────────────────────────────────────────────────────
 
@@ -46,19 +49,23 @@ namespace Scripts.Floor3.Core
         private void Start()
         {
             if (_robotController == null)
-                Debug.LogError("[Floor3Brain] RobotController reference missing!");
+                Debug.LogError("[Floor3Brain] RobotController missing!");
             if (_quizManager == null)
-                Debug.LogError("[Floor3Brain] QuizManager reference missing!");
+                Debug.LogError("[Floor3Brain] QuizManager missing!");
+            if (_virusSpawner == null)
+                Debug.LogWarning("[Floor3Brain] VirusSpawner not assigned — no virus spawning.");
         }
 
         // ── Event Handlers ───────────────────────────────────────────────
 
         private void HandleCheckpointReached(int waypointIndex)
         {
-            Debug.Log($"[Floor3Brain] Checkpoint at waypoint {waypointIndex} → Starting quiz.");
+            // Store the robot's current position as the checkpoint position.
+            // Robot snaps to waypoint on arrival so this is accurate.
+            _lastCheckpointPosition = _robotController.transform.position;
+
+            Debug.Log($"[Floor3Brain] Checkpoint {waypointIndex} at {_lastCheckpointPosition} → quiz start.");
             _quizManager.StartQuiz(waypointIndex);
-            // Robot stays in Waiting state until QuizManager calls back via
-            // OnCorrectAnswer() or OnWrongAnswer() below
         }
 
         private void HandleStateChanged(RobotState newState)
@@ -70,39 +77,37 @@ namespace Scripts.Floor3.Core
         private void HandleEmotionChanged(RobotEmotion newEmotion)
         {
             // DAY 5: GameContext.Instance.UpdateEmotion(newEmotion);
-            // DAY 6: LLM prompt context updated here
             Debug.Log($"[Floor3Brain] Robot emotion → {newEmotion}");
         }
 
         private void HandleRobotDied()
         {
-            Debug.Log("[Floor3Brain] Robot died → Game Over.");
+            Debug.Log("[Floor3Brain] Robot died → clearing viruses.");
+            _virusSpawner?.ClearAllViruses();
             // DAY 5: GameContext.Instance.TriggerGameOver();
         }
 
         private void HandleEscortComplete()
         {
-            Debug.Log("[Floor3Brain] Escort complete → Level Won!");
+            Debug.Log("[Floor3Brain] Escort complete → clearing viruses.");
+            _virusSpawner?.ClearAllViruses();
             // DAY 5: GameContext.Instance.TriggerLevelComplete();
         }
 
         // ── Public API (called by QuizManager) ───────────────────────────
 
-        /// <summary>Quiz resolved with correct answer. Robot gets speed boost.</summary>
         public void OnCorrectAnswer()
         {
-            Debug.Log("[Floor3Brain] Correct answer → speed boost + resume.");
+            Debug.Log("[Floor3Brain] Correct → speed boost.");
             _robotController.ApplySpeedBoost();
-            // Note: ApplySpeedBoost() internally calls ChangeState(Accelerated)
-            // which transitions to Moving. Robot resumes automatically.
         }
 
-        /// <summary>Quiz resolved with wrong answer or timeout. Robot stunned, viruses spawn.</summary>
         public void OnWrongAnswer()
         {
-            Debug.Log("[Floor3Brain] Wrong answer → stun + virus spawn.");
+            Debug.Log($"[Floor3Brain] Wrong → stun + spawn near {_lastCheckpointPosition}.");
             _robotController.ApplyStun();
-            // DAY 3: _virusSpawner.SpawnWave();
+            // Spawn near the checkpoint where the wrong answer happened
+            _virusSpawner?.SpawnWave(_lastCheckpointPosition);
             // DAY 4: _difficultyManager.RegisterWrongAnswer();
         }
     }

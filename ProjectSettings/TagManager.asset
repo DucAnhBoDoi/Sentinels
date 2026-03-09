@@ -65,6 +65,9 @@ TagManager:
   - name: RobotEscort
     uniqueID: 3146002283
     locked: 0
+  - name: Virus
+    uniqueID: 3401878275
+    locked: 0
   - name: Ui
     uniqueID: 1994503901
     locked: 0
