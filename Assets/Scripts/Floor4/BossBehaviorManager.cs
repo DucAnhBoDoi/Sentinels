@@ -87,15 +87,22 @@ public class BossBehaviorManager : MonoBehaviour
         }
         float distance = Vector2.Distance(transform.position, TargetedPlayer.transform.position);
         int rng = Random.Range(1, 11);
-        if (distance <= 9)
+        if (distance <= 7)
         {
             if (rng <= 3)
             {
                 yield return ShockWaveAttack();
             }
-            else if (distance < 6)
+            else
             {
                 yield return PunchAttack();
+            }
+        }
+        else if (distance <= 9)
+        {
+            if (rng <= 3)
+            {
+                yield return ShockWaveAttack();
             }
             else if (rng <= 9)
             {
@@ -106,7 +113,7 @@ public class BossBehaviorManager : MonoBehaviour
                 yield return ShootAttack();
             }
         }
-        else if (distance <= 40)
+        else if (distance <= 30)
         {
             if (rng <= 3)
             {
