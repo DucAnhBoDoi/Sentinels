@@ -8,4 +8,7 @@ public class PlayerStatsSO : ScriptableObject
 
     [field: SerializeField]
     public Color[] FlashLightColors { get; private set; }
+
+    [field: SerializeField]
+    public float AttackCoolDown { get; private set; }
 }

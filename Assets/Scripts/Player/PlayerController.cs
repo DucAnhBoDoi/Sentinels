@@ -2,7 +2,7 @@ using UnityEngine;
 using UnityEngine.Rendering.Universal;
 
 [RequireComponent(typeof(Rigidbody2D))]
-[RequireComponent(typeof(PlayerControlDirection), typeof(PlayerControlFlashLight))]
+[RequireComponent(typeof(PlayerControlDirection), typeof(PlayerControlFlashLight), typeof(PlayerAttack))]
 [RequireComponent(typeof(PlayerIdle), typeof(PlayerMove))]
 public class PlayerController : MonoBehaviour
 {
