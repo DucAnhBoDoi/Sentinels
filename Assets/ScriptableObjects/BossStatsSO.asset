@@ -13,7 +13,9 @@ MonoBehaviour:
   m_Name: BossStatsSO
   m_EditorClassIdentifier: Game::BossStatsSO
   <BlowUpTime>k__BackingField: 10
-  <FlashTime>k__BackingField: 10
+  <FlashTime>k__BackingField: 5
   <SwitchColorTime>k__BackingField: 5
-  <RecoverTime>k__BackingField: 0.7
+  <RecoverTime>k__BackingField: 1.5
+  <ProjectileVelocity>k__BackingField: 10
+  <ProjectileLifeTime>k__BackingField: 5
   _playerStats: {fileID: 11400000, guid: 347aa2e530b4f1ec2bccab8663ed990f, type: 2}

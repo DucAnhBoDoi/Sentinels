@@ -1,11 +1,12 @@
 using System.Collections;
+using System.Linq;
 using DG.Tweening;
 using UnityEngine;
 using UnityEngine.Rendering.Universal;
 
 [RequireComponent(typeof(BossController))]
 [RequireComponent(typeof(BossPunchBehavior), typeof(BossTargetPlayerBehavior), typeof(BossMoveToPlayerBehavior))]
-[RequireComponent(typeof(BossShockWaveAttackBehavior))]
+[RequireComponent(typeof(BossShockWaveAttackBehavior), typeof(BossShootBehavior))]
 public class BossBehaviorManager : MonoBehaviour
 {
     private enum BossPhase
@@ -15,15 +16,21 @@ public class BossBehaviorManager : MonoBehaviour
         Phase3,
     }
 
+    [HideInInspector]
     public PlayerController TargetedPlayer;
+
+    public PlayerController[] Players { get; private set; }
+
+    [SerializeField]
+    private Light2D _globalLight;
 
     private BossController _controller;
     private BossPunchBehavior _punchBehavior;
     private BossTargetPlayerBehavior _targetPlayerBehavior;
     private BossMoveToPlayerBehavior _moveToPlayerBehavior;
     private BossShockWaveAttackBehavior _shockWaveAttackBehavior;
+    private BossShootBehavior _shootBehavior;
 
-    private Light2D _globalLight;
     private BossPhase _phase;
 
     private void Awake()
@@ -33,10 +40,14 @@ public class BossBehaviorManager : MonoBehaviour
         _targetPlayerBehavior = GetComponent<BossTargetPlayerBehavior>();
         _moveToPlayerBehavior = GetComponent<BossMoveToPlayerBehavior>();
         _shockWaveAttackBehavior = GetComponent<BossShockWaveAttackBehavior>();
+        _shootBehavior = GetComponent<BossShootBehavior>();
     }
 
     private void Start()
     {
+        Players = GameObject
+            .FindGameObjectsWithTag("Player")
+            .Select(go => go.GetComponent<PlayerController>()).ToArray();
         StartCoroutine(RootBehavior());
     }
 
@@ -70,10 +81,14 @@ public class BossBehaviorManager : MonoBehaviour
 
     private IEnumerator Phase1()
     {
+        if (TargetedPlayer == null)
+        {
+            yield return StartBehavior(_targetPlayerBehavior);
+        }
         float distance = Vector2.Distance(transform.position, TargetedPlayer.transform.position);
+        int rng = Random.Range(1, 11);
         if (distance <= 9)
         {
-            int rng = Random.Range(1, 11);
             if (rng <= 3)
             {
                 yield return ShockWaveAttack();
@@ -82,18 +97,36 @@ public class BossBehaviorManager : MonoBehaviour
             {
                 yield return PunchAttack();
             }
+            else if (rng <= 9)
+            {
+                yield return ChargeAttack();
+            }
+            else
+            {
+                yield return ShootAttack();
+            }
+        }
+        else if (distance <= 40)
+        {
+            if (rng <= 3)
+            {
+                yield return ShootAttack();
+            }
             else
             {
                 yield return ChargeAttack();
             }
         }
-        else if (distance <= 40)
-        {
-            yield return ChargeAttack();
-        }
         else
         {
-            yield return ChargeAttack();
+            if (rng <= 3)
+            {
+                yield return ChargeAttack();
+            }
+            else
+            {
+                yield return ShootAttack();
+            }
         }
     }
 
@@ -123,6 +156,12 @@ public class BossBehaviorManager : MonoBehaviour
     {
         yield return transform.DOShakePosition(0.2f).WaitForCompletion();
         yield return StartBehavior(_shockWaveAttackBehavior);
+    }
+
+    private IEnumerator ShootAttack()
+    {
+        yield return StartBehavior(_targetPlayerBehavior);
+        yield return StartBehavior(_shootBehavior);
     }
 
     private IEnumerator StartBehavior(BehaviorTreeNode node)

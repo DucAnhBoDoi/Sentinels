@@ -18,9 +18,11 @@ GameObject:
   - component: {fileID: 3200347379960659348}
   - component: {fileID: 1409648666473417118}
   - component: {fileID: 2119797328756548091}
+  - component: {fileID: 8477332428180450898}
+  - component: {fileID: 1953741731729491295}
   m_Layer: 9
   m_Name: Player
-  m_TagString: Untagged
+  m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -250,6 +252,31 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Game::PlayerAttack
   _attackFX: {fileID: 7259959272596394168}
+--- !u!114 &8477332428180450898
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1204861742628958928}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c78a956414305ae689cb0532aa13f681, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Game::KnockBackManager
+  KnockBackRecoverTime: 0
+--- !u!114 &1953741731729491295
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1204861742628958928}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 334fb4a14539f963fb678b16688a1396, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Game::PlayerKnockBack
 --- !u!1 &6946194123876143101
 GameObject:
   m_ObjectHideFlags: 0

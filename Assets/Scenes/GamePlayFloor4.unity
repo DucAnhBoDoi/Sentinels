@@ -101306,6 +101306,10 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8332243261188305588, guid: 14a726786528904d5a46c7c36dec2e34, type: 3}
+      propertyPath: _globalLight
+      value: 
+      objectReference: {fileID: 615285906}
+    - target: {fileID: 8332243261188305588, guid: 14a726786528904d5a46c7c36dec2e34, type: 3}
       propertyPath: TargetedPlayer
       value: 
       objectReference: {fileID: 1983532530}
@@ -101340,11 +101344,11 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 869320125483506860, guid: 46098023cf838ea7d8b3d9b9b12a7431, type: 3}
       propertyPath: m_Color.b
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 869320125483506860, guid: 46098023cf838ea7d8b3d9b9b12a7431, type: 3}
       propertyPath: m_Color.g
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 869320125483506860, guid: 46098023cf838ea7d8b3d9b9b12a7431, type: 3}
       propertyPath: m_Color.r

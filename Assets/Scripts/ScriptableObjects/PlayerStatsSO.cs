@@ -11,4 +11,7 @@ public class PlayerStatsSO : ScriptableObject
 
     [field: SerializeField]
     public float AttackCoolDown { get; private set; }
+
+    [field: SerializeField]
+    public float KnockBackRecoverTime { get; private set; }
 }

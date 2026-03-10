@@ -1,15 +1,16 @@
 using UnityEngine;
 using UnityEngine.Rendering.Universal;
 
-[RequireComponent(typeof(Rigidbody2D))]
+[RequireComponent(typeof(Rigidbody2D), typeof(KnockBackManager))]
 [RequireComponent(typeof(PlayerControlDirection), typeof(PlayerControlFlashLight), typeof(PlayerAttack))]
-[RequireComponent(typeof(PlayerIdle), typeof(PlayerMove))]
+[RequireComponent(typeof(PlayerIdle), typeof(PlayerMove), typeof(PlayerKnockBack))]
 public class PlayerController : MonoBehaviour
 {
     public enum PlayerState
     {
         Idle,
         Move,
+        KnockBack,
     }
 
     [field: SerializeField]
@@ -19,6 +20,8 @@ public class PlayerController : MonoBehaviour
     public Light2D FlashLight { get; private set; }
 
     public Rigidbody2D Rb { get; private set; }
+
+    public KnockBackManager KnockManager { get; private set; }
 
     public InputSystem_Actions Input { get; private set; }
 
@@ -44,5 +47,7 @@ public class PlayerController : MonoBehaviour
     {
         Rb = GetComponent<Rigidbody2D>();
         Input = new();
+        KnockManager = GetComponent<KnockBackManager>();
+        KnockManager.KnockBackRecoverTime = Stats.KnockBackRecoverTime;
     }
 }

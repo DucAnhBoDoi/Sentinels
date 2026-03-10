@@ -14,6 +14,16 @@ public class BossTargetPlayerBehavior : BehaviorTreeNode
     public override void BehaviorStart()
     {
         base.BehaviorStart();
+        PlayerController targetedPlayer = _boss.Players[0];
+        foreach (PlayerController player in _boss.Players)
+        {
+            if (Vector2.Distance(player.transform.position, transform.position) <
+                    Vector2.Distance(targetedPlayer.transform.position, transform.position))
+            {
+                targetedPlayer = player;
+            }
+        }
+        _boss.TargetedPlayer = targetedPlayer;
         Vector2 direction = _boss.TargetedPlayer.transform.position - transform.position;
         float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
         transform
