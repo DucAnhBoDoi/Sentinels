@@ -4078,7 +4078,7 @@ MonoBehaviour:
     CustomLookAtTarget: 0
   Lens:
     FieldOfView: 60
-    OrthographicSize: 7
+    OrthographicSize: 15
     NearClipPlane: 0.3
     FarClipPlane: 1000
     Dutch: 0
@@ -4174,7 +4174,7 @@ Camera:
   far clip plane: 1000
   field of view: 60
   orthographic: 1
-  orthographic size: 7
+  orthographic size: 15
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
@@ -4388,11 +4388,23 @@ PrefabInstance:
       propertyPath: m_Enabled
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 3492533361139882385, guid: 14a726786528904d5a46c7c36dec2e34, type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 5301649941191314252, guid: 14a726786528904d5a46c7c36dec2e34, type: 3}
       propertyPath: m_Name
       value: BossAvatar
       objectReference: {fileID: 0}
+    - target: {fileID: 5345914900061118391, guid: 14a726786528904d5a46c7c36dec2e34, type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 6571584547868995208, guid: 14a726786528904d5a46c7c36dec2e34, type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7776240785662624608, guid: 14a726786528904d5a46c7c36dec2e34, type: 3}
       propertyPath: m_Enabled
       value: 0
       objectReference: {fileID: 0}
@@ -101305,6 +101317,10 @@ PrefabInstance:
       propertyPath: m_IsActive
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 7776240785662624608, guid: 14a726786528904d5a46c7c36dec2e34, type: 3}
+      propertyPath: _teleportPoints
+      value: 
+      objectReference: {fileID: 1511694289}
     - target: {fileID: 8332243261188305588, guid: 14a726786528904d5a46c7c36dec2e34, type: 3}
       propertyPath: _globalLight
       value: 

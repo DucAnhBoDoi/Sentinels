@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.Events;
 
 [RequireComponent(typeof(BossController))]
 public class BossControlColor : MonoBehaviour, IFlashLightInteract
@@ -8,6 +9,9 @@ public class BossControlColor : MonoBehaviour, IFlashLightInteract
         NoColor,
         Color,
     }
+
+    public event UnityAction OnColor;
+    public event UnityAction<bool> OnNoColor;
 
     [SerializeField]
     private Color _inactiveColor;
@@ -19,9 +23,12 @@ public class BossControlColor : MonoBehaviour, IFlashLightInteract
     private float _blowUpTimer;
     private float _flashTimer;
     private float _switchColorTimer;
+    private bool _didBlowUp;
     private Color[] _palete;
 
     private BossColorState _state;
+
+    public bool IsSpotted => _flashLight != null;
 
     private void Awake()
     {
@@ -30,11 +37,6 @@ public class BossControlColor : MonoBehaviour, IFlashLightInteract
         _flashTimer = _boss.Stats.FlashTime;
         _switchColorTimer = _boss.Stats.SwitchColorTime;
         _palete = _boss.Stats.BossColors;
-    }
-
-    private void Start()
-    {
-        _boss.BossBodySr.color = _inactiveColor;
     }
 
     private void Update()
@@ -46,9 +48,7 @@ public class BossControlColor : MonoBehaviour, IFlashLightInteract
                     _switchColorTimer -= Time.deltaTime;
                     if (_switchColorTimer <= 0)
                     {
-                        _state = BossColorState.Color;
-                        _switchColorTimer = _boss.Stats.SwitchColorTime;
-                        _boss.BossBodySr.color = _palete[Random.Range(0, _palete.Length)];
+                        TransitionToColorState();
                     }
                 }
                 break;
@@ -61,6 +61,7 @@ public class BossControlColor : MonoBehaviour, IFlashLightInteract
                     }
                     else
                     {
+                        _blowUpTimer += Mathf.Min(_boss.Stats.BlowUpTime, _blowUpTimer + Time.deltaTime / 2);
                         _flashTimer -= Time.deltaTime;
                     }
 
@@ -71,20 +72,35 @@ public class BossControlColor : MonoBehaviour, IFlashLightInteract
                     else if (_blowUpTimer <= 0)
                     {
                         _state = BossColorState.NoColor;
-                        Debug.Log("Reduce player health");
+                        _didBlowUp = true;
                     }
 
                     if (_state != BossColorState.Color)
                     {
-                        _flashTimer = _boss.Stats.FlashTime;
-                        _blowUpTimer = _boss.Stats.BlowUpTime;
-                        _boss.BossBodySr.color = _inactiveColor;
+                        TransitionToNoColorState();
                     }
                 }
                 break;
             default:
                 break;
         }
+    }
+
+    public void TransitionToColorState()
+    {
+        _state = BossColorState.Color;
+        _switchColorTimer = _boss.Stats.SwitchColorTime;
+        _boss.BossBodySr.color = _palete[Random.Range(0, _palete.Length)];
+        OnColor?.Invoke();
+    }
+
+    public void TransitionToNoColorState()
+    {
+        _flashTimer = _boss.Stats.FlashTime;
+        _blowUpTimer = _boss.Stats.BlowUpTime;
+        _boss.BossBodySr.color = _inactiveColor;
+        OnNoColor?.Invoke(_didBlowUp);
+        _didBlowUp = false;
     }
 
     public void OnFlashLightHit(FlashLightController flashLight)

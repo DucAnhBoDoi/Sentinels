@@ -19,10 +19,10 @@ public class BossMoveToPlayerBehavior : BehaviorTreeNode
         base.BehaviorStart();
         Vector3 direction = _boss.TargetedPlayer.transform.position - transform.position;
         float distance = Mathf.Abs(Vector2.Distance(transform.position, _boss.TargetedPlayer.transform.position));
-        float velocity = 20;
-        if (distance <= 10)
+        float velocity = 35;
+        if (distance <= 15)
         {
-            velocity = 10;
+            velocity = 15;
         }
         float time = distance / velocity;
         transform

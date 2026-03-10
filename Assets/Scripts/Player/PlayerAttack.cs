@@ -15,12 +15,13 @@ public class PlayerAttack : MonoBehaviour
     private void Awake()
     {
         _controller = GetComponent<PlayerController>();
+        _attackFX.Damage = _controller.Stats.AttackDamage;
         _attackReady = true;
     }
 
     private void Update()
     {
-        if (_attackReady)
+        if (_attackReady && !_controller.FlashLight.isActiveAndEnabled)
         {
             if (_controller.Input.Player.Attack.WasPerformedThisFrame())
             {

@@ -21,5 +21,6 @@ MonoBehaviour:
   - {r: 1, g: 1, b: 0, a: 1}
   - {r: 1, g: 0, b: 1, a: 1}
   - {r: 0, g: 1, b: 1, a: 1}
+  <AttackDamage>k__BackingField: 1
   <AttackCoolDown>k__BackingField: 1.7
   <KnockBackRecoverTime>k__BackingField: 0.5

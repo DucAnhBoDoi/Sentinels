@@ -3,6 +3,9 @@ using UnityEngine;
 
 public class PlayerAttackFX : MonoBehaviour
 {
+    [HideInInspector]
+    public int Damage;
+
     [SerializeField]
     private Transform _rotateAxis;
 
@@ -18,5 +21,13 @@ public class PlayerAttackFX : MonoBehaviour
     {
         DOTween.Kill(this);
         _rotateAxis.localRotation = Quaternion.Euler(0, 0, 0);
+    }
+
+    private void OnTriggerEnter2D(Collider2D other)
+    {
+        if (other.TryGetComponent(out HealthManager hm))
+        {
+            hm.ReduceHealth(Damage);
+        }
     }
 }

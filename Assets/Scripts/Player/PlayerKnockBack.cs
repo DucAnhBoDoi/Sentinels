@@ -1,10 +1,15 @@
-using System;
+using DG.Tweening;
 using UnityEngine;
 
 [RequireComponent(typeof(PlayerController))]
 public class PlayerKnockBack : MonoBehaviour
 {
     private PlayerController _controller;
+
+    private void OnDestroy()
+    {
+        DOTween.Kill(this);
+    }
 
     private void Awake()
     {
@@ -20,6 +25,7 @@ public class PlayerKnockBack : MonoBehaviour
     private void OnPlayerKnockBack()
     {
         _controller.State = PlayerController.PlayerState.KnockBack;
+        _controller.HurtAnimation();
     }
 
     private void OnPlayerKnockBackRecover()

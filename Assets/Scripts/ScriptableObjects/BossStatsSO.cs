@@ -21,6 +21,9 @@ public class BossStatsSO : ScriptableObject
     [field: SerializeField]
     public float ProjectileLifeTime { get; private set; }
 
+    [field: SerializeField]
+    public int BossHealth { get; private set; }
+
     [SerializeField]
     private PlayerStatsSO _playerStats;
 

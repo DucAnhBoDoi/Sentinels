@@ -12,10 +12,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3902f7fe98003bb5f835b6b4e1a684a0, type: 3}
   m_Name: BossStatsSO
   m_EditorClassIdentifier: Game::BossStatsSO
-  <BlowUpTime>k__BackingField: 10
+  <BlowUpTime>k__BackingField: 15
   <FlashTime>k__BackingField: 5
-  <SwitchColorTime>k__BackingField: 5
-  <RecoverTime>k__BackingField: 1.5
+  <SwitchColorTime>k__BackingField: 10
+  <RecoverTime>k__BackingField: 1.2
   <ProjectileVelocity>k__BackingField: 10
   <ProjectileLifeTime>k__BackingField: 5
+  <BossHealth>k__BackingField: 10
   _playerStats: {fileID: 11400000, guid: 347aa2e530b4f1ec2bccab8663ed990f, type: 2}
