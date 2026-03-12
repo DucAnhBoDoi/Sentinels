@@ -48,6 +48,16 @@ namespace Scripts.Floor3.Gameplay
                 // Call public TakeDamage with huge value — guaranteed one-shot kill
                 virus.TakeDamage(9999f);
             }
+
+            // Kill Utility Robot
+            UtilityRobotAI_Floor3 robot = other.GetComponent<UtilityRobotAI_Floor3>();
+            if (robot != null)
+            {
+                if (_logKills)
+                    Debug.Log($"[DebugVirusKiller] {gameObject.name} destroyed robot");
+
+                robot.TakeDamage();
+            }
         }
 
         // Also catch overlap if player is already inside a virus when it spawns
