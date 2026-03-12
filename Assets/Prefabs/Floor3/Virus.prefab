@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 5711131947530457266}
   - component: {fileID: 3022512770075305053}
   - component: {fileID: 7698671788292035931}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: Virus
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -141,3 +141,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d8d3b1e46532bd542ac9c03ea4ec7141, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Game::Scripts.Floor3.AI.VirusAI
+  _wallLayer:
+    serializedVersion: 2
+    m_Bits: 128
+  _rayCount: 8
+  _rayLength: 1.2
+  _avoidanceWeight: 2.5
+  _drawSteeringRays: 1

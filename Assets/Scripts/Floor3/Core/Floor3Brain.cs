@@ -1,12 +1,11 @@
 // ============================================================
 // FILE: Assets/Scripts/Floor3/Core/Floor3Brain.cs
 // Namespace: Scripts.Floor3.Core
-// ── UPDATED DAY 3 ──────────────────────────────────────────
+// ── UPDATED DAY 4 ──────────────────────────────────────────
 // Changes:
-//   - Stores _lastCheckpointPosition when checkpoint fires
-//   - OnWrongAnswer() passes that position to SpawnWave()
-//     so viruses spawn NEAR the failed checkpoint, not randomly
-//   - VirusSpawner.ClearAllViruses() on robot death / escort done
+//   - DifficultyManager wired in
+//   - OnWrongAnswer() notifies DifficultyManager
+//   - Checkpoint position passed to SpawnWave()
 // ============================================================
 
 using UnityEngine;
@@ -19,8 +18,8 @@ namespace Scripts.Floor3.Core
         [Header("Scene References")]
         [SerializeField] private RobotController _robotController;
         [SerializeField] private QuizManager     _quizManager;
-        [SerializeField] private VirusSpawner    _virusSpawner;
-        // [SerializeField] private DifficultyManager _difficultyManager; // Day 4
+        [SerializeField] private VirusSpawner      _virusSpawner;
+        [SerializeField] private DifficultyManager  _difficultyManager;
 
         // World position of the last checkpoint waypoint reached.
         // Used to localize wrong-answer virus spawns.
@@ -108,7 +107,7 @@ namespace Scripts.Floor3.Core
             _robotController.ApplyStun();
             // Spawn near the checkpoint where the wrong answer happened
             _virusSpawner?.SpawnWave(_lastCheckpointPosition);
-            // DAY 4: _difficultyManager.RegisterWrongAnswer();
+            _difficultyManager?.RegisterWrongAnswer();
         }
     }
 }

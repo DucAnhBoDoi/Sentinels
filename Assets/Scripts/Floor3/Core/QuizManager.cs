@@ -59,11 +59,11 @@ namespace Scripts.Floor3.Core
         // ── Private State ─────────────────────────────────────────────────
 
         private IQuizGenerator _generator;
-        private QuizQuestion _activeQuestion;
+        private QuizQuestion   _activeQuestion;
 
-        private int _playerAAnswer = -1;   // -1 = not answered
-        private int _playerBAnswer = -1;
-        private bool _quizActive = false;
+        private int  _playerAAnswer  = -1;   // -1 = not answered
+        private int  _playerBAnswer  = -1;
+        private bool _quizActive     = false;
         private bool _conflictActive = false;
 
         private Coroutine _timerCoroutine;
@@ -104,6 +104,18 @@ namespace Scripts.Floor3.Core
             QuizEventBus.OnPlayerBAnswered -= HandlePlayerBAnswer;
         }
 
+        // ── Public API (called by Floor3Brain / DifficultyManager) ─────────
+
+        /// <summary>
+        /// Called by DifficultyManager to adjust quiz time pressure per difficulty tier.
+        /// Takes effect on the NEXT quiz started — does not affect active quiz.
+        /// </summary>
+        public void SetTimeLimit(float newLimit)
+        {
+            _defaultTimeLimit = newLimit;
+            Debug.Log($"[QuizManager] Time limit updated to {newLimit}s");
+        }
+
         // ── Public API (called by Floor3Brain) ───────────────────────────
 
         /// <summary>
@@ -133,7 +145,7 @@ namespace Scripts.Floor3.Core
             _generator.RequestQuestion(
                 waypointIndex,
                 onComplete: OnQuestionReceived,
-                onError: OnGeneratorError
+                onError:    OnGeneratorError
             );
         }
 
@@ -142,7 +154,7 @@ namespace Scripts.Floor3.Core
         private void OnQuestionReceived(QuizQuestion question)
         {
             _activeQuestion = question;
-            _quizActive = true;
+            _quizActive     = true;
             _conflictActive = false;
 
             Log($"Question received: \"{question.QuestionText}\"");
@@ -244,7 +256,11 @@ namespace Scripts.Floor3.Core
 
             while (elapsed < duration)
             {
-                elapsed += Time.deltaTime;
+                // CRITICAL: Use unscaledDeltaTime so the quiz timer continues
+                // counting while Time.timeScale = 0 (game frozen during quiz).
+                // If we used Time.deltaTime here, the timer would freeze too
+                // and the quiz would never time out.
+                elapsed += Time.unscaledDeltaTime;
                 float normalized = 1f - (elapsed / duration);      // 1 → 0
                 QuizEventBus.RaiseTimerTick(normalized, duration - elapsed);
                 yield return null;
@@ -268,7 +284,7 @@ namespace Scripts.Floor3.Core
 
         private void CleanupQuiz()
         {
-            _quizActive = false;
+            _quizActive     = false;
             _conflictActive = false;
             _activeQuestion = null;
             ResetAnswers();
