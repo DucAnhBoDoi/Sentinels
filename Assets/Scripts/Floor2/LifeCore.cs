@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.UI;
+using TMPro; // BẮT BUỘC có dòng này để dùng TextMeshPro
 
 public class LifeCore : MonoBehaviour
 {
@@ -10,6 +11,7 @@ public class LifeCore : MonoBehaviour
 
     [Header("Giao diện UI")]
     public Slider energyBar;
+    public TextMeshProUGUI hpText; // Ô mới để kéo HpText vào
     public GameObject gameOverPanel;
 
     [Header("Trạng thái")]
@@ -22,21 +24,24 @@ public class LifeCore : MonoBehaviour
             energyBar.maxValue = maxEnergy;
             energyBar.value = energy;
         }
+        
+        UpdateHpDisplay(); // Cập nhật chữ lúc mới vào game
+
         if (gameOverPanel != null) gameOverPanel.SetActive(false);
     }
 
     void Update() {
         if (energyBar != null) energyBar.value = energy;
+        
+        UpdateHpDisplay(); // Luôn cập nhật chữ khi máu thay đổi
 
         // LOGIC HỒI MÁU LÕI & TRỪ MÁU TẤT CẢ PLAYER ĐANG SẠC
         if (playersOnPlatforms > 0 && energy < maxEnergy) {
             energy += chargeSpeed * Time.deltaTime;
 
-            // Tìm tất cả đối tượng có script PlayerHealth trong Scene
             PlayerHealth[] allPlayers = Object.FindObjectsByType<PlayerHealth>(FindObjectsSortMode.None);
             
             foreach (PlayerHealth ph in allPlayers) {
-                // CHỈ TRỪ MÁU những ai đang thực sự đứng trên bệ sạc
                 if (ph.isOnPlatform) {
                     ph.TakeDamage(10f * Time.deltaTime); 
                 }
@@ -54,7 +59,14 @@ public class LifeCore : MonoBehaviour
         }
     }
 
-    // Hàm PUBLIC để PlayerHealth có thể gọi khi Player hết máu
+    // HÀM MỚI: Hiển thị con số lên màn hình
+    void UpdateHpDisplay() {
+        if (hpText != null) {
+            // Hiển thị định dạng "100 / 100" giống ảnh bạn muốn
+            hpText.text = Mathf.RoundToInt(energy) + " / " + maxEnergy;
+        }
+    }
+
     public void GameOver() {
         if (gameOverPanel != null) {
             gameOverPanel.SetActive(true);

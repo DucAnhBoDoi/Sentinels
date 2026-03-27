@@ -9,7 +9,7 @@ public class PlayerCombat : MonoBehaviour
     public float offsetDistance = 1.2f;
 
     [Header("Cấu hình phím đánh")]
-    public KeyCode attackKey = KeyCode.Mouse0; // Mặc định là chuột trái cho Player 1
+    public KeyCode attackKey = KeyCode.Mouse0; 
 
     [Header("Hồi máu khi giết quái")]
     public float healthRegenPerKill = 15f; 
@@ -24,7 +24,6 @@ public class PlayerCombat : MonoBehaviour
         if (moveInput > 0) attackPoint.localPosition = new Vector3(offsetDistance, 0, 0);
         else if (moveInput < 0) attackPoint.localPosition = new Vector3(-offsetDistance, 0, 0);
 
-        // Nhấn đúng phím được gán mới đánh
         if (Input.GetKeyDown(attackKey))
         {
             Attack();
@@ -33,16 +32,30 @@ public class PlayerCombat : MonoBehaviour
 
     void Attack()
     {
+        // Quét tất cả quái trong phạm vi vòng tròn
         Collider2D[] hitEnemies = Physics2D.OverlapCircleAll(attackPoint.position, attackRange, enemyLayers);
 
         foreach (Collider2D enemy in hitEnemies)
         {
+            // --- BẮT ĐẦU ĐOẠN SỬA ĐỂ RƠI ĐỒ ---
+            // Thử tìm script ItemDropper trên con quái bị chém trúng
+            ItemDropper dropper = enemy.GetComponent<ItemDropper>();
+            if (dropper != null)
+            {
+                // Gọi hàm rơi đồ ngẫu nhiên
+                dropper.DropRandomItem();
+            }
+            // --- KẾT THÚC ĐOẠN SỬA ---
+
             StopAllCoroutines();
             StartCoroutine(HitStop(0.03f)); 
 
             Debug.Log(gameObject.name + " tiêu diệt: " + enemy.name);
+            
+            // Xóa quái vật
             Destroy(enemy.gameObject);
 
+            // Hồi máu cho người chơi
             PlayerHealth ph = GetComponent<PlayerHealth>();
             if (ph != null) {
                 ph.Heal(healthRegenPerKill);
@@ -52,7 +65,7 @@ public class PlayerCombat : MonoBehaviour
 
     IEnumerator HitStop(float duration)
     {
-        Time.timeScale = 0.01f; // Tránh lỗi NaN khi để bằng 0
+        Time.timeScale = 0.01f; 
         yield return new WaitForSecondsRealtime(duration);
         Time.timeScale = 1f; 
     }

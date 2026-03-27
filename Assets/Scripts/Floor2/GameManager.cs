@@ -7,7 +7,7 @@ public class GameManager : MonoBehaviour
     [Header("Cấu hình thời gian")]
     public float timeRemaining = 300f;
     public bool timerIsRunning = false; 
-    private bool isGameOver = false; // Biến khóa trạng thái kết thúc
+    private bool isGameOver = false; 
 
     [Header("Giao diện UI")]
     public TextMeshProUGUI timeText; 
@@ -16,7 +16,8 @@ public class GameManager : MonoBehaviour
     [Header("Phần thưởng chiến thắng")]
     public GameObject shardPrefab;   
     public Transform coreTransform;  
-    public Vector3 shardOffset = new Vector3(0, -2.5f, 0); 
+    [Tooltip("Chỉnh khoảng cách rơi ra xa Core. Ví dụ: Y = -3 để rơi xuống dưới.")]
+    public Vector3 shardOffset = new Vector3(0, -3f, 0); 
 
     void Start()
     {
@@ -45,7 +46,7 @@ public class GameManager : MonoBehaviour
 
     void Update()
     {
-        if (isGameOver) return; // Nếu đã thắng, ngừng mọi tính toán thời gian
+        if (isGameOver) return; 
 
         if (timerIsRunning)
         {
@@ -59,7 +60,7 @@ public class GameManager : MonoBehaviour
                 timeRemaining = 0;
                 DisplayTime(0); 
                 timerIsRunning = false;
-                isGameOver = true; // Kích hoạt trạng thái kết thúc
+                isGameOver = true; 
                 WinGame();
             }
         }
@@ -75,33 +76,39 @@ public class GameManager : MonoBehaviour
 
     void WinGame()
     {
+        // 1. Hiển thị bảng thông báo thắng (nếu có)
         if (winPanel != null) winPanel.SetActive(true);
 
-        // 1. DỪNG SINH QUÁI MỚI NGAY LẬP TỨC
+        // 2. Dừng sinh quái
         EnemySpawner spawner = Object.FindAnyObjectByType<EnemySpawner>();
         if (spawner != null)
         {
-            spawner.StopSpawning(); // Đảm bảo EnemySpawner đã có hàm này
+            spawner.StopSpawning(); 
         }
 
-        // 2. XÓA SẠCH QUÁI TRÊN TOÀN BẢN ĐỒ
-        // Lưu ý: Bạn PHẢI gán Tag "Enemy" cho Prefab quái như đã làm ở ảnh image_b27116.png
+        // 3. Xóa sạch quái còn sót lại
         GameObject[] enemies = GameObject.FindGameObjectsWithTag("Enemy");
         foreach (GameObject enemy in enemies)
         {
             Destroy(enemy);
         }
 
-        // 3. XUẤT HIỆN MẢNH VỠ
+        // 4. XUẤT HIỆN MẢNH VỠ TẠI VỊ TRÍ OFFSET
         if (shardPrefab != null && coreTransform != null)
         {
-            GameObject spawnedShard = Instantiate(shardPrefab, coreTransform.position + shardOffset, Quaternion.identity);
+            // Tính toán vị trí mới dựa trên offset bạn chỉnh
+            Vector3 spawnPosition = coreTransform.position + shardOffset;
             
+            GameObject spawnedShard = Instantiate(shardPrefab, spawnPosition, Quaternion.identity);
+            
+            // Đảm bảo mảnh vỡ nằm trên lớp Player để dễ thấy
             SpriteRenderer sr = spawnedShard.GetComponent<SpriteRenderer>();
             if (sr != null) {
                 sr.sortingLayerName = "Player"; 
                 sr.sortingOrder = 10;
             }
+            
+            Debug.Log("Shard đã rơi tại vị trí: " + spawnPosition);
         }
     }
 
