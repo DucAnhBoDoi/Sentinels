@@ -64,6 +64,16 @@ public class PlayerMovement_Level3 : MonoBehaviour
             else if (keyboard.leftArrowKey.isPressed)
                 movement.x = -1f;
         }
+
+        // Flip character based on movement direction
+        if (movement.x > 0)
+        {
+            transform.localScale = new Vector3(1, 1, 1); // quay phải
+        }
+        else if (movement.x < 0)
+        {
+            transform.localScale = new Vector3(-1, 1, 1); // quay trái
+        }
     }
 
     void FixedUpdate()

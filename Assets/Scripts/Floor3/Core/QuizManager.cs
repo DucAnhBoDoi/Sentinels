@@ -235,7 +235,7 @@ namespace Scripts.Floor3.Core
             StopTimerCoroutine();
 
             bool isCorrect = (chosenIndex == _activeQuestion.CorrectAnswerIndex);
-            Log($"Answer evaluated: {(isCorrect ? "CORRECT ✓" : "WRONG ✗")} " +
+            Log($"Answer evaluated: {(isCorrect ? "CORRECT" : "WRONG")} " +
                 $"(chosen={chosenIndex}, correct={_activeQuestion.CorrectAnswerIndex})");
 
             QuizEventBus.RaiseQuizResolved(isCorrect, _activeQuestion.CorrectAnswerIndex);

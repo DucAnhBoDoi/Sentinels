@@ -160,8 +160,19 @@ namespace Scripts.Floor3.Gameplay
 
             if (_currentWaypointIndex >= _waypoints.Length) return;
 
-            Transform target    = _waypoints[_currentWaypointIndex];
-            Vector3   direction = (target.position - transform.position).normalized;
+            Transform target = _waypoints[_currentWaypointIndex];
+            Vector3 direction = (target.position - transform.position).normalized;
+
+            // ── NEW: Flip robot based on movement direction ──
+            if (direction.x > 0.01f)
+            {
+                transform.localScale = new Vector3(1, 1, 1);   // face right
+            }
+            else if (direction.x < -0.01f)
+            {
+                transform.localScale = new Vector3(-1, 1, 1);  // face left
+            }
+
             transform.position += direction * _currentSpeed * Time.deltaTime;
 
             float dist = Vector2.Distance(transform.position, target.position);
@@ -250,21 +261,22 @@ namespace Scripts.Floor3.Gameplay
             Collider2D[] hits = Physics2D.OverlapCircleAll(
                 transform.position, _panicRadius, _virusLayer);
 
-            bool virusNearby = false;
+            bool enemyNearby = false;
             foreach (var hit in hits)
             {
-                if (hit.GetComponent<VirusAI>() != null)
+                if (hit.GetComponent<VirusAI>() != null ||
+                    hit.GetComponent<UtilityRobotAI_Floor3>() != null)
                 {
-                    virusNearby = true;
+                    enemyNearby = true;
                     break;
                 }
             }
 
-            if (virusNearby && !_isPanicked)
+            if (enemyNearby && !_isPanicked)
             {
                 EnterPanic();
             }
-            else if (!virusNearby && _isPanicked)
+            else if (!enemyNearby && _isPanicked)
             {
                 ExitPanic();
             }

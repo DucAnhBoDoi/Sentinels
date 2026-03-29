@@ -128,8 +128,8 @@ namespace Scripts.Floor3.UI
             if (_hpBar != null)
             {
                 _hpBar.fillAmount = normalized;
-                _hpBar.color = normalized > 0.6f ? _hpColorHigh
-                             : normalized > 0.3f ? _hpColorMedium
+                _hpBar.color = normalized > 0.7f ? _hpColorHigh
+                             : normalized > 0.5f ? _hpColorMedium
                              : _hpColorLow;
             }
 

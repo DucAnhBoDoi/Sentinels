@@ -1,11 +1,14 @@
 // ============================================================
 // FILE: Assets/Scripts/Floor3/Core/Floor3Brain.cs
 // Namespace: Scripts.Floor3.Core
-// ── UPDATED DAY 4 ──────────────────────────────────────────
+// ── UPDATED DAY 5 ──────────────────────────────────────────
 // Changes:
-//   - DifficultyManager wired in
-//   - OnWrongAnswer() notifies DifficultyManager
-//   - Checkpoint position passed to SpawnWave()
+//   - GameContext fully wired in (all DAY 5 hooks filled)
+//   - OnCorrectAnswer / OnWrongAnswer update GameContext
+//   - HandleRobotDied → GameContext.TriggerGameOver()
+//   - HandleEscortComplete → GameContext.TriggerLevelComplete()
+//   - HandleEmotionChanged → GameContext.UpdateEmotion()
+//   - Start() → GameContext.StartTracking()
 // ============================================================
 
 using UnityEngine;
@@ -16,13 +19,12 @@ namespace Scripts.Floor3.Core
     public class Floor3Brain : MonoBehaviour
     {
         [Header("Scene References")]
-        [SerializeField] private RobotController _robotController;
-        [SerializeField] private QuizManager     _quizManager;
-        [SerializeField] private VirusSpawner      _virusSpawner;
+        [SerializeField] private RobotController    _robotController;
+        [SerializeField] private QuizManager        _quizManager;
+        [SerializeField] private VirusSpawner       _virusSpawner;
         [SerializeField] private DifficultyManager  _difficultyManager;
 
-        // World position of the last checkpoint waypoint reached.
-        // Used to localize wrong-answer virus spawns.
+        // World position of the last checkpoint — used to localize virus spawns
         private Vector3 _lastCheckpointPosition;
 
         // ── Lifecycle ────────────────────────────────────────────────────
@@ -32,6 +34,7 @@ namespace Scripts.Floor3.Core
             RobotEventBus.OnCheckpointReached += HandleCheckpointReached;
             RobotEventBus.OnStateChanged      += HandleStateChanged;
             RobotEventBus.OnEmotionChanged    += HandleEmotionChanged;
+            RobotEventBus.OnRobotDamaged      += HandleRobotDamaged;
             RobotEventBus.OnRobotDied         += HandleRobotDied;
             RobotEventBus.OnEscortComplete    += HandleEscortComplete;
         }
@@ -41,56 +44,59 @@ namespace Scripts.Floor3.Core
             RobotEventBus.OnCheckpointReached -= HandleCheckpointReached;
             RobotEventBus.OnStateChanged      -= HandleStateChanged;
             RobotEventBus.OnEmotionChanged    -= HandleEmotionChanged;
+            RobotEventBus.OnRobotDamaged      -= HandleRobotDamaged;
             RobotEventBus.OnRobotDied         -= HandleRobotDied;
             RobotEventBus.OnEscortComplete    -= HandleEscortComplete;
         }
 
         private void Start()
         {
-            if (_robotController == null)
-                Debug.LogError("[Floor3Brain] RobotController missing!");
-            if (_quizManager == null)
-                Debug.LogError("[Floor3Brain] QuizManager missing!");
-            if (_virusSpawner == null)
-                Debug.LogWarning("[Floor3Brain] VirusSpawner not assigned — no virus spawning.");
+            if (_robotController == null) Debug.LogError("[Floor3Brain] RobotController missing!");
+            if (_quizManager     == null) Debug.LogError("[Floor3Brain] QuizManager missing!");
+            if (_virusSpawner    == null) Debug.LogWarning("[Floor3Brain] VirusSpawner not assigned.");
+
+            // Start game time tracking
+            GameContext.Instance?.StartTracking();
         }
 
         // ── Event Handlers ───────────────────────────────────────────────
 
         private void HandleCheckpointReached(int waypointIndex)
         {
-            // Store the robot's current position as the checkpoint position.
-            // Robot snaps to waypoint on arrival so this is accurate.
             _lastCheckpointPosition = _robotController.transform.position;
-
-            Debug.Log($"[Floor3Brain] Checkpoint {waypointIndex} at {_lastCheckpointPosition} → quiz start.");
+            GameContext.Instance?.RegisterCheckpoint();
+            Debug.Log($"[Floor3Brain] Checkpoint {waypointIndex} → quiz start.");
             _quizManager.StartQuiz(waypointIndex);
         }
 
         private void HandleStateChanged(RobotState newState)
         {
-            // DAY 4: _difficultyManager.OnRobotStateChanged(newState);
             Debug.Log($"[Floor3Brain] Robot state → {newState}");
         }
 
         private void HandleEmotionChanged(RobotEmotion newEmotion)
         {
-            // DAY 5: GameContext.Instance.UpdateEmotion(newEmotion);
+            GameContext.Instance?.UpdateEmotion(newEmotion);
             Debug.Log($"[Floor3Brain] Robot emotion → {newEmotion}");
+        }
+
+        private void HandleRobotDamaged(float normalizedHp)
+        {
+            GameContext.Instance?.UpdateRobotHp(normalizedHp);
         }
 
         private void HandleRobotDied()
         {
-            Debug.Log("[Floor3Brain] Robot died → clearing viruses.");
+            Debug.Log("[Floor3Brain] Robot died → Game Over.");
             _virusSpawner?.ClearAllViruses();
-            // DAY 5: GameContext.Instance.TriggerGameOver();
+            GameContext.Instance?.TriggerGameOver(GameOverReason.RobotDestroyed);
         }
 
         private void HandleEscortComplete()
         {
-            Debug.Log("[Floor3Brain] Escort complete → clearing viruses.");
+            Debug.Log("[Floor3Brain] Escort complete → Level Won!");
             _virusSpawner?.ClearAllViruses();
-            // DAY 5: GameContext.Instance.TriggerLevelComplete();
+            GameContext.Instance?.TriggerLevelComplete();
         }
 
         // ── Public API (called by QuizManager) ───────────────────────────
@@ -98,14 +104,15 @@ namespace Scripts.Floor3.Core
         public void OnCorrectAnswer()
         {
             Debug.Log("[Floor3Brain] Correct → speed boost.");
+            GameContext.Instance?.RegisterCorrectAnswer();
             _robotController.ApplySpeedBoost();
         }
 
         public void OnWrongAnswer()
         {
-            Debug.Log($"[Floor3Brain] Wrong → stun + spawn near {_lastCheckpointPosition}.");
+            Debug.Log($"[Floor3Brain] Wrong → stun + viruses.");
+            GameContext.Instance?.RegisterWrongAnswer();
             _robotController.ApplyStun();
-            // Spawn near the checkpoint where the wrong answer happened
             _virusSpawner?.SpawnWave(_lastCheckpointPosition);
             _difficultyManager?.RegisterWrongAnswer();
         }

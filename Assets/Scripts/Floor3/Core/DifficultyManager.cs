@@ -72,7 +72,7 @@ namespace Scripts.Floor3.Core
 
         [Header("Wrong Answer Thresholds")]
         [SerializeField] private int _wrongAnswersForMedium = 2;
-        [SerializeField] private int _wrongAnswersForHard   = 4;
+        [SerializeField] private int _wrongAnswersForHard   = 3;
 
         [Header("Debug")]
         [SerializeField] private bool _logDifficulty = true;

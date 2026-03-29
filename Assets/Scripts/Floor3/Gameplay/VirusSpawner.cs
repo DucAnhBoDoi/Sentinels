@@ -40,8 +40,8 @@ namespace Scripts.Floor3.Gameplay
         // ── Inspector ────────────────────────────────────────────────────
 
         [Header("References")]
-        [SerializeField] private GameObject      _virusPrefab;
-        [SerializeField] private Transform       _virusContainer;
+        [SerializeField] private GameObject _virusPrefab;
+        [SerializeField] private Transform _virusContainer;
         [SerializeField] private RobotController _robotController;
 
         [Header("All Spawn Points")]
@@ -67,23 +67,30 @@ namespace Scripts.Floor3.Gameplay
                  "E.g. 2 = pick from the 2 spawn points closest to the failed checkpoint.")]
         [SerializeField] private int _nearestSpawnPointCount = 2;
 
+        [Header("Robot Distance Spawn Limit")]
+        [Tooltip("Minimum distance from robot where virus can spawn.")]
+        [SerializeField] private float _minSpawnDistanceFromRobot = 4f;
+
+        [Tooltip("Maximum distance from robot where virus can spawn.")]
+        [SerializeField] private float _maxSpawnDistanceFromRobot = 15f;
+
         [Header("Debug")]
         [SerializeField] private bool _logSpawning = true;
 
         // ── Private State ─────────────────────────────────────────────────
 
-        private readonly List<VirusAI> _activeViruses  = new List<VirusAI>();
-        private int      _totalWavesSpawned = 0;
-        private bool     _spawningActive    = false;
-        private Coroutine _continuousLoop   = null;
+        private readonly List<VirusAI> _activeViruses = new List<VirusAI>();
+        private int _totalWavesSpawned = 0;
+        private bool _spawningActive = false;
+        private Coroutine _continuousLoop = null;
 
         // ── Unity Lifecycle ──────────────────────────────────────────────
 
         private void Awake()
         {
-            if (_virusPrefab      == null) Debug.LogError("[VirusSpawner] Virus prefab not assigned!");
-            if (_robotController  == null) Debug.LogError("[VirusSpawner] RobotController not assigned!");
-            if (_virusContainer   == null) Debug.LogError("[VirusSpawner] VirusContainer not assigned!");
+            if (_virusPrefab == null) Debug.LogError("[VirusSpawner] Virus prefab not assigned!");
+            if (_robotController == null) Debug.LogError("[VirusSpawner] RobotController not assigned!");
+            if (_virusContainer == null) Debug.LogError("[VirusSpawner] VirusContainer not assigned!");
             if (_currentVirusData == null) Debug.LogError("[VirusSpawner] VirusData not assigned!");
             if (_spawnPoints == null || _spawnPoints.Length == 0)
                 Debug.LogWarning("[VirusSpawner] No spawn points assigned!");
@@ -231,8 +238,16 @@ namespace Scripts.Floor3.Gameplay
 
         private Vector3 GetRandomSpawnPoint()
         {
+            // NEW: try spawn points near robot first
+            List<Transform> nearbyPoints = GetSpawnPointsNearRobot();
+
+            if (nearbyPoints.Count > 0)
+                return nearbyPoints[Random.Range(0, nearbyPoints.Count)].position;
+
+            // fallback to original behavior
             if (_spawnPoints == null || _spawnPoints.Length == 0)
                 return transform.position;
+
             return _spawnPoints[Random.Range(0, _spawnPoints.Length)].position;
         }
 
@@ -249,6 +264,26 @@ namespace Scripts.Floor3.Gameplay
                 .Where(sp => sp != null)
                 .OrderBy(sp => Vector3.Distance(sp.position, origin))
                 .Take(count)
+                .ToList();
+        }
+
+        /// <summary>
+        /// Returns spawn points within a distance range from the escort robot.
+        /// Ensures viruses do not spawn too close to the robot.
+        /// </summary>
+        private List<Transform> GetSpawnPointsNearRobot()
+        {
+            if (_robotController == null || _spawnPoints == null)
+                return new List<Transform>();
+
+            Vector3 robotPos = _robotController.transform.position;
+
+            return _spawnPoints
+                .Where(sp =>
+                    sp != null &&
+                    Vector3.Distance(sp.position, robotPos) >= _minSpawnDistanceFromRobot &&
+                    Vector3.Distance(sp.position, robotPos) <= _maxSpawnDistanceFromRobot
+                )
                 .ToList();
         }
 
@@ -279,7 +314,7 @@ namespace Scripts.Floor3.Gameplay
 
         // ── Getters (for DifficultyManager Day 4) ────────────────────────
 
-        public int GetActiveVirusCount()  => _activeViruses.Count;
+        public int GetActiveVirusCount() => _activeViruses.Count;
         public int GetTotalWavesSpawned() => _totalWavesSpawned;
 
         // ── Helpers ───────────────────────────────────────────────────────
