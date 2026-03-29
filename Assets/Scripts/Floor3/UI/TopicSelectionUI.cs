@@ -81,9 +81,9 @@ namespace Scripts.Floor3.UI
             Time.timeScale = 0f;
 
             // Wire buttons
-            _technologyButton?.onClick.AddListener(() => OnTopicSelected("technology", "⚙ Technology"));
-            _biologyButton?.onClick.AddListener(   () => OnTopicSelected("biology",    "🧬 Biology"));
-            _ethicsButton?.onClick.AddListener(    () => OnTopicSelected("ethics",     "⚖ Ethics"));
+            _technologyButton?.onClick.AddListener(() => OnTopicSelected("technology", "Technology"));
+            _biologyButton?.onClick.AddListener(   () => OnTopicSelected("biology",    "Biology"));
+            _ethicsButton?.onClick.AddListener(    () => OnTopicSelected("ethics",     "Ethics"));
             _startButton?.onClick.AddListener(OnStartClicked);
 
             // Initial state
@@ -122,15 +122,15 @@ namespace Scripts.Floor3.UI
 
             SetLoadingText("Questions ready!");
             SetSourceText(usingFallback
-                ? "⚠ Using backup questions (AI unavailable)"
-                : "✓ AI-generated questions loaded");
+                ? "Using backup questions (AI unavailable)"
+                : "AI-generated questions loaded");
 
             Log($"Questions ready. Fallback: {usingFallback}. Count: {_geminiGenerator.QueueCount}");
 
             // Show start button
             SetStartButton(true);
             if (_startButtonText != null)
-                _startButtonText.text = "▶ Start Mission";
+                _startButtonText.text = "Start Mission";
         }
 
         // ── Start Game ────────────────────────────────────────────────────

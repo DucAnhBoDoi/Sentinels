@@ -197,7 +197,7 @@ namespace Scripts.Floor3.UI
                 _answerButtons[correctIndex].colors = btnColors;
             }
 
-            string msg   = isCorrect ? "✓ CORRECT!" : "✗ WRONG!";
+            string msg   = isCorrect ? "CORRECT!" : "WRONG!";
             Color  color = isCorrect ? _correctColor : _wrongColor;
             SetResultText(msg, color);
 
