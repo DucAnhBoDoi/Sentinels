@@ -16,6 +16,9 @@ public class PlayerMovement : MonoBehaviour
     [Header("Tầm tác động (Dành cho Player B)")]
     public float attackRange = 1.5f;
     public float interactRange = 1.5f;
+    
+    [Tooltip("Chỉnh độ lệch tâm (Ví dụ: Y = -2.5 để dời vòng tròn xuống dưới chân)")]
+    public Vector2 actionOffset; // Biến mới để chỉnh độ lệch
 
     void Start()
     {
@@ -65,7 +68,10 @@ public class PlayerMovement : MonoBehaviour
     void PerformAttack()
     {
         bool hit = false;
-        foreach (Collider2D col in Physics2D.OverlapCircleAll(transform.position, attackRange))
+        // Cộng thêm actionOffset vào vị trí đánh để dời tâm xuống
+        Vector2 centerPoint = (Vector2)transform.position + actionOffset; 
+        
+        foreach (Collider2D col in Physics2D.OverlapCircleAll(centerPoint, attackRange))
         {
             var robot = col.GetComponent<UtilityRobotAI>();
             if (robot) { robot.TakeDamage(); hit = true; }
@@ -75,7 +81,10 @@ public class PlayerMovement : MonoBehaviour
 
     void PerformRepair()
     {
-        foreach (Collider2D col in Physics2D.OverlapCircleAll(transform.position, interactRange))
+        // Cộng thêm actionOffset vào vị trí tương tác
+        Vector2 centerPoint = (Vector2)transform.position + actionOffset;
+
+        foreach (Collider2D col in Physics2D.OverlapCircleAll(centerPoint, interactRange))
         {
             var node = col.GetComponent<CircuitNode>();
             if (node && !node.isWire && node.GetComponent<SpriteRenderer>().color.a > 0)
@@ -89,7 +98,12 @@ public class PlayerMovement : MonoBehaviour
 
     void OnDrawGizmosSelected()
     {
+        // Vẽ vòng tròn tầm đánh (Màu vàng)
         Gizmos.color = Color.yellow;
-        Gizmos.DrawWireSphere(transform.position, attackRange);
+        Gizmos.DrawWireSphere(transform.position + (Vector3)actionOffset, attackRange);
+        
+        // (Tùy chọn) Mình thêm luôn vòng tròn tầm tương tác (Màu xanh lá) để bạn dễ nhìn
+        Gizmos.color = Color.green;
+        Gizmos.DrawWireSphere(transform.position + (Vector3)actionOffset, interactRange);
     }
 }
