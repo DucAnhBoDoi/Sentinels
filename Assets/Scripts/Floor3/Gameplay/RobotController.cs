@@ -32,11 +32,11 @@ namespace Scripts.Floor3.Gameplay
 
         [Header("Waypoints")]
         [SerializeField] private Transform[] _waypoints;
-        [SerializeField] private bool[]      _isCheckpoint;
+        [SerializeField] private bool[] _isCheckpoint;
 
         [Header("Movement Settings")]
-        [SerializeField] private float _baseSpeed            = 2f;
-        [SerializeField] private float _acceleratedSpeed     = 4f;
+        [SerializeField] private float _baseSpeed = 2f;
+        [SerializeField] private float _acceleratedSpeed = 4f;
         [SerializeField] private float _waypointReachThreshold = 0.15f;
 
         [Header("Stun Settings")]
@@ -65,19 +65,23 @@ namespace Scripts.Floor3.Gameplay
 
         private RobotStateMachine _stateMachine;
 
-        private int   _currentWaypointIndex = 0;
+        private int _currentWaypointIndex = 0;
         private float _currentHp;
         private float _currentSpeed;
-        private bool  _isEscortComplete      = false;
-        private int   _checkpointsFired      = 0;
+        private bool _isEscortComplete = false;
+        private int _checkpointsFired = 0;
 
         // Escort gate — set by ProximityDetector
-        // Robot only moves when at least 1 player is close enough
-        private bool      _escortGateOpen    = true;
+        private bool _escortGateOpen = true;
 
-        // Panic tracking
-        private bool      _isPanicked        = false;
+        // Panic tracking (virus proximity)
+        private bool _isPanicked = false;
         private Coroutine _proximityCoroutine = null;
+
+        // Transient state flags — ExitPanic must respect these
+        // so it never overrides an active stun or acceleration
+        private bool _isStunned = false;
+        private bool _isAccelerating = false;
 
         // State before panic (so we can restore correctly)
         private RobotState _stateBeforePanic = RobotState.Moving;
@@ -93,12 +97,12 @@ namespace Scripts.Floor3.Gameplay
             var rb = GetComponent<Rigidbody2D>();
             if (rb != null)
             {
-                rb.bodyType    = RigidbodyType2D.Kinematic;
+                rb.bodyType = RigidbodyType2D.Kinematic;
                 rb.gravityScale = 0f;
-                rb.constraints  = RigidbodyConstraints2D.FreezeRotation;
+                rb.constraints = RigidbodyConstraints2D.FreezeRotation;
             }
 
-            _currentHp    = _maxHp;
+            _currentHp = _maxHp;
             _currentSpeed = _baseSpeed;
             ValidateWaypointArrays();
         }
@@ -107,14 +111,14 @@ namespace Scripts.Floor3.Gameplay
         {
             // ── FEATURE 1: Quiz Freeze ────────────────────────────────────
             // Subscribe to quiz events to freeze/unfreeze time
-            QuizEventBus.OnQuizStarted  += OnQuizStarted;
+            QuizEventBus.OnQuizStarted += OnQuizStarted;
             QuizEventBus.OnQuizResolved += OnQuizResolved;
             QuizEventBus.OnTimerExpired += OnQuizTimerExpired;
         }
 
         private void OnDisable()
         {
-            QuizEventBus.OnQuizStarted  -= OnQuizStarted;
+            QuizEventBus.OnQuizStarted -= OnQuizStarted;
             QuizEventBus.OnQuizResolved -= OnQuizResolved;
             QuizEventBus.OnTimerExpired -= OnQuizTimerExpired;
 
@@ -162,17 +166,6 @@ namespace Scripts.Floor3.Gameplay
 
             Transform target = _waypoints[_currentWaypointIndex];
             Vector3 direction = (target.position - transform.position).normalized;
-
-            // ── NEW: Flip robot based on movement direction ──
-            if (direction.x > 0.01f)
-            {
-                transform.localScale = new Vector3(1, 1, 1);   // face right
-            }
-            else if (direction.x < -0.01f)
-            {
-                transform.localScale = new Vector3(-1, 1, 1);  // face left
-            }
-
             transform.position += direction * _currentSpeed * Time.deltaTime;
 
             float dist = Vector2.Distance(transform.position, target.position);
@@ -184,7 +177,7 @@ namespace Scripts.Floor3.Gameplay
         {
             transform.position = _waypoints[index].position;
 
-            bool isFinal      = (index >= _waypoints.Length - 1);
+            bool isFinal = (index >= _waypoints.Length - 1);
             bool isCheckpoint = index < _isCheckpoint.Length && _isCheckpoint[index];
 
             if (isFinal)
@@ -261,22 +254,21 @@ namespace Scripts.Floor3.Gameplay
             Collider2D[] hits = Physics2D.OverlapCircleAll(
                 transform.position, _panicRadius, _virusLayer);
 
-            bool enemyNearby = false;
+            bool virusNearby = false;
             foreach (var hit in hits)
             {
-                if (hit.GetComponent<VirusAI>() != null ||
-                    hit.GetComponent<UtilityRobotAI_Floor3>() != null)
+                if (hit.GetComponent<VirusAI>() != null)
                 {
-                    enemyNearby = true;
+                    virusNearby = true;
                     break;
                 }
             }
 
-            if (enemyNearby && !_isPanicked)
+            if (virusNearby && !_isPanicked)
             {
                 EnterPanic();
             }
-            else if (!enemyNearby && _isPanicked)
+            else if (!virusNearby && _isPanicked)
             {
                 ExitPanic();
             }
@@ -284,26 +276,53 @@ namespace Scripts.Floor3.Gameplay
 
         private void EnterPanic()
         {
-            // Set flag FIRST — HandleMovement checks this flag directly.
-            // Even if ChangeState fails below, the flag stops movement immediately.
-            _stateBeforePanic = _stateMachine.CurrentState;
-            _isPanicked       = true;
+            // Guard: already panicked — ProximityScanLoop can call this
+            // multiple times if virus stays in range across scan ticks.
+            if (_isPanicked) return;
+
+            // Save state BEFORE panic for restoration later.
+            // Only save stable states — if currently in a transient state
+            // (Stunned/Accelerated), fall back to Moving on restore.
+            var current = _stateMachine.CurrentState;
+            _stateBeforePanic = (current == RobotState.Waiting)
+                ? RobotState.Waiting
+                : RobotState.Moving;
+
+            // Set flag FIRST — HandleMovement checks this before state machine.
+            _isPanicked = true;
 
             _stateMachine.ChangeEmotion(RobotEmotion.Panicked);
-            _stateMachine.ChangeState(RobotState.Panicked);  // requires updated RobotState.cs
+            _stateMachine.ChangeState(RobotState.Panicked);
 
-            Debug.Log("[RobotController] Virus nearby — PANICKED. Robot stopped.");
+            Debug.Log($"[RobotController] Virus nearby — PANICKED (was {current}). Robot stopped.");
         }
 
         private void ExitPanic()
         {
             _isPanicked = false;
-
             _stateMachine.ChangeEmotion(RobotEmotion.Stable);
 
-            // Restore the appropriate state
-            // If we were waiting at a checkpoint before panic, stay Waiting
-            // Otherwise resume Moving
+            // CRITICAL: Don't blindly resume Moving/Waiting.
+            // Check if Stun or Acceleration coroutine is STILL running.
+            // If stun is active → robot should stay Stunned, not resume.
+            // If acceleration is active → robot should stay Accelerated.
+            // The coroutine itself will handle the transition when it ends.
+            if (_isStunned)
+            {
+                _stateMachine.ChangeState(RobotState.Stunned);
+                Debug.Log("[RobotController] Area clear — returning to Stunned (stun still active).");
+                return;
+            }
+
+            if (_isAccelerating)
+            {
+                _stateMachine.ChangeState(RobotState.Moving);
+                _stateMachine.ChangeState(RobotState.Accelerated);
+                Debug.Log("[RobotController] Area clear — returning to Accelerated (boost still active).");
+                return;
+            }
+
+            // No active transient state — restore stable state
             RobotState resumeState = (_stateBeforePanic == RobotState.Waiting)
                 ? RobotState.Waiting
                 : RobotState.Moving;
@@ -329,12 +348,19 @@ namespace Scripts.Floor3.Gameplay
 
         private IEnumerator AccelerationCoroutine()
         {
+            _isAccelerating = true;
             _currentSpeed = _acceleratedSpeed;
             _stateMachine.ChangeState(RobotState.Moving);
             _stateMachine.ChangeState(RobotState.Accelerated);
+
             yield return new WaitForSeconds(_accelerationDuration);
+
+            _isAccelerating = false;
             _currentSpeed = _baseSpeed;
-            if (_stateMachine.CurrentState == RobotState.Accelerated)
+
+            if (_isPanicked)
+                _stateMachine.ChangeState(RobotState.Panicked);
+            else if (_stateMachine.CurrentState == RobotState.Accelerated)
                 _stateMachine.ChangeState(RobotState.Moving);
         }
 
@@ -345,11 +371,19 @@ namespace Scripts.Floor3.Gameplay
 
         private IEnumerator StunCoroutine()
         {
+            _isStunned = true;
             _stateMachine.ChangeState(RobotState.Stunned);
+
             yield return new WaitForSeconds(_stunDuration);
+
+            _isStunned = false;
             _currentSpeed = _baseSpeed;
-            // Only resume Moving if not currently in Panic
-            if (!_isPanicked)
+
+            // After stun ends: if STILL panicked (virus still nearby),
+            // go to Panicked. Otherwise resume Moving.
+            if (_isPanicked)
+                _stateMachine.ChangeState(RobotState.Panicked);
+            else
                 _stateMachine.ChangeState(RobotState.Moving);
         }
 
@@ -374,16 +408,16 @@ namespace Scripts.Floor3.Gameplay
             // Don't override Panicked emotion — proximity check owns that
             if (_isPanicked) return;
 
-            if      (normalizedHp > 0.6f) _stateMachine.ChangeEmotion(RobotEmotion.Stable);
+            if (normalizedHp > 0.6f) _stateMachine.ChangeEmotion(RobotEmotion.Stable);
             else if (normalizedHp > 0.3f) _stateMachine.ChangeEmotion(RobotEmotion.Confused);
-            else                          _stateMachine.ChangeEmotion(RobotEmotion.Panicked);
+            else _stateMachine.ChangeEmotion(RobotEmotion.Panicked);
         }
 
         // ── Getters ──────────────────────────────────────────────────────
 
-        public float GetNormalizedHp()         => _currentHp / _maxHp;
-        public int   GetCurrentWaypointIndex() => _currentWaypointIndex;
-        public bool  IsPanicked()              => _isPanicked;
+        public float GetNormalizedHp() => _currentHp / _maxHp;
+        public int GetCurrentWaypointIndex() => _currentWaypointIndex;
+        public bool IsPanicked() => _isPanicked;
 
         /// <summary>
         /// Called by ProximityDetector.

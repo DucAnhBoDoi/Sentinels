@@ -69,21 +69,39 @@ namespace Scripts.Floor3.Core
         /// </summary>
         private bool IsTransitionValid(RobotState from, RobotState to)
         {
+            // ── RULE: Panicked can be entered from ANY state ───────────────
+            // Virus proximity check runs independently of quiz/stun logic.
+            // Robot must always be able to panic regardless of current state.
+            if (to == RobotState.Panicked) return true;
+
+            // ── RULE: Panicked can exit to any movement state ─────────────
+            if (from == RobotState.Panicked) return true;
+
             return (from, to) switch
             {
+                // From Moving
                 (RobotState.Moving, RobotState.Waiting) => true,
                 (RobotState.Moving, RobotState.Stunned) => true,
-                // Waiting → Accelerated: correct answer while robot is paused at checkpoint
-                (RobotState.Waiting, RobotState.Accelerated) => true,
-                (RobotState.Waiting, RobotState.Stunned) => true,
-                (RobotState.Waiting, RobotState.AskingQuestion) => true,
+                (RobotState.Moving, RobotState.Accelerated) => true,
+
+                // From Waiting (at checkpoint)
                 (RobotState.Waiting, RobotState.Moving) => true,
+                (RobotState.Waiting, RobotState.Stunned) => true,
+                (RobotState.Waiting, RobotState.Accelerated) => true,
+                (RobotState.Waiting, RobotState.AskingQuestion) => true,
+
+                // From AskingQuestion
                 (RobotState.AskingQuestion, RobotState.Moving) => true,
                 (RobotState.AskingQuestion, RobotState.Stunned) => true,
                 (RobotState.AskingQuestion, RobotState.Accelerated) => true,
+
+                // From Stunned (timer expires → resume)
                 (RobotState.Stunned, RobotState.Moving) => true,
+
+                // From Accelerated (boost ends)
                 (RobotState.Accelerated, RobotState.Moving) => true,
                 (RobotState.Accelerated, RobotState.Waiting) => true,
+
                 _ => false
             };
         }
