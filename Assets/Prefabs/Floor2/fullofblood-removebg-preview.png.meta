@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 3584c1f4bed05aa4c86a4d146e615453
+guid: 0fdf07a8d374e7546ac729a8afc5092b
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -3882421745933238481
-    second: gun-removebg-preview_0
+      213: 6154926896102076295
+    second: fullofblood-removebg-preview_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -100,13 +100,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: gun-removebg-preview_0
+      name: fullofblood-removebg-preview_0
       rect:
         serializedVersion: 2
-        x: 56
-        y: 90
-        width: 238
-        height: 171
+        x: 73
+        y: 67
+        width: 82
+        height: 95
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -115,8 +115,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: f2fb565fdfdde1ac0800000000000000
-      internalID: -3882421745933238481
+      spriteID: 78f69acd661ba6550800000000000000
+      internalID: 6154926896102076295
       vertices: []
       indices: 
       edges: []
@@ -135,7 +135,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      gun-removebg-preview_0: -3882421745933238481
+      fullofblood-removebg-preview_0: 6154926896102076295
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
