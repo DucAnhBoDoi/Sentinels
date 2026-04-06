@@ -1,20 +1,24 @@
 // ══════════════════════════════════════════════════════
 // FILE: PlayerMovement.cs (Di chuyển, Lộn, Lật mặt & Đánh)
+// Dùng cho mọi máy, mọi Tầng.
 // ══════════════════════════════════════════════════════
 using UnityEngine;
 using UnityEngine.InputSystem;
 
 public class PlayerMovement : MonoBehaviour
 {
-    [Header("Cài đặt Di chuyển")]
+    [Header("Cấu hình di chuyển")]
     public float moveSpeed = 5f;
+    public bool useQuestSystem = true; // Tầng 3: HÃY BỎ TICK Ô NÀY TRONG INSPECTOR
+    
+    [Header("Thành phần hỗ trợ")]
     public Rigidbody2D rb;
     public Animator anim;
-    
-    [Header("Cài đặt Chiến đấu")]
-    public bool canAttack = true; // BẬT/TẮT quyền tấn công ở Inspector
+
+    [Header("Cấu hình Chiến đấu")]
+    public bool canAttack = true; 
     public float attackRange = 1.5f;
-    public Vector2 actionOffset; // Dời tâm vòng tròn xuống chân
+    public Vector2 actionOffset; 
 
     private Vector2 movement;
     private bool isRolling = false;
@@ -32,13 +36,17 @@ public class PlayerMovement : MonoBehaviour
 
     void Update()
     {
-        if (!QuestPopupManager.isGameStarted || isRolling) return;
+        // Kiểm tra xem có đang bị kẹt bởi bảng Quest không (chỉ dùng nếu useQuestSystem = true)
+        if (useQuestSystem && !QuestPopupManager.isGameStarted) return;
+        
+        // Nếu đang lộn thì không cho nhận thêm input di chuyển
+        if (isRolling) return;
         
         var keyboard = Keyboard.current;
         var mouse = Mouse.current;
         if (keyboard == null || mouse == null) return;
 
-        // 1. DI CHUYỂN (W, A, S, D)
+        // 1. NHẬN INPUT DI CHUYỂN (WASD cho cả 2 máy)
         movement = Vector2.zero;
         if (keyboard.wKey.isPressed) movement.y = 1f;
         else if (keyboard.sKey.isPressed) movement.y = -1f;
@@ -46,15 +54,17 @@ public class PlayerMovement : MonoBehaviour
         else if (keyboard.aKey.isPressed) movement.x = -1f;
 
         FlipCharacter();
+
+        // Cập nhật Animation chạy
         if (anim) anim.SetBool("isRunning", movement.sqrMagnitude > 0);
 
-        // 2. LỘN (Space)
+        // 2. LỘN (Phím Space)
         if (keyboard.spaceKey.wasPressedThisFrame && movement != Vector2.zero)
         {
             PerformRoll();
         }
 
-        // 3. TẤN CÔNG (Chuột trái) - Chỉ chạy nếu canAttack = true
+        // 3. TẤN CÔNG (Chuột trái)
         if (mouse.leftButton.wasPressedThisFrame && canAttack)
         {
             PerformAttack();
@@ -82,8 +92,10 @@ public class PlayerMovement : MonoBehaviour
     {
         isRolling = true;
         if (anim) anim.SetTrigger("isRolling");
+        
+        // Unity 6 dùng linearVelocity, các bản cũ dùng velocity
         rb.linearVelocity = movement.normalized * (moveSpeed * 1.5f);
-        Invoke("FinishRoll", 0.5f);
+        Invoke("FinishRoll", 0.5f); 
     }
 
     void FinishRoll()
@@ -96,28 +108,22 @@ public class PlayerMovement : MonoBehaviour
     {
         if (anim) anim.SetTrigger("isAttacking");
 
-        bool hit = false;
-        
-        // --- SỬA Ở ĐÂY: Tính toán lại Offset theo hướng mặt ---
         float facingDir = Mathf.Sign(transform.localScale.x);
         Vector2 actualOffset = new Vector2(actionOffset.x * facingDir, actionOffset.y);
         Vector2 centerPoint = (Vector2)transform.position + actualOffset; 
-        // -----------------------------------------------------
 
         foreach (Collider2D col in Physics2D.OverlapCircleAll(centerPoint, attackRange))
         {
+            // Tầng 1 đánh Robot, Tầng 3 bạn có thể thêm logic đánh quái khác ở đây
             var robot = col.GetComponent<UtilityRobotAI>();
-            if (robot) { robot.TakeDamage(); hit = true; }
+            if (robot) robot.TakeDamage();
         }
-        Debug.Log(hit ? gameObject.name + " đập trúng quái!" : gameObject.name + " đánh hụt!");
     }
 
     void OnDrawGizmosSelected()
     {
-        // Vẽ Gizmos cũng phải nhân với hướng mặt để hiển thị đúng
         float facingDir = Mathf.Sign(transform.localScale.x);
         Vector2 actualOffset = new Vector2(actionOffset.x * facingDir, actionOffset.y);
-
         Gizmos.color = Color.yellow;
         Gizmos.DrawWireSphere((Vector2)transform.position + actualOffset, attackRange);
     }

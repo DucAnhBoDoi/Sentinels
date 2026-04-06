@@ -301,8 +301,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9d82908b2dcb5c3499535457ef91a3a8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Game::UtilityRobotAI_Floor3
-  playerA: {fileID: 965340829}
-  playerB: {fileID: 850891663}
+  playerA: {fileID: 0}
+  playerB: {fileID: 0}
   moveSpeed: 3
   patrolSpeed: 1.5
   detectionRadius: 7
@@ -421,8 +421,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9d82908b2dcb5c3499535457ef91a3a8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Game::UtilityRobotAI_Floor3
-  playerA: {fileID: 965340829}
-  playerB: {fileID: 850891663}
+  playerA: {fileID: 0}
+  playerB: {fileID: 0}
   moveSpeed: 3
   patrolSpeed: 1.5
   detectionRadius: 18.08
@@ -554,7 +554,7 @@ MonoBehaviour:
   m_StreamingVersion: 20241001
   m_LegacyPriority: 0
   Target:
-    TrackingTarget: {fileID: 965340829}
+    TrackingTarget: {fileID: 69923561}
     LookAtTarget: {fileID: 0}
     CustomLookAtTarget: 0
   Lens:
@@ -586,7 +586,7 @@ Transform:
   m_GameObject: {fileID: 34369548}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 9.64, y: -2.0200005, z: -10}
+  m_LocalPosition: {x: 5.74, y: 3.91, z: -10}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -925,6 +925,215 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 8891588931429743710, guid: 06437eea732de2147a538e706834aff5, type: 3}
   m_PrefabInstance: {fileID: 65224545}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &69923560
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 69923561}
+  - component: {fileID: 69923567}
+  - component: {fileID: 69923565}
+  - component: {fileID: 69923564}
+  - component: {fileID: 69923563}
+  - component: {fileID: 69923562}
+  m_Layer: 0
+  m_Name: Player_A_Navigator
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &69923561
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 69923560}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 5.74, y: 3.91, z: 0}
+  m_LocalScale: {x: 1.1132231, y: 1.1132231, z: 1.1132231}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 535715959}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!95 &69923562
+Animator:
+  serializedVersion: 7
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 69923560}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: 16a89965aefd77342aae7dbe1c906169, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_AnimatePhysics: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
+--- !u!61 &69923563
+BoxCollider2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 69923560}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_ForceSendLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ForceReceiveLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ContactCaptureLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_CallbackLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_IsTrigger: 0
+  m_UsedByEffector: 0
+  m_CompositeOperation: 0
+  m_CompositeOrder: 0
+  m_Offset: {x: -0.31167504, y: -2.1593592}
+  m_SpriteTilingProperty:
+    border: {x: 0, y: 0, z: 0, w: 0}
+    pivot: {x: 0.5, y: 0.5}
+    oldSize: {x: 7.5, y: 5}
+    newSize: {x: 7.5, y: 5}
+    adaptiveTilingThreshold: 0.5
+    drawMode: 0
+    adaptiveTiling: 0
+  m_AutoTiling: 0
+  m_Size: {x: 1.136904, y: 0.68948174}
+  m_EdgeRadius: 0
+--- !u!50 &69923564
+Rigidbody2D:
+  serializedVersion: 5
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 69923560}
+  m_BodyType: 0
+  m_Simulated: 1
+  m_UseFullKinematicContacts: 1
+  m_UseAutoMass: 0
+  m_Mass: 1
+  m_LinearDamping: 0
+  m_AngularDamping: 0.05
+  m_GravityScale: 0
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_Interpolate: 1
+  m_SleepingMode: 1
+  m_CollisionDetection: 0
+  m_Constraints: 4
+--- !u!114 &69923565
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 69923560}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9f627bfedfebd6d458330de008e71ed9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Game::PlayerMovement
+  moveSpeed: 10
+  useQuestSystem: 0
+  rb: {fileID: 69923564}
+  anim: {fileID: 69923562}
+  canAttack: 1
+  attackRange: 1.5
+  actionOffset: {x: 0.5, y: -1.3}
+--- !u!212 &69923567
+SpriteRenderer:
+  serializedVersion: 2
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 69923560}
+  m_Enabled: 1
+  m_CastShadows: 0
+  m_ReceiveShadows: 0
+  m_DynamicOccludee: 1
+  m_StaticShadowCaster: 0
+  m_MotionVectors: 1
+  m_LightProbeUsage: 1
+  m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 0
+  m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
+  m_ForceMeshLod: -1
+  m_MeshLodSelectionBias: 0
+  m_RenderingLayerMask: 1
+  m_RendererPriority: 0
+  m_Materials:
+  - {fileID: 2100000, guid: a97c105638bdf8b4a8650670310a4cd3, type: 2}
+  m_StaticBatchInfo:
+    firstSubMesh: 0
+    subMeshCount: 0
+  m_StaticBatchRoot: {fileID: 0}
+  m_ProbeAnchor: {fileID: 0}
+  m_LightProbeVolumeOverride: {fileID: 0}
+  m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
+  m_PreserveUVs: 0
+  m_IgnoreNormalsForChartDetection: 0
+  m_ImportantGI: 0
+  m_StitchLightmapSeams: 1
+  m_SelectedEditorRenderState: 0
+  m_MinimumChartSize: 4
+  m_AutoUVMaxDistance: 0.5
+  m_AutoUVMaxAngle: 89
+  m_LightmapParameters: {fileID: 0}
+  m_GlobalIlluminationMeshLod: 0
+  m_SortingLayerID: -854467317
+  m_SortingLayer: 5
+  m_SortingOrder: 0
+  m_MaskInteraction: 0
+  m_Sprite: {fileID: 3204480812468917802, guid: 47ca56c93ee7f9c4ca339ccba00b414b, type: 3}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_FlipX: 0
+  m_FlipY: 0
+  m_DrawMode: 0
+  m_Size: {x: 7.5, y: 5}
+  m_AdaptiveModeThreshold: 0.5
+  m_SpriteTileMode: 0
+  m_WasSpriteAssigned: 1
+  m_SpriteSortPoint: 0
 --- !u!1001 &75291384
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1032,8 +1241,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9d82908b2dcb5c3499535457ef91a3a8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Game::UtilityRobotAI_Floor3
-  playerA: {fileID: 965340829}
-  playerB: {fileID: 850891663}
+  playerA: {fileID: 0}
+  playerB: {fileID: 0}
   moveSpeed: 3
   patrolSpeed: 1.5
   detectionRadius: 10.96
@@ -1320,8 +1529,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9d82908b2dcb5c3499535457ef91a3a8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Game::UtilityRobotAI_Floor3
-  playerA: {fileID: 965340829}
-  playerB: {fileID: 850891663}
+  playerA: {fileID: 0}
+  playerB: {fileID: 0}
   moveSpeed: 3
   patrolSpeed: 1.5
   detectionRadius: 7
@@ -1609,8 +1818,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9d82908b2dcb5c3499535457ef91a3a8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Game::UtilityRobotAI_Floor3
-  playerA: {fileID: 965340829}
-  playerB: {fileID: 850891663}
+  playerA: {fileID: 0}
+  playerB: {fileID: 0}
   moveSpeed: 3
   patrolSpeed: 1.5
   detectionRadius: 7
@@ -2039,8 +2248,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9d82908b2dcb5c3499535457ef91a3a8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Game::UtilityRobotAI_Floor3
-  playerA: {fileID: 965340829}
-  playerB: {fileID: 850891663}
+  playerA: {fileID: 0}
+  playerB: {fileID: 0}
   moveSpeed: 3
   patrolSpeed: 1.5
   detectionRadius: 7
@@ -2159,8 +2368,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9d82908b2dcb5c3499535457ef91a3a8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Game::UtilityRobotAI_Floor3
-  playerA: {fileID: 965340829}
-  playerB: {fileID: 850891663}
+  playerA: {fileID: 0}
+  playerB: {fileID: 0}
   moveSpeed: 3
   patrolSpeed: 1.5
   detectionRadius: 7
@@ -2615,8 +2824,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9d82908b2dcb5c3499535457ef91a3a8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Game::UtilityRobotAI_Floor3
-  playerA: {fileID: 965340829}
-  playerB: {fileID: 850891663}
+  playerA: {fileID: 0}
+  playerB: {fileID: 0}
   moveSpeed: 3
   patrolSpeed: 1.5
   detectionRadius: 7
@@ -3043,8 +3252,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9d82908b2dcb5c3499535457ef91a3a8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Game::UtilityRobotAI_Floor3
-  playerA: {fileID: 965340829}
-  playerB: {fileID: 850891663}
+  playerA: {fileID: 0}
+  playerB: {fileID: 0}
   moveSpeed: 3
   patrolSpeed: 1.5
   detectionRadius: 7
@@ -3163,8 +3372,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9d82908b2dcb5c3499535457ef91a3a8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Game::UtilityRobotAI_Floor3
-  playerA: {fileID: 965340829}
-  playerB: {fileID: 850891663}
+  playerA: {fileID: 0}
+  playerB: {fileID: 0}
   moveSpeed: 3
   patrolSpeed: 1.5
   detectionRadius: 7
@@ -3378,7 +3587,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Game::Scripts.Floor3.AI.GeminiAPIService
   _backendUrl: https://floor3-quiz-backend-mhoang-dev-sows-projects-4b881ae1.vercel.app/api/quiz
-  _timeoutSeconds: 12
+  _timeoutSeconds: 0
   _logRequests: 1
 --- !u!114 &339713292
 MonoBehaviour:
@@ -3500,8 +3709,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9d82908b2dcb5c3499535457ef91a3a8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Game::UtilityRobotAI_Floor3
-  playerA: {fileID: 965340829}
-  playerB: {fileID: 850891663}
+  playerA: {fileID: 0}
+  playerB: {fileID: 0}
   moveSpeed: 3
   patrolSpeed: 1.5
   detectionRadius: 13.79
@@ -4484,39 +4693,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1049576754}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &431722292
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 431722293}
-  m_Layer: 0
-  m_Name: '[PLAYERS]'
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &431722293
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 431722292}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: -30.9, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children:
-  - {fileID: 965340829}
-  - {fileID: 850891663}
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &463350723
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -4624,8 +4800,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9d82908b2dcb5c3499535457ef91a3a8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Game::UtilityRobotAI_Floor3
-  playerA: {fileID: 965340829}
-  playerB: {fileID: 850891663}
+  playerA: {fileID: 0}
+  playerB: {fileID: 0}
   moveSpeed: 3
   patrolSpeed: 1.5
   detectionRadius: 7
@@ -8740,8 +8916,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9d82908b2dcb5c3499535457ef91a3a8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Game::UtilityRobotAI_Floor3
-  playerA: {fileID: 965340829}
-  playerB: {fileID: 850891663}
+  playerA: {fileID: 0}
+  playerB: {fileID: 0}
   moveSpeed: 3
   patrolSpeed: 1.5
   detectionRadius: 7
@@ -8987,8 +9163,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9d82908b2dcb5c3499535457ef91a3a8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Game::UtilityRobotAI_Floor3
-  playerA: {fileID: 965340829}
-  playerB: {fileID: 850891663}
+  playerA: {fileID: 0}
+  playerB: {fileID: 0}
   moveSpeed: 3
   patrolSpeed: 1.5
   detectionRadius: 7
@@ -9138,8 +9314,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9d82908b2dcb5c3499535457ef91a3a8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Game::UtilityRobotAI_Floor3
-  playerA: {fileID: 965340829}
-  playerB: {fileID: 850891663}
+  playerA: {fileID: 0}
+  playerB: {fileID: 0}
   moveSpeed: 3
   patrolSpeed: 1.5
   detectionRadius: 7
@@ -9410,8 +9586,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9d82908b2dcb5c3499535457ef91a3a8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Game::UtilityRobotAI_Floor3
-  playerA: {fileID: 965340829}
-  playerB: {fileID: 850891663}
+  playerA: {fileID: 0}
+  playerB: {fileID: 0}
   moveSpeed: 3
   patrolSpeed: 1.5
   detectionRadius: 7
@@ -9530,8 +9706,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9d82908b2dcb5c3499535457ef91a3a8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Game::UtilityRobotAI_Floor3
-  playerA: {fileID: 965340829}
-  playerB: {fileID: 850891663}
+  playerA: {fileID: 0}
+  playerB: {fileID: 0}
   moveSpeed: 3
   patrolSpeed: 1.5
   detectionRadius: 7
@@ -9711,6 +9887,39 @@ MonoBehaviour:
   m_hasFontAssetChanged: 0
   m_baseMaterial: {fileID: 0}
   m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
+--- !u!1 &535715958
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 535715959}
+  m_Layer: 0
+  m_Name: '[PLAYERS]'
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &535715959
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 535715958}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 69923561}
+  - {fileID: 1202850496}
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &540203338
 GameObject:
   m_ObjectHideFlags: 0
@@ -9899,8 +10108,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9d82908b2dcb5c3499535457ef91a3a8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Game::UtilityRobotAI_Floor3
-  playerA: {fileID: 965340829}
-  playerB: {fileID: 850891663}
+  playerA: {fileID: 0}
+  playerB: {fileID: 0}
   moveSpeed: 3
   patrolSpeed: 1.5
   detectionRadius: 7
@@ -10094,8 +10303,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9d82908b2dcb5c3499535457ef91a3a8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Game::UtilityRobotAI_Floor3
-  playerA: {fileID: 965340829}
-  playerB: {fileID: 850891663}
+  playerA: {fileID: 0}
+  playerB: {fileID: 0}
   moveSpeed: 3
   patrolSpeed: 1.5
   detectionRadius: 7
@@ -10337,8 +10546,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9d82908b2dcb5c3499535457ef91a3a8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Game::UtilityRobotAI_Floor3
-  playerA: {fileID: 965340829}
-  playerB: {fileID: 850891663}
+  playerA: {fileID: 0}
+  playerB: {fileID: 0}
   moveSpeed: 3
   patrolSpeed: 1.5
   detectionRadius: 7
@@ -10642,8 +10851,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9d82908b2dcb5c3499535457ef91a3a8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Game::UtilityRobotAI_Floor3
-  playerA: {fileID: 965340829}
-  playerB: {fileID: 850891663}
+  playerA: {fileID: 0}
+  playerB: {fileID: 0}
   moveSpeed: 3
   patrolSpeed: 1.5
   detectionRadius: 7
@@ -10762,8 +10971,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9d82908b2dcb5c3499535457ef91a3a8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Game::UtilityRobotAI_Floor3
-  playerA: {fileID: 965340829}
-  playerB: {fileID: 850891663}
+  playerA: {fileID: 0}
+  playerB: {fileID: 0}
   moveSpeed: 3
   patrolSpeed: 1.5
   detectionRadius: 7
@@ -10913,8 +11122,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9d82908b2dcb5c3499535457ef91a3a8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Game::UtilityRobotAI_Floor3
-  playerA: {fileID: 965340829}
-  playerB: {fileID: 850891663}
+  playerA: {fileID: 0}
+  playerB: {fileID: 0}
   moveSpeed: 3
   patrolSpeed: 1.5
   detectionRadius: 7
@@ -11033,8 +11242,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9d82908b2dcb5c3499535457ef91a3a8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Game::UtilityRobotAI_Floor3
-  playerA: {fileID: 965340829}
-  playerB: {fileID: 850891663}
+  playerA: {fileID: 0}
+  playerB: {fileID: 0}
   moveSpeed: 3
   patrolSpeed: 1.5
   detectionRadius: 7
@@ -11388,8 +11597,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9d82908b2dcb5c3499535457ef91a3a8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Game::UtilityRobotAI_Floor3
-  playerA: {fileID: 965340829}
-  playerB: {fileID: 850891663}
+  playerA: {fileID: 0}
+  playerB: {fileID: 0}
   moveSpeed: 3
   patrolSpeed: 1.5
   detectionRadius: 7
@@ -11489,7 +11698,7 @@ Transform:
   m_GameObject: {fileID: 753653868}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 9.64, y: -2.0200005, z: -10}
+  m_LocalPosition: {x: 5.74, y: 3.91, z: -10}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -163312,8 +163521,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9d82908b2dcb5c3499535457ef91a3a8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Game::UtilityRobotAI_Floor3
-  playerA: {fileID: 965340829}
-  playerB: {fileID: 850891663}
+  playerA: {fileID: 0}
+  playerB: {fileID: 0}
   moveSpeed: 3
   patrolSpeed: 1.5
   detectionRadius: 7
@@ -163451,234 +163660,6 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls: []
---- !u!1 &850891662
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 850891663}
-  - component: {fileID: 850891667}
-  - component: {fileID: 850891665}
-  - component: {fileID: 850891664}
-  - component: {fileID: 850891669}
-  - component: {fileID: 850891670}
-  - component: {fileID: 850891671}
-  m_Layer: 0
-  m_Name: Player_B_Mechanic
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &850891663
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 850891662}
-  serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 13.19, y: 28.82, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 431722293}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!61 &850891664
-BoxCollider2D:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 850891662}
-  m_Enabled: 1
-  serializedVersion: 3
-  m_Density: 1
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_ForceSendLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_ForceReceiveLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_ContactCaptureLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_CallbackLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_IsTrigger: 0
-  m_UsedByEffector: 0
-  m_CompositeOperation: 0
-  m_CompositeOrder: 0
-  m_Offset: {x: 0, y: -0.0010261536}
-  m_SpriteTilingProperty:
-    border: {x: 0, y: 0, z: 0, w: 0}
-    pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 2, y: 2}
-    newSize: {x: 1, y: 1}
-    adaptiveTilingThreshold: 0.5
-    drawMode: 0
-    adaptiveTiling: 0
-  m_AutoTiling: 0
-  m_Size: {x: 1, y: 0.9979477}
-  m_EdgeRadius: 0
---- !u!50 &850891665
-Rigidbody2D:
-  serializedVersion: 5
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 850891662}
-  m_BodyType: 0
-  m_Simulated: 1
-  m_UseFullKinematicContacts: 1
-  m_UseAutoMass: 0
-  m_Mass: 1
-  m_LinearDamping: 0
-  m_AngularDamping: 0.05
-  m_GravityScale: 0
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_Interpolate: 1
-  m_SleepingMode: 1
-  m_CollisionDetection: 0
-  m_Constraints: 4
---- !u!212 &850891667
-SpriteRenderer:
-  serializedVersion: 2
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 850891662}
-  m_Enabled: 1
-  m_CastShadows: 0
-  m_ReceiveShadows: 0
-  m_DynamicOccludee: 1
-  m_StaticShadowCaster: 0
-  m_MotionVectors: 1
-  m_LightProbeUsage: 1
-  m_ReflectionProbeUsage: 1
-  m_RayTracingMode: 0
-  m_RayTraceProcedural: 0
-  m_RayTracingAccelStructBuildFlagsOverride: 0
-  m_RayTracingAccelStructBuildFlags: 1
-  m_SmallMeshCulling: 1
-  m_ForceMeshLod: -1
-  m_MeshLodSelectionBias: 0
-  m_RenderingLayerMask: 1
-  m_RendererPriority: 0
-  m_Materials:
-  - {fileID: 2100000, guid: a97c105638bdf8b4a8650670310a4cd3, type: 2}
-  m_StaticBatchInfo:
-    firstSubMesh: 0
-    subMeshCount: 0
-  m_StaticBatchRoot: {fileID: 0}
-  m_ProbeAnchor: {fileID: 0}
-  m_LightProbeVolumeOverride: {fileID: 0}
-  m_ScaleInLightmap: 1
-  m_ReceiveGI: 1
-  m_PreserveUVs: 0
-  m_IgnoreNormalsForChartDetection: 0
-  m_ImportantGI: 0
-  m_StitchLightmapSeams: 1
-  m_SelectedEditorRenderState: 0
-  m_MinimumChartSize: 4
-  m_AutoUVMaxDistance: 0.5
-  m_AutoUVMaxAngle: 89
-  m_LightmapParameters: {fileID: 0}
-  m_GlobalIlluminationMeshLod: 0
-  m_SortingLayerID: -854467317
-  m_SortingLayer: 5
-  m_SortingOrder: 0
-  m_MaskInteraction: 0
-  m_Sprite: {fileID: 4723107735738678597, guid: 45e8d1004506a1f4792cfe0c1a4db307, type: 3}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
-  m_FlipX: 0
-  m_FlipY: 0
-  m_DrawMode: 0
-  m_Size: {x: 1, y: 1}
-  m_AdaptiveModeThreshold: 0.5
-  m_SpriteTileMode: 0
-  m_WasSpriteAssigned: 1
-  m_SpriteSortPoint: 0
---- !u!114 &850891669
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 850891662}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1d63fb03374cdd74c85396c242ff0151, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Game::PlayerMovement_Level3
-  playerType: 1
-  moveSpeed: 12
-  rb: {fileID: 850891665}
---- !u!95 &850891670
-Animator:
-  serializedVersion: 7
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 850891662}
-  m_Enabled: 1
-  m_Avatar: {fileID: 0}
-  m_Controller: {fileID: 9100000, guid: ec3546abd3a1e7947a132f8657ebc100, type: 2}
-  m_CullingMode: 0
-  m_UpdateMode: 0
-  m_ApplyRootMotion: 0
-  m_LinearVelocityBlending: 0
-  m_StabilizeFeet: 0
-  m_AnimatePhysics: 0
-  m_WarningMessage: 
-  m_HasTransformHierarchy: 1
-  m_AllowConstantClipSamplingOptimization: 1
-  m_KeepAnimatorStateOnDisable: 0
-  m_WriteDefaultValuesOnDisable: 0
---- !u!114 &850891671
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 850891662}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: bc1e6a83544d62d4889c4bcd0a1bd30a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Game::Scripts.Floor3.Gameplay.PlayerAttack
-  _playerType: 1
-  _attackDamage: 1
-  _attackRange: 1.5
-  _attackCooldown: 0.4
-  _attackIndicator: {fileID: 0}
-  _indicatorDuration: 0.12
-  _virusLayer:
-    serializedVersion: 2
-    m_Bits: 256
-  _drawGizmos: 1
 --- !u!1 &851562864
 GameObject:
   m_ObjectHideFlags: 0
@@ -163980,8 +163961,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9d82908b2dcb5c3499535457ef91a3a8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Game::UtilityRobotAI_Floor3
-  playerA: {fileID: 965340829}
-  playerB: {fileID: 850891663}
+  playerA: {fileID: 0}
+  playerB: {fileID: 0}
   moveSpeed: 3
   patrolSpeed: 1.5
   detectionRadius: 7
@@ -164100,8 +164081,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9d82908b2dcb5c3499535457ef91a3a8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Game::UtilityRobotAI_Floor3
-  playerA: {fileID: 965340829}
-  playerB: {fileID: 850891663}
+  playerA: {fileID: 0}
+  playerB: {fileID: 0}
   moveSpeed: 3
   patrolSpeed: 1.5
   detectionRadius: 7
@@ -164282,8 +164263,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9d82908b2dcb5c3499535457ef91a3a8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Game::UtilityRobotAI_Floor3
-  playerA: {fileID: 965340829}
-  playerB: {fileID: 850891663}
+  playerA: {fileID: 0}
+  playerB: {fileID: 0}
   moveSpeed: 3
   patrolSpeed: 1.5
   detectionRadius: 7
@@ -164402,8 +164383,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9d82908b2dcb5c3499535457ef91a3a8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Game::UtilityRobotAI_Floor3
-  playerA: {fileID: 965340829}
-  playerB: {fileID: 850891663}
+  playerA: {fileID: 0}
+  playerB: {fileID: 0}
   moveSpeed: 3
   patrolSpeed: 1.5
   detectionRadius: 7
@@ -164522,8 +164503,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9d82908b2dcb5c3499535457ef91a3a8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Game::UtilityRobotAI_Floor3
-  playerA: {fileID: 965340829}
-  playerB: {fileID: 850891663}
+  playerA: {fileID: 0}
+  playerB: {fileID: 0}
   moveSpeed: 3
   patrolSpeed: 1.5
   detectionRadius: 7
@@ -164566,234 +164547,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1049576754}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &965340828
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 965340829}
-  - component: {fileID: 965340834}
-  - component: {fileID: 965340831}
-  - component: {fileID: 965340830}
-  - component: {fileID: 965340836}
-  - component: {fileID: 965340837}
-  - component: {fileID: 965340838}
-  m_Layer: 0
-  m_Name: Player_A_Navigator
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &965340829
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 965340828}
-  serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 9.64, y: 28.88, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 431722293}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!61 &965340830
-BoxCollider2D:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 965340828}
-  m_Enabled: 1
-  serializedVersion: 3
-  m_Density: 1
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_ForceSendLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_ForceReceiveLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_ContactCaptureLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_CallbackLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_IsTrigger: 0
-  m_UsedByEffector: 0
-  m_CompositeOperation: 0
-  m_CompositeOrder: 0
-  m_Offset: {x: 0, y: 0.0028486252}
-  m_SpriteTilingProperty:
-    border: {x: 0, y: 0, z: 0, w: 0}
-    pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 2, y: 2}
-    newSize: {x: 1, y: 1}
-    adaptiveTilingThreshold: 0.5
-    drawMode: 0
-    adaptiveTiling: 0
-  m_AutoTiling: 0
-  m_Size: {x: 1, y: 1.0056973}
-  m_EdgeRadius: 0
---- !u!50 &965340831
-Rigidbody2D:
-  serializedVersion: 5
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 965340828}
-  m_BodyType: 0
-  m_Simulated: 1
-  m_UseFullKinematicContacts: 1
-  m_UseAutoMass: 0
-  m_Mass: 1
-  m_LinearDamping: 0
-  m_AngularDamping: 0.05
-  m_GravityScale: 0
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_Interpolate: 1
-  m_SleepingMode: 1
-  m_CollisionDetection: 0
-  m_Constraints: 4
---- !u!212 &965340834
-SpriteRenderer:
-  serializedVersion: 2
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 965340828}
-  m_Enabled: 1
-  m_CastShadows: 0
-  m_ReceiveShadows: 0
-  m_DynamicOccludee: 1
-  m_StaticShadowCaster: 0
-  m_MotionVectors: 1
-  m_LightProbeUsage: 1
-  m_ReflectionProbeUsage: 1
-  m_RayTracingMode: 0
-  m_RayTraceProcedural: 0
-  m_RayTracingAccelStructBuildFlagsOverride: 0
-  m_RayTracingAccelStructBuildFlags: 1
-  m_SmallMeshCulling: 1
-  m_ForceMeshLod: -1
-  m_MeshLodSelectionBias: 0
-  m_RenderingLayerMask: 1
-  m_RendererPriority: 0
-  m_Materials:
-  - {fileID: 2100000, guid: a97c105638bdf8b4a8650670310a4cd3, type: 2}
-  m_StaticBatchInfo:
-    firstSubMesh: 0
-    subMeshCount: 0
-  m_StaticBatchRoot: {fileID: 0}
-  m_ProbeAnchor: {fileID: 0}
-  m_LightProbeVolumeOverride: {fileID: 0}
-  m_ScaleInLightmap: 1
-  m_ReceiveGI: 1
-  m_PreserveUVs: 0
-  m_IgnoreNormalsForChartDetection: 0
-  m_ImportantGI: 0
-  m_StitchLightmapSeams: 1
-  m_SelectedEditorRenderState: 0
-  m_MinimumChartSize: 4
-  m_AutoUVMaxDistance: 0.5
-  m_AutoUVMaxAngle: 89
-  m_LightmapParameters: {fileID: 0}
-  m_GlobalIlluminationMeshLod: 0
-  m_SortingLayerID: -854467317
-  m_SortingLayer: 5
-  m_SortingOrder: 0
-  m_MaskInteraction: 0
-  m_Sprite: {fileID: 4723107735738678597, guid: 06ca6bf28451e524587ae84d40c39c78, type: 3}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
-  m_FlipX: 0
-  m_FlipY: 0
-  m_DrawMode: 0
-  m_Size: {x: 1, y: 1}
-  m_AdaptiveModeThreshold: 0.5
-  m_SpriteTileMode: 0
-  m_WasSpriteAssigned: 1
-  m_SpriteSortPoint: 0
---- !u!114 &965340836
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 965340828}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1d63fb03374cdd74c85396c242ff0151, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Game::PlayerMovement_Level3
-  playerType: 0
-  moveSpeed: 12
-  rb: {fileID: 965340831}
---- !u!95 &965340837
-Animator:
-  serializedVersion: 7
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 965340828}
-  m_Enabled: 1
-  m_Avatar: {fileID: 0}
-  m_Controller: {fileID: 9100000, guid: d01a803f9df5e694ab2122b2e74da88a, type: 2}
-  m_CullingMode: 0
-  m_UpdateMode: 0
-  m_ApplyRootMotion: 0
-  m_LinearVelocityBlending: 0
-  m_StabilizeFeet: 0
-  m_AnimatePhysics: 0
-  m_WarningMessage: 
-  m_HasTransformHierarchy: 1
-  m_AllowConstantClipSamplingOptimization: 1
-  m_KeepAnimatorStateOnDisable: 0
-  m_WriteDefaultValuesOnDisable: 0
---- !u!114 &965340838
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 965340828}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: bc1e6a83544d62d4889c4bcd0a1bd30a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Game::Scripts.Floor3.Gameplay.PlayerAttack
-  _playerType: 0
-  _attackDamage: 1
-  _attackRange: 1.2
-  _attackCooldown: 0.4
-  _attackIndicator: {fileID: 0}
-  _indicatorDuration: 0.12
-  _virusLayer:
-    serializedVersion: 2
-    m_Bits: 256
-  _drawGizmos: 1
 --- !u!1 &971522470
 GameObject:
   m_ObjectHideFlags: 0
@@ -165104,8 +164857,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Game::Scripts.Floor3.Gameplay.ProximityDetector
   _robotTransform: {fileID: 1954845575}
-  _playerA: {fileID: 965340829}
-  _playerB: {fileID: 850891663}
+  _playerA: {fileID: 69923561}
+  _playerB: {fileID: 1202850496}
   _difficultyManager: {fileID: 1838325660}
   _robotController: {fileID: 1954845576}
   _warnDistance: 5
@@ -165231,8 +164984,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9d82908b2dcb5c3499535457ef91a3a8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Game::UtilityRobotAI_Floor3
-  playerA: {fileID: 965340829}
-  playerB: {fileID: 850891663}
+  playerA: {fileID: 0}
+  playerB: {fileID: 0}
   moveSpeed: 3
   patrolSpeed: 1.5
   detectionRadius: 10.21
@@ -165351,8 +165104,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9d82908b2dcb5c3499535457ef91a3a8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Game::UtilityRobotAI_Floor3
-  playerA: {fileID: 965340829}
-  playerB: {fileID: 850891663}
+  playerA: {fileID: 0}
+  playerB: {fileID: 0}
   moveSpeed: 3
   patrolSpeed: 1.5
   detectionRadius: 7
@@ -165655,11 +165408,11 @@ PrefabInstance:
     - target: {fileID: 6185796740172727157, guid: 6f23337fe8759aa469cc1e2a202d5aea, type: 3}
       propertyPath: playerA
       value: 
-      objectReference: {fileID: 965340829}
+      objectReference: {fileID: 0}
     - target: {fileID: 6185796740172727157, guid: 6f23337fe8759aa469cc1e2a202d5aea, type: 3}
       propertyPath: playerB
       value: 
-      objectReference: {fileID: 850891663}
+      objectReference: {fileID: 0}
     - target: {fileID: 3207705342381422007, guid: 06437eea732de2147a538e706834aff5, type: 3}
       propertyPath: m_SortingLayer
       value: 8
@@ -165754,8 +165507,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9d82908b2dcb5c3499535457ef91a3a8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Game::UtilityRobotAI_Floor3
-  playerA: {fileID: 965340829}
-  playerB: {fileID: 850891663}
+  playerA: {fileID: 0}
+  playerB: {fileID: 0}
   moveSpeed: 3
   patrolSpeed: 1.5
   detectionRadius: 7
@@ -165964,8 +165717,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9d82908b2dcb5c3499535457ef91a3a8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Game::UtilityRobotAI_Floor3
-  playerA: {fileID: 965340829}
-  playerB: {fileID: 850891663}
+  playerA: {fileID: 0}
+  playerB: {fileID: 0}
   moveSpeed: 3
   patrolSpeed: 1.5
   detectionRadius: 7
@@ -166084,8 +165837,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9d82908b2dcb5c3499535457ef91a3a8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Game::UtilityRobotAI_Floor3
-  playerA: {fileID: 965340829}
-  playerB: {fileID: 850891663}
+  playerA: {fileID: 0}
+  playerB: {fileID: 0}
   moveSpeed: 3
   patrolSpeed: 1.5
   detectionRadius: 7
@@ -166280,6 +166033,215 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1049576754}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1202850495
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1202850496}
+  - component: {fileID: 1202850502}
+  - component: {fileID: 1202850500}
+  - component: {fileID: 1202850499}
+  - component: {fileID: 1202850498}
+  - component: {fileID: 1202850497}
+  m_Layer: 0
+  m_Name: Player_B_Mechanic
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1202850496
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1202850495}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 10.75, y: 3.78, z: 0}
+  m_LocalScale: {x: 1.113223, y: 1.113223, z: 1.113223}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 535715959}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!95 &1202850497
+Animator:
+  serializedVersion: 7
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1202850495}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: 6bc9e59c85138554ea049505903ffafd, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_AnimatePhysics: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
+--- !u!61 &1202850498
+BoxCollider2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1202850495}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_ForceSendLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ForceReceiveLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ContactCaptureLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_CallbackLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_IsTrigger: 0
+  m_UsedByEffector: 0
+  m_CompositeOperation: 0
+  m_CompositeOrder: 0
+  m_Offset: {x: -0.3129298, y: -2.159185}
+  m_SpriteTilingProperty:
+    border: {x: 0, y: 0, z: 0, w: 0}
+    pivot: {x: 0.5, y: 0.5}
+    oldSize: {x: 7.5, y: 5}
+    newSize: {x: 7.5, y: 5}
+    adaptiveTilingThreshold: 0.5
+    drawMode: 0
+    adaptiveTiling: 0
+  m_AutoTiling: 0
+  m_Size: {x: 1.1347982, y: 0.68794847}
+  m_EdgeRadius: 0
+--- !u!50 &1202850499
+Rigidbody2D:
+  serializedVersion: 5
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1202850495}
+  m_BodyType: 0
+  m_Simulated: 1
+  m_UseFullKinematicContacts: 1
+  m_UseAutoMass: 0
+  m_Mass: 1
+  m_LinearDamping: 0
+  m_AngularDamping: 0.05
+  m_GravityScale: 0
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_Interpolate: 1
+  m_SleepingMode: 1
+  m_CollisionDetection: 0
+  m_Constraints: 4
+--- !u!114 &1202850500
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1202850495}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9f627bfedfebd6d458330de008e71ed9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Game::PlayerMovement
+  moveSpeed: 10
+  useQuestSystem: 1
+  rb: {fileID: 1202850499}
+  anim: {fileID: 1202850497}
+  canAttack: 1
+  attackRange: 1.5
+  actionOffset: {x: 0.5, y: -1.3}
+--- !u!212 &1202850502
+SpriteRenderer:
+  serializedVersion: 2
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1202850495}
+  m_Enabled: 1
+  m_CastShadows: 0
+  m_ReceiveShadows: 0
+  m_DynamicOccludee: 1
+  m_StaticShadowCaster: 0
+  m_MotionVectors: 1
+  m_LightProbeUsage: 1
+  m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 0
+  m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
+  m_ForceMeshLod: -1
+  m_MeshLodSelectionBias: 0
+  m_RenderingLayerMask: 1
+  m_RendererPriority: 0
+  m_Materials:
+  - {fileID: 2100000, guid: a97c105638bdf8b4a8650670310a4cd3, type: 2}
+  m_StaticBatchInfo:
+    firstSubMesh: 0
+    subMeshCount: 0
+  m_StaticBatchRoot: {fileID: 0}
+  m_ProbeAnchor: {fileID: 0}
+  m_LightProbeVolumeOverride: {fileID: 0}
+  m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
+  m_PreserveUVs: 0
+  m_IgnoreNormalsForChartDetection: 0
+  m_ImportantGI: 0
+  m_StitchLightmapSeams: 1
+  m_SelectedEditorRenderState: 0
+  m_MinimumChartSize: 4
+  m_AutoUVMaxDistance: 0.5
+  m_AutoUVMaxAngle: 89
+  m_LightmapParameters: {fileID: 0}
+  m_GlobalIlluminationMeshLod: 0
+  m_SortingLayerID: -854467317
+  m_SortingLayer: 5
+  m_SortingOrder: 0
+  m_MaskInteraction: 0
+  m_Sprite: {fileID: 3204480812468917802, guid: 198037fdefa74b341b2d825b19aa9d1a, type: 3}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_FlipX: 0
+  m_FlipY: 0
+  m_DrawMode: 0
+  m_Size: {x: 7.5, y: 5}
+  m_AdaptiveModeThreshold: 0.5
+  m_SpriteTileMode: 0
+  m_WasSpriteAssigned: 1
+  m_SpriteSortPoint: 0
 --- !u!1001 &1207143544
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -166387,8 +166349,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9d82908b2dcb5c3499535457ef91a3a8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Game::UtilityRobotAI_Floor3
-  playerA: {fileID: 965340829}
-  playerB: {fileID: 850891663}
+  playerA: {fileID: 0}
+  playerB: {fileID: 0}
   moveSpeed: 3
   patrolSpeed: 1.5
   detectionRadius: 7
@@ -166742,8 +166704,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9d82908b2dcb5c3499535457ef91a3a8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Game::UtilityRobotAI_Floor3
-  playerA: {fileID: 965340829}
-  playerB: {fileID: 850891663}
+  playerA: {fileID: 0}
+  playerB: {fileID: 0}
   moveSpeed: 3
   patrolSpeed: 1.5
   detectionRadius: 7
@@ -167074,8 +167036,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9d82908b2dcb5c3499535457ef91a3a8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Game::UtilityRobotAI_Floor3
-  playerA: {fileID: 965340829}
-  playerB: {fileID: 850891663}
+  playerA: {fileID: 0}
+  playerB: {fileID: 0}
   moveSpeed: 3
   patrolSpeed: 1.5
   detectionRadius: 10.53
@@ -167194,8 +167156,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9d82908b2dcb5c3499535457ef91a3a8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Game::UtilityRobotAI_Floor3
-  playerA: {fileID: 965340829}
-  playerB: {fileID: 850891663}
+  playerA: {fileID: 0}
+  playerB: {fileID: 0}
   moveSpeed: 3
   patrolSpeed: 1.5
   detectionRadius: 7
@@ -167314,8 +167276,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9d82908b2dcb5c3499535457ef91a3a8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Game::UtilityRobotAI_Floor3
-  playerA: {fileID: 965340829}
-  playerB: {fileID: 850891663}
+  playerA: {fileID: 0}
+  playerB: {fileID: 0}
   moveSpeed: 3
   patrolSpeed: 1.5
   detectionRadius: 7
@@ -167465,8 +167427,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9d82908b2dcb5c3499535457ef91a3a8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Game::UtilityRobotAI_Floor3
-  playerA: {fileID: 965340829}
-  playerB: {fileID: 850891663}
+  playerA: {fileID: 0}
+  playerB: {fileID: 0}
   moveSpeed: 3
   patrolSpeed: 1.5
   detectionRadius: 7
@@ -167585,8 +167547,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9d82908b2dcb5c3499535457ef91a3a8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Game::UtilityRobotAI_Floor3
-  playerA: {fileID: 965340829}
-  playerB: {fileID: 850891663}
+  playerA: {fileID: 0}
+  playerB: {fileID: 0}
   moveSpeed: 3
   patrolSpeed: 1.5
   detectionRadius: 10.89
@@ -167705,8 +167667,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9d82908b2dcb5c3499535457ef91a3a8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Game::UtilityRobotAI_Floor3
-  playerA: {fileID: 965340829}
-  playerB: {fileID: 850891663}
+  playerA: {fileID: 0}
+  playerB: {fileID: 0}
   moveSpeed: 3
   patrolSpeed: 1.5
   detectionRadius: 7
@@ -167735,8 +167697,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9d82908b2dcb5c3499535457ef91a3a8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Game::UtilityRobotAI_Floor3
-  playerA: {fileID: 965340829}
-  playerB: {fileID: 850891663}
+  playerA: {fileID: 0}
+  playerB: {fileID: 0}
   moveSpeed: 3
   patrolSpeed: 1.5
   detectionRadius: 7
@@ -168319,8 +168281,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9d82908b2dcb5c3499535457ef91a3a8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Game::UtilityRobotAI_Floor3
-  playerA: {fileID: 965340829}
-  playerB: {fileID: 850891663}
+  playerA: {fileID: 0}
+  playerB: {fileID: 0}
   moveSpeed: 3
   patrolSpeed: 1.5
   detectionRadius: 7
@@ -168571,8 +168533,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9d82908b2dcb5c3499535457ef91a3a8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Game::UtilityRobotAI_Floor3
-  playerA: {fileID: 965340829}
-  playerB: {fileID: 850891663}
+  playerA: {fileID: 0}
+  playerB: {fileID: 0}
   moveSpeed: 3
   patrolSpeed: 1.5
   detectionRadius: 7
@@ -171740,8 +171702,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9d82908b2dcb5c3499535457ef91a3a8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Game::UtilityRobotAI_Floor3
-  playerA: {fileID: 965340829}
-  playerB: {fileID: 850891663}
+  playerA: {fileID: 0}
+  playerB: {fileID: 0}
   moveSpeed: 3
   patrolSpeed: 1.5
   detectionRadius: 7
@@ -213772,8 +213734,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9d82908b2dcb5c3499535457ef91a3a8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Game::UtilityRobotAI_Floor3
-  playerA: {fileID: 965340829}
-  playerB: {fileID: 850891663}
+  playerA: {fileID: 0}
+  playerB: {fileID: 0}
   moveSpeed: 3
   patrolSpeed: 1.5
   detectionRadius: 7
@@ -213892,8 +213854,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9d82908b2dcb5c3499535457ef91a3a8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Game::UtilityRobotAI_Floor3
-  playerA: {fileID: 965340829}
-  playerB: {fileID: 850891663}
+  playerA: {fileID: 0}
+  playerB: {fileID: 0}
   moveSpeed: 3
   patrolSpeed: 1.5
   detectionRadius: 21.79
@@ -214281,8 +214243,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9d82908b2dcb5c3499535457ef91a3a8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Game::UtilityRobotAI_Floor3
-  playerA: {fileID: 965340829}
-  playerB: {fileID: 850891663}
+  playerA: {fileID: 0}
+  playerB: {fileID: 0}
   moveSpeed: 3
   patrolSpeed: 1.5
   detectionRadius: 7
@@ -214401,8 +214363,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9d82908b2dcb5c3499535457ef91a3a8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Game::UtilityRobotAI_Floor3
-  playerA: {fileID: 965340829}
-  playerB: {fileID: 850891663}
+  playerA: {fileID: 0}
+  playerB: {fileID: 0}
   moveSpeed: 3
   patrolSpeed: 1.5
   detectionRadius: 7
@@ -214617,8 +214579,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9d82908b2dcb5c3499535457ef91a3a8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Game::UtilityRobotAI_Floor3
-  playerA: {fileID: 965340829}
-  playerB: {fileID: 850891663}
+  playerA: {fileID: 0}
+  playerB: {fileID: 0}
   moveSpeed: 3
   patrolSpeed: 1.5
   detectionRadius: 7
@@ -215269,8 +215231,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9d82908b2dcb5c3499535457ef91a3a8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Game::UtilityRobotAI_Floor3
-  playerA: {fileID: 965340829}
-  playerB: {fileID: 850891663}
+  playerA: {fileID: 0}
+  playerB: {fileID: 0}
   moveSpeed: 3
   patrolSpeed: 1.5
   detectionRadius: 7
@@ -215653,8 +215615,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9d82908b2dcb5c3499535457ef91a3a8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Game::UtilityRobotAI_Floor3
-  playerA: {fileID: 965340829}
-  playerB: {fileID: 850891663}
+  playerA: {fileID: 0}
+  playerB: {fileID: 0}
   moveSpeed: 3
   patrolSpeed: 1.5
   detectionRadius: 7
@@ -215773,8 +215735,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9d82908b2dcb5c3499535457ef91a3a8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Game::UtilityRobotAI_Floor3
-  playerA: {fileID: 965340829}
-  playerB: {fileID: 850891663}
+  playerA: {fileID: 0}
+  playerB: {fileID: 0}
   moveSpeed: 3
   patrolSpeed: 1.5
   detectionRadius: 7
@@ -215803,8 +215765,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9d82908b2dcb5c3499535457ef91a3a8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Game::UtilityRobotAI_Floor3
-  playerA: {fileID: 965340829}
-  playerB: {fileID: 850891663}
+  playerA: {fileID: 0}
+  playerB: {fileID: 0}
   moveSpeed: 3
   patrolSpeed: 1.5
   detectionRadius: 13.34
@@ -216137,8 +216099,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9d82908b2dcb5c3499535457ef91a3a8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Game::UtilityRobotAI_Floor3
-  playerA: {fileID: 965340829}
-  playerB: {fileID: 850891663}
+  playerA: {fileID: 0}
+  playerB: {fileID: 0}
   moveSpeed: 3
   patrolSpeed: 1.5
   detectionRadius: 7
@@ -216257,8 +216219,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9d82908b2dcb5c3499535457ef91a3a8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Game::UtilityRobotAI_Floor3
-  playerA: {fileID: 965340829}
-  playerB: {fileID: 850891663}
+  playerA: {fileID: 0}
+  playerB: {fileID: 0}
   moveSpeed: 3
   patrolSpeed: 1.5
   detectionRadius: 10.69
@@ -216372,8 +216334,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9d82908b2dcb5c3499535457ef91a3a8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Game::UtilityRobotAI_Floor3
-  playerA: {fileID: 965340829}
-  playerB: {fileID: 850891663}
+  playerA: {fileID: 0}
+  playerB: {fileID: 0}
   moveSpeed: 3
   patrolSpeed: 1.5
   detectionRadius: 7
@@ -216554,8 +216516,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9d82908b2dcb5c3499535457ef91a3a8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Game::UtilityRobotAI_Floor3
-  playerA: {fileID: 965340829}
-  playerB: {fileID: 850891663}
+  playerA: {fileID: 0}
+  playerB: {fileID: 0}
   moveSpeed: 3
   patrolSpeed: 1.5
   detectionRadius: 7
@@ -216705,8 +216667,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9d82908b2dcb5c3499535457ef91a3a8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Game::UtilityRobotAI_Floor3
-  playerA: {fileID: 965340829}
-  playerB: {fileID: 850891663}
+  playerA: {fileID: 0}
+  playerB: {fileID: 0}
   moveSpeed: 3
   patrolSpeed: 1.5
   detectionRadius: 7
@@ -216957,8 +216919,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9d82908b2dcb5c3499535457ef91a3a8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Game::UtilityRobotAI_Floor3
-  playerA: {fileID: 965340829}
-  playerB: {fileID: 850891663}
+  playerA: {fileID: 0}
+  playerB: {fileID: 0}
   moveSpeed: 3
   patrolSpeed: 1.5
   detectionRadius: 7
@@ -217220,7 +217182,7 @@ SceneRoots:
   - {fileID: 1528404738}
   - {fileID: 540487096}
   - {fileID: 18845744}
-  - {fileID: 431722293}
+  - {fileID: 535715959}
   - {fileID: 144580824}
   - {fileID: 1807938695}
   - {fileID: 571387757}
