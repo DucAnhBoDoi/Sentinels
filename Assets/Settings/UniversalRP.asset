@@ -14,6 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   k_AssetVersion: 13
   k_AssetPreviousVersion: 13
+  k_AssetVersion: 13
+  k_AssetPreviousVersion: 13
   m_RendererType: 1
   m_RendererData: {fileID: 0}
   m_RendererDataList:
