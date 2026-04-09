@@ -7,6 +7,9 @@ TagManager:
   - Flashlight
   - RobotWaypoint
   - RobotEscort
+  - Enemy
+  - ChargePad
+  - TheCore
   layers:
   - Default
   - TransparentFX
@@ -17,8 +20,8 @@ TagManager:
   - Obstacle
   - Wall
   - Virus
-  - 
-  - 
+  - Player
+  - Enemy
   - 
   - 
   - 

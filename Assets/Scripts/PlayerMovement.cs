@@ -10,15 +10,15 @@ public class PlayerMovement : MonoBehaviour
     [Header("Cấu hình di chuyển")]
     public float moveSpeed = 5f;
     public bool useQuestSystem = true; // Tầng 3: HÃY BỎ TICK Ô NÀY TRONG INSPECTOR
-    
+
     [Header("Thành phần hỗ trợ")]
     public Rigidbody2D rb;
     public Animator anim;
 
     [Header("Cấu hình Chiến đấu")]
-    public bool canAttack = true; 
+    public bool canAttack = true;
     public float attackRange = 1.5f;
-    public Vector2 actionOffset; 
+    public Vector2 actionOffset;
 
     private Vector2 movement;
     private bool isRolling = false;
@@ -28,20 +28,20 @@ public class PlayerMovement : MonoBehaviour
     {
         if (!rb) rb = GetComponent<Rigidbody2D>();
         if (!anim) anim = GetComponent<Animator>();
-        
+
         rb.gravityScale = 0;
         rb.constraints = RigidbodyConstraints2D.FreezeRotation;
-        baseScaleX = Mathf.Abs(transform.localScale.x); 
+        baseScaleX = Mathf.Abs(transform.localScale.x);
     }
 
     void Update()
     {
         // Kiểm tra xem có đang bị kẹt bởi bảng Quest không (chỉ dùng nếu useQuestSystem = true)
         if (useQuestSystem && !QuestPopupManager.isGameStarted) return;
-        
+
         // Nếu đang lộn thì không cho nhận thêm input di chuyển
         if (isRolling) return;
-        
+
         var keyboard = Keyboard.current;
         var mouse = Mouse.current;
         if (keyboard == null || mouse == null) return;
@@ -83,7 +83,7 @@ public class PlayerMovement : MonoBehaviour
     {
         if (movement.x != 0)
         {
-            float direction = Mathf.Sign(movement.x); 
+            float direction = Mathf.Sign(movement.x);
             transform.localScale = new Vector3(baseScaleX * direction, transform.localScale.y, transform.localScale.z);
         }
     }
@@ -92,10 +92,10 @@ public class PlayerMovement : MonoBehaviour
     {
         isRolling = true;
         if (anim) anim.SetTrigger("isRolling");
-        
+
         // Unity 6 dùng linearVelocity, các bản cũ dùng velocity
         rb.linearVelocity = movement.normalized * (moveSpeed * 1.5f);
-        Invoke("FinishRoll", 0.5f); 
+        Invoke("FinishRoll", 0.5f);
     }
 
     void FinishRoll()
@@ -110,13 +110,13 @@ public class PlayerMovement : MonoBehaviour
 
         float facingDir = Mathf.Sign(transform.localScale.x);
         Vector2 actualOffset = new Vector2(actionOffset.x * facingDir, actionOffset.y);
-        Vector2 centerPoint = (Vector2)transform.position + actualOffset; 
+        Vector2 centerPoint = (Vector2)transform.position + actualOffset;
 
         foreach (Collider2D col in Physics2D.OverlapCircleAll(centerPoint, attackRange))
         {
             // Tầng 1 đánh Robot, Tầng 3 bạn có thể thêm logic đánh quái khác ở đây
-            var robot = col.GetComponent<UtilityRobotAI>();
-            if (robot) robot.TakeDamage();
+            var skeleton = col.GetComponent<SkeletonAI>();
+            if (skeleton) skeleton.TakeDamage();
         }
     }
 

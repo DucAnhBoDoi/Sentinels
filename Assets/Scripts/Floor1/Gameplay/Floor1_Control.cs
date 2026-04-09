@@ -43,7 +43,7 @@ public class Floor1_Control : MonoBehaviour
                 flashlightTransform.gameObject.SetActive(!isLightOn);
             }
         }
-        
+
         // ----------------------------------------------------
         // LOGIC PLAYER B (Bắt phím E để sửa điện)
         // ----------------------------------------------------
@@ -52,8 +52,8 @@ public class Floor1_Control : MonoBehaviour
             if (keyboard.eKey.wasPressedThisFrame) PerformRepair();
 
             bool repairing = keyboard.eKey.isPressed;
-            foreach (var robot in UtilityRobotAI.allRobots)
-                robot.isPlayerBRepairing = repairing;
+            foreach (var skeleton in SkeletonAI.allRobots)
+                skeleton.isPlayerBRepairing = repairing;
         }
     }
 
@@ -68,11 +68,11 @@ public class Floor1_Control : MonoBehaviour
 
             Vector2 mouseScreenPosition = Mouse.current.position.ReadValue();
             Vector3 mouseWorldPosition = Camera.main.ScreenToWorldPoint(new Vector3(mouseScreenPosition.x, mouseScreenPosition.y, Camera.main.nearClipPlane));
-            mouseWorldPosition.z = 0f; 
+            mouseWorldPosition.z = 0f;
 
             Vector3 lookDirection = mouseWorldPosition - flashlightTransform.position;
             float angle = Mathf.Atan2(lookDirection.y, lookDirection.x) * Mathf.Rad2Deg;
-            
+
             flashlightTransform.rotation = Quaternion.Euler(0, 0, angle - 90f);
         }
     }
