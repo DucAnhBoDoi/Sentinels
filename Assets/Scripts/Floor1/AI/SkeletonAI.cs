@@ -3,13 +3,14 @@ using System.Collections.Generic;
 using System.Collections;
 
 [RequireComponent(typeof(SpriteRenderer))]
-[RequireComponent(typeof(Rigidbody2D))] 
-[RequireComponent(typeof(Animator))] // Bắt buộc phải có Animator
+[RequireComponent(typeof(Rigidbody2D))]
+[RequireComponent(typeof(Animator))]
 public class SkeletonAI : MonoBehaviour
 {
     [Header("Tham chiếu")]
     public Transform playerA;
     public Transform playerB;
+    public HealthBar healthBar; // MỚI: Kéo HealthBar_Canvas của quái vào đây
     private Animator anim;
     private SpriteRenderer sr;
     private Rigidbody2D rb;
@@ -18,12 +19,14 @@ public class SkeletonAI : MonoBehaviour
     public float moveSpeed = 2.5f;
     public float patrolSpeed = 1.2f;
     public float detectionRadius = 8f;
-    public float attackRange = 1.2f; // Khoảng cách để vung kiếm
+    public float attackRange = 1.2f;
+    public Vector2 actionOffset;
     public float attackCooldown = 1.5f;
     private float lastAttackTime;
 
     [Header("Trạng thái")]
     public int health = 3;
+    private int maxHealth;
     private bool isDead = false;
     private bool isAggroed = false;
     public bool isPlayerBRepairing = false;
@@ -40,34 +43,40 @@ public class SkeletonAI : MonoBehaviour
     private Vector2 startPos, patrolTarget;
     private float stuckTimer = 0f;
 
-    void Start() 
-    { 
-        sr = GetComponent<SpriteRenderer>(); 
-        rb = GetComponent<Rigidbody2D>(); 
+    void Start()
+    {
+        sr = GetComponent<SpriteRenderer>();
+        rb = GetComponent<Rigidbody2D>();
         anim = GetComponent<Animator>();
-        
-        allRobots.Add(this); 
-        startPos = transform.position; 
-        PickNewPatrolPoint(); 
 
-        // Tự động tìm Player nếu chưa kéo vào
+        allRobots.Add(this);
+        startPos = transform.position;
+        PickNewPatrolPoint();
+
         if (playerA == null) playerA = GameObject.Find("Player_A_Navigator")?.transform;
         if (playerB == null) playerB = GameObject.Find("Player_B_Mechanic")?.transform;
+
+        // KHỞI TẠO MÁU
+        maxHealth = health;
+        if (healthBar) healthBar.UpdateBar(health, maxHealth);
     }
 
     void OnDestroy() => allRobots.Remove(this);
 
-    void Update() 
+    void Update()
     {
         if (isDead) return;
 
         Transform target = DecideTarget();
-        
-        // Kiểm tra khoảng cách tấn công
-        if (target != null && Vector2.Distance(transform.position, target.position) <= attackRange)
+
+        float facingDir = sr.flipX ? -1f : 1f;
+        Vector2 actualOffset = new Vector2(actionOffset.x * facingDir, actionOffset.y);
+        Vector2 attackCenter = (Vector2)transform.position + actualOffset;
+
+        if (target != null && Vector2.Distance(attackCenter, target.position) <= attackRange)
         {
             TryAttack();
-            rb.linearVelocity = Vector2.zero; // Dừng lại khi đánh
+            rb.linearVelocity = Vector2.zero;
             anim.SetBool("isRunning", false);
         }
         else
@@ -76,32 +85,65 @@ public class SkeletonAI : MonoBehaviour
         }
     }
 
+    Transform DecideTarget()
+    {
+        if (playerA == null && playerB == null) return null;
+
+        PlayerHP hpA = playerA?.GetComponent<PlayerHP>();
+        PlayerHP hpB = playerB?.GetComponent<PlayerHP>();
+
+        float distA = (playerA && hpA != null && !hpA.IsDead) ? Vector2.Distance(transform.position, playerA.position) : float.MaxValue;
+        float distB = (playerB && hpB != null && !hpB.IsDead) ? Vector2.Distance(transform.position, playerB.position) : float.MaxValue;
+
+        if (!isAggroed && (distA <= detectionRadius || distB <= detectionRadius)) isAggroed = true;
+        if (!isAggroed || (distA == float.MaxValue && distB == float.MaxValue))
+        {
+            isAggroed = false;
+            return null;
+        }
+
+        float scoreB = (playerB && !hpB.IsDead) ? (distanceWeight / Mathf.Max(distB, 0.1f)) + (isPlayerBRepairing ? 50f : 0f) : 0f;
+        float scoreA = (playerA && !hpA.IsDead) ? (distanceWeight / Mathf.Max(distA, 0.1f)) : 0f;
+
+        return scoreB > scoreA ? playerB : playerA;
+    }
+
     void TryAttack()
     {
         if (Time.time >= lastAttackTime + attackCooldown)
         {
             anim.SetTrigger("isAttacking");
             lastAttackTime = Time.time;
-            // Ở đây bạn có thể thêm code gây sát thương cho Player
         }
     }
 
-    Transform DecideTarget()
+    public void ExecuteHit()
     {
-        if (playerA == null && playerB == null) return null;
-
-        float distA = playerA ? Vector2.Distance(transform.position, playerA.position) : float.MaxValue;
-        float distB = playerB ? Vector2.Distance(transform.position, playerB.position) : float.MaxValue;
-
-        if (!isAggroed && (distA <= detectionRadius || distB <= detectionRadius)) isAggroed = true; 
-        if (!isAggroed) return null; 
-
-        float scoreB = (playerB) ? (distanceWeight / Mathf.Max(distB, 0.1f)) + (isPlayerBRepairing ? 50f : 0f) : 0f;
-        float scoreA = (playerA) ? (distanceWeight / Mathf.Max(distA, 0.1f)) : 0f;
-
-        return scoreB > scoreA ? playerB : playerA;
+        PerformDamageToPlayer();
     }
 
+    void PerformDamageToPlayer()
+    {
+        float facingDir = sr.flipX ? -1f : 1f;
+        Vector2 actualOffset = new Vector2(actionOffset.x * facingDir, actionOffset.y);
+        Vector2 attackCenter = (Vector2)transform.position + actualOffset;
+
+       
+        Collider2D[] hitObjects = Physics2D.OverlapCircleAll(attackCenter, attackRange);
+
+        foreach (Collider2D col in hitObjects)
+        {
+           
+            PlayerHP playerHP = col.GetComponentInParent<PlayerHP>();
+
+            if (playerHP != null && !playerHP.IsDead)
+            {
+                playerHP.TakeDamage(1);
+                Debug.Log("<color=red>Chém trúng thân Player:</color> " + col.name);
+                break; 
+            }
+        }
+    }
     void ExecuteContextSteering(Transform target)
     {
         Vector2 currentPos = transform.position;
@@ -109,16 +151,17 @@ public class SkeletonAI : MonoBehaviour
         float currentSpeed = (target == null) ? patrolSpeed : moveSpeed;
         Vector2 currentVelocityDir = rb.linearVelocity.normalized;
 
-        if (target == null) // ĐI TUẦN
+        if (target == null)
         {
             bestDir = (patrolTarget - currentPos).normalized;
-            if (Vector2.Distance(currentPos, patrolTarget) < 0.2f || 
-                Physics2D.CircleCast(currentPos, robotRadius, bestDir, 0.5f, obstacleLayer))
+            stuckTimer += Time.deltaTime;
+            if (Vector2.Distance(currentPos, patrolTarget) < 0.2f || stuckTimer > 3f)
             {
                 PickNewPatrolPoint();
+                stuckTimer = 0f;
             }
         }
-        else // TRUY SÁT
+        else
         {
             float highestScore = float.MinValue;
             Vector2 idealDir = ((Vector2)target.position - currentPos).normalized;
@@ -139,14 +182,14 @@ public class SkeletonAI : MonoBehaviour
 
         if (bestDir != Vector2.zero)
         {
-            rb.linearVelocity = bestDir.normalized * currentSpeed; 
-            sr.flipX = bestDir.x < 0; 
-            anim.SetBool("isRunning", true); // Bật anim chạy
+            rb.linearVelocity = bestDir.normalized * currentSpeed;
+            sr.flipX = bestDir.x < 0;
+            anim.SetBool("isRunning", true);
         }
         else
         {
             rb.linearVelocity = Vector2.zero;
-            anim.SetBool("isRunning", false); // Tắt anim chạy
+            anim.SetBool("isRunning", false);
         }
     }
 
@@ -155,29 +198,36 @@ public class SkeletonAI : MonoBehaviour
     public void TakeDamage()
     {
         if (isDead) return;
-
         health--;
-        if (health <= 0)
-        {
-            StartCoroutine(DieRoutine());
-        }
-        else
-        {
-            anim.SetTrigger("isHurt");
-        }
+
+        // CẬP NHẬT THANH MÁU QUÁI
+        if (healthBar) healthBar.UpdateBar(health, maxHealth);
+
+        if (health <= 0) StartCoroutine(DieRoutine());
+        else anim.SetTrigger("isHurt");
     }
 
     IEnumerator DieRoutine()
     {
         isDead = true;
         rb.linearVelocity = Vector2.zero;
-        anim.SetTrigger("isDead"); // Kích hoạt animation chết
-        
-        // Tắt va chạm để không cản đường Player
+        anim.SetTrigger("isDead");
         GetComponent<Collider2D>().enabled = false;
-        this.enabled = false; 
-
-        yield return new WaitForSeconds(2f); // Đợi 2 giây rồi biến mất
+        this.enabled = false;
+        yield return new WaitForSeconds(2f);
         Destroy(gameObject);
+    }
+
+    private void OnDrawGizmos()
+    {
+        if (sr == null) sr = GetComponent<SpriteRenderer>();
+        float facingDir = sr.flipX ? -1f : 1f;
+        Vector2 actualOffset = new Vector2(actionOffset.x * facingDir, actionOffset.y);
+        Vector2 attackCenter = (Vector2)transform.position + actualOffset;
+
+        Gizmos.color = Color.yellow;
+        Gizmos.DrawWireSphere(transform.position, detectionRadius);
+        Gizmos.color = Color.red;
+        Gizmos.DrawWireSphere(attackCenter, attackRange);
     }
 }

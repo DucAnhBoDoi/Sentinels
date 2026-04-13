@@ -19,6 +19,7 @@ public class PlayerMovement : MonoBehaviour
     public bool canAttack = true;
     public float attackRange = 1.5f;
     public Vector2 actionOffset;
+    public LayerMask enemyLayer;
 
     private Vector2 movement;
     private bool isRolling = false;
@@ -108,14 +109,19 @@ public class PlayerMovement : MonoBehaviour
     {
         if (anim) anim.SetTrigger("isAttacking");
 
+    }
+
+    public void ExecutePlayerHit()
+    {
         float facingDir = Mathf.Sign(transform.localScale.x);
         Vector2 actualOffset = new Vector2(actionOffset.x * facingDir, actionOffset.y);
         Vector2 centerPoint = (Vector2)transform.position + actualOffset;
 
-        foreach (Collider2D col in Physics2D.OverlapCircleAll(centerPoint, attackRange))
+        Collider2D[] hitEnemies = Physics2D.OverlapCircleAll(centerPoint, attackRange, enemyLayer);
+
+        foreach (Collider2D col in hitEnemies)
         {
-            // Tầng 1 đánh Robot, Tầng 3 bạn có thể thêm logic đánh quái khác ở đây
-            var skeleton = col.GetComponent<SkeletonAI>();
+            var skeleton = col.GetComponentInParent<SkeletonAI>();
             if (skeleton) skeleton.TakeDamage();
         }
     }
