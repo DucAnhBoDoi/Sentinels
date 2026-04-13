@@ -1,15 +1,15 @@
 using UnityEngine;
-using UnityEngine.SceneManagement; 
+using UnityEngine.SceneManagement;
 using UnityEngine.InputSystem;
-using UnityEngine.UI; 
-using System.Collections; 
+using UnityEngine.UI;
+using System.Collections;
 
 public class Floor1Manager : MonoBehaviour
 {
     public static Floor1Manager Instance;
 
     [Header("Tham chiếu Chuyển Màn")]
-    public Transform elevatorDoor; 
+    public Transform elevatorDoor;
     public float interactDistance = 3f;
 
     [Header("Tham chiếu Người chơi")]
@@ -17,15 +17,15 @@ public class Floor1Manager : MonoBehaviour
     public Transform playerB;
 
     [Header("Hiệu ứng Chuyển cảnh")]
-    public Image fadeImage; 
+    public Image fadeImage;
     public float fadeDuration = 1.5f;
 
     private bool isLevelComplete = false;
-    private bool isTransitioning = false; 
+    private bool isTransitioning = false;
 
-    void Awake() 
-    { 
-        if (Instance == null) Instance = this; 
+    void Awake()
+    {
+        if (Instance == null) Instance = this;
     }
 
     void Start()
@@ -44,6 +44,16 @@ public class Floor1Manager : MonoBehaviour
     {
         isLevelComplete = true;
         Debug.Log("<color=green>ĐIỆN ĐÃ CÓ! CẢ 2 NGƯỜI CHƠI HÃY LẠI GẦN CỬA VÀ BẤM PHÍM [2] ĐỂ QUA TẦNG!</color>");
+    }
+
+    public void QuitToMenuWithFade(string menuSceneName)
+    {
+        StartCoroutine(TransitionToMenuSequence(menuSceneName));
+    }
+
+    public void RestartLevelWithFade()
+    {
+        StartCoroutine(TransitionToRestartSequence());
     }
 
     void Update()
@@ -76,23 +86,23 @@ public class Floor1Manager : MonoBehaviour
     // 1. Tối dần đi rồi chuyển Scene
     IEnumerator TransitionToNextFloor()
     {
-        isTransitioning = true; 
+        isTransitioning = true;
 
         if (fadeImage != null)
         {
             fadeImage.gameObject.SetActive(true);
             float elapsed = 0f;
             Color c = fadeImage.color;
-            
+
             while (elapsed < fadeDuration)
             {
                 elapsed += Time.deltaTime;
-                c.a = Mathf.Clamp01(elapsed / fadeDuration); 
+                c.a = Mathf.Clamp01(elapsed / fadeDuration);
                 fadeImage.color = c;
                 yield return null;
             }
         }
-        SceneManager.LoadScene("GamePlayFloor2"); 
+        SceneManager.LoadScene("GamePlayFloor2");
     }
 
     // 2. Sáng dần lên lúc mới mở game
@@ -102,16 +112,65 @@ public class Floor1Manager : MonoBehaviour
 
         float elapsed = 0f;
         Color c = fadeImage.color;
-        c.a = 1f; 
+        c.a = 1f;
         fadeImage.color = c;
 
         while (elapsed < fadeDuration)
         {
             elapsed += Time.deltaTime;
-            c.a = Mathf.Clamp01(1f - (elapsed / fadeDuration)); 
+            c.a = Mathf.Clamp01(1f - (elapsed / fadeDuration));
             fadeImage.color = c;
             yield return null;
         }
-        fadeImage.gameObject.SetActive(false); 
+        fadeImage.gameObject.SetActive(false);
+    }
+
+    IEnumerator TransitionToMenuSequence(string sceneName)
+    {
+        // Quan trọng: Phải dùng unscaledDeltaTime vì có thể game đang bị dừng (Time.timeScale = 0)
+        if (fadeImage != null)
+        {
+            fadeImage.gameObject.SetActive(true);
+            float elapsed = 0f;
+            Color c = fadeImage.color;
+
+            while (elapsed < fadeDuration)
+            {
+                // Dùng unscaledDeltaTime để bỏ qua việc dừng thời gian
+                elapsed += Time.unscaledDeltaTime;
+                c.a = Mathf.Clamp01(elapsed / fadeDuration);
+                fadeImage.color = c;
+                yield return null;
+            }
+        }
+
+        // Trả lại thời gian về 1 để Scene Menu chạy bình thường
+        Time.timeScale = 1f;
+        QuestPopupManager.hasAcceptedOnce = false;
+        SceneManager.LoadScene(sceneName);
+    }
+    IEnumerator TransitionToRestartSequence()
+    {
+        if (fadeImage != null)
+        {
+            fadeImage.gameObject.SetActive(true);
+            float elapsed = 0f;
+            Color c = fadeImage.color;
+
+            // Tối dần màn hình (Dùng unscaledDeltaTime vì game đang dừng)
+            while (elapsed < fadeDuration)
+            {
+                elapsed += Time.unscaledDeltaTime;
+                c.a = Mathf.Clamp01(elapsed / fadeDuration);
+                fadeImage.color = c;
+                yield return null;
+            }
+        }
+
+        // QUAN TRỌNG: Trả lại thời gian về 1 để Scene mới chạy được
+        Time.timeScale = 1f;
+
+        // Tải lại Scene hiện tại
+        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
     }
 }
