@@ -1,7 +1,7 @@
 using UnityEngine;
 
 [RequireComponent(typeof(BossControlColor), typeof(BossBehaviorManager), typeof(HealthManager))]
-public class BossController : MonoBehaviour
+public class BossController : MonoBehaviour, IDamagable
 {
     [field: SerializeField]
     public BossStatsSO Stats { get; private set; }
@@ -18,5 +18,10 @@ public class BossController : MonoBehaviour
         BossColor = GetComponent<BossControlColor>();
         BossHealth = GetComponent<HealthManager>();
         BossHealth.SetHealthUp(Stats.BossHealth);
+    }
+
+    public void TakeDamage()
+    {
+        BossHealth.ReduceHealth(1);
     }
 }

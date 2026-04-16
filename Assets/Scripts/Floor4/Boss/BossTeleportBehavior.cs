@@ -20,7 +20,7 @@ public class BossTeleportBehavior : BehaviorTreeNode
         foreach (Transform point in _teleportPoints)
         {
             float sum = 0;
-            foreach (PlayerController player in _boss.Players)
+            foreach (GameObject player in _boss.Players)
             {
                 sum += Vector2.Distance(player.transform.position, point.position);
             }

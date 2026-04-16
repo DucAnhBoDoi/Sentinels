@@ -14,8 +14,8 @@ public class BossTargetPlayerBehavior : BehaviorTreeNode
     public override void BehaviorStart()
     {
         base.BehaviorStart();
-        PlayerController targetedPlayer = _boss.Players[0];
-        foreach (PlayerController player in _boss.Players)
+        GameObject targetedPlayer = _boss.Players[0];
+        foreach (GameObject player in _boss.Players)
         {
             if (Vector2.Distance(player.transform.position, transform.position) <
                     Vector2.Distance(targetedPlayer.transform.position, transform.position))

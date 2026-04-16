@@ -16,13 +16,11 @@ public class BossBehaviorManager : MonoBehaviour
         Phase3,
     }
 
-    [HideInInspector]
-    public PlayerController TargetedPlayer;
+    [HideInInspector] public GameObject TargetedPlayer;
 
-    public PlayerController[] Players { get; private set; }
+    public GameObject[] Players { get; private set; }
 
-    [SerializeField]
-    private Light2D _globalLight;
+    [SerializeField] private Light2D _globalLight;
 
     private BossController _controller;
     private BossPunchBehavior _punchBehavior;
@@ -53,9 +51,7 @@ public class BossBehaviorManager : MonoBehaviour
 
     private void Start()
     {
-        Players = GameObject
-            .FindGameObjectsWithTag("Player")
-            .Select(go => go.GetComponent<PlayerController>()).ToArray();
+        Players = GameObject.FindGameObjectsWithTag("Player");
         _behaviorRoutine = StartCoroutine(RootBehavior());
 
         _controller.BossColor.OnColor += OnBossChangeColor;
@@ -72,14 +68,14 @@ public class BossBehaviorManager : MonoBehaviour
         switch (_phase)
         {
             case BossPhase.Phase1:
+            {
+                if (_controller.BossHealth.Health <= _controller.Stats.BossHealth / 2)
                 {
-                    if (_controller.BossHealth.Health <= _controller.Stats.BossHealth / 2)
-                    {
-                        _phase = BossPhase.Phase2;
-                        _controller.BossColor.enabled = true;
-                        _controller.BossColor.TransitionToColorState();
-                    }
+                    _phase = BossPhase.Phase2;
+                    _controller.BossColor.enabled = true;
+                    _controller.BossColor.TransitionToColorState();
                 }
+            }
                 break;
             case BossPhase.Phase2:
                 break;
@@ -102,19 +98,19 @@ public class BossBehaviorManager : MonoBehaviour
             switch (_phase)
             {
                 case BossPhase.Phase1:
-                    {
-                        yield return Phase1();
-                    }
+                {
+                    yield return Phase1();
+                }
                     break;
                 case BossPhase.Phase2:
-                    {
-                        yield return Phase2();
-                    }
+                {
+                    yield return Phase2();
+                }
                     break;
                 case BossPhase.Phase3:
-                    {
-                        yield return Phase3();
-                    }
+                {
+                    yield return Phase3();
+                }
                     break;
                 default:
                     break;
@@ -129,6 +125,7 @@ public class BossBehaviorManager : MonoBehaviour
         {
             yield return StartBehavior(_targetPlayerBehavior);
         }
+
         float distance = Vector2.Distance(transform.position, TargetedPlayer.transform.position);
         int rng = Random.Range(1, 11);
         if (distance <= 7)
@@ -187,6 +184,7 @@ public class BossBehaviorManager : MonoBehaviour
         {
             _globalLight.intensity = 0;
         }
+
         while (_p2HideCount >= 0)
         {
             yield return StartBehavior(_teleportBehavior);
@@ -194,13 +192,15 @@ public class BossBehaviorManager : MonoBehaviour
             {
                 yield return null;
             }
+
             int health = _controller.BossHealth.Health;
             while (_p2HideCount >= 0
-                    && !_controller.BossColor.IsSpotted
-                    && _controller.BossHealth.Health == health)
+                   && !_controller.BossColor.IsSpotted
+                   && _controller.BossHealth.Health == health)
             {
                 yield return null;
             }
+
             _p2HideCount--;
             _p2AllowAttack = _p2HideCount < 0;
             // if (_p2HideCount >= 0)
@@ -208,6 +208,7 @@ public class BossBehaviorManager : MonoBehaviour
             //     yield return wait;
             // }
         }
+
         if (_p2AllowAttack)
         {
             yield return Phase1();
@@ -256,9 +257,12 @@ public class BossBehaviorManager : MonoBehaviour
         _p2AllowAttack = true;
         if (didBlowUp)
         {
-            foreach (PlayerController player in Players)
+            foreach (GameObject player in Players)
             {
-                player.HurtAnimation();
+                if (player.TryGetComponent(out PlayerController ctl))
+                {
+                    ctl.HurtAnimation();
+                }
             }
         }
     }
@@ -270,6 +274,7 @@ public class BossBehaviorManager : MonoBehaviour
         {
             yield return null;
         }
+
         node.BehaviorEnd();
     }
 
@@ -279,14 +284,18 @@ public class BossBehaviorManager : MonoBehaviour
         {
             StopCoroutine(_behaviorRoutine);
         }
+
         _controller.BossColor.TransitionToNoColorState();
         _controller.BossColor.enabled = false;
         _isDead = true;
         _globalLight.intensity = 1;
         _controller.BossBodySr.color = Color.gray;
-        foreach (PlayerController player in Players)
+        foreach (GameObject player in Players)
         {
-            player.PlayerAttackController.enabled = true;
+            if (player.TryGetComponent(out PlayerAttack atk))
+            {
+                atk.enabled = false;
+            }
         }
     }
 }
