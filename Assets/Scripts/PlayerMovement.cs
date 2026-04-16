@@ -121,8 +121,8 @@ public class PlayerMovement : MonoBehaviour
 
         foreach (Collider2D col in hitEnemies)
         {
-            var skeleton = col.GetComponentInParent<SkeletonAI>();
-            if (skeleton) skeleton.TakeDamage();
+            var skeleton = col.GetComponentInParent<IDamagable>();
+            if (skeleton != null) skeleton.TakeDamage();
         }
     }
 

@@ -5,7 +5,7 @@ using System.Collections;
 [RequireComponent(typeof(SpriteRenderer))]
 [RequireComponent(typeof(Rigidbody2D))]
 [RequireComponent(typeof(Animator))]
-public class SkeletonAI : MonoBehaviour
+public class SkeletonAI : MonoBehaviour, IDamagable
 {
     [Header("Tham chiếu")]
     public Transform playerA;
