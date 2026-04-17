@@ -381,6 +381,9 @@ MonoBehaviour:
   playerA: {fileID: 0}
   playerB: {fileID: 0}
   healthBar: {fileID: 2458835091318358661}
+  playerLayer:
+    serializedVersion: 2
+    m_Bits: 512
   moveSpeed: 6
   patrolSpeed: 1.5
   detectionRadius: 8

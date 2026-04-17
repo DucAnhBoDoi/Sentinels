@@ -2,15 +2,15 @@ using UnityEngine;
 using System.Collections.Generic;
 using System.Collections;
 
-[RequireComponent(typeof(SpriteRenderer))]
-[RequireComponent(typeof(Rigidbody2D))]
-[RequireComponent(typeof(Animator))]
+[RequireComponent(typeof(SpriteRenderer), typeof(Rigidbody2D), typeof(Animator))]
 public class SkeletonAI : MonoBehaviour, IDamagable
 {
     [Header("Tham chiếu")]
     public Transform playerA;
     public Transform playerB;
-    public HealthBar healthBar; // MỚI: Kéo HealthBar_Canvas của quái vào đây
+    public HealthBar healthBar;
+    public LayerMask playerLayer; // MỚI: Dùng để chỉ chém vào Hitbox Player
+
     private Animator anim;
     private SpriteRenderer sr;
     private Rigidbody2D rb;
@@ -31,7 +31,7 @@ public class SkeletonAI : MonoBehaviour, IDamagable
     private bool isAggroed = false;
     public bool isPlayerBRepairing = false;
 
-    [Header("Steering (Né vật cản)")]
+    [Header("Steering")]
     public float patrolRadius = 4f;
     public LayerMask obstacleLayer;
     public int scanDirections = 16;
@@ -48,7 +48,6 @@ public class SkeletonAI : MonoBehaviour, IDamagable
         sr = GetComponent<SpriteRenderer>();
         rb = GetComponent<Rigidbody2D>();
         anim = GetComponent<Animator>();
-
         allRobots.Add(this);
         startPos = transform.position;
         PickNewPatrolPoint();
@@ -56,7 +55,6 @@ public class SkeletonAI : MonoBehaviour, IDamagable
         if (playerA == null) playerA = GameObject.Find("Player_A_Navigator")?.transform;
         if (playerB == null) playerB = GameObject.Find("Player_B_Mechanic")?.transform;
 
-        // KHỞI TẠO MÁU
         maxHealth = health;
         if (healthBar) healthBar.UpdateBar(health, maxHealth);
     }
@@ -69,11 +67,16 @@ public class SkeletonAI : MonoBehaviour, IDamagable
 
         Transform target = DecideTarget();
 
+        // --- CẬP NHẬT: CHECK NÉ ĐÈN TRƯỚC KHI ĐÁNH ---
+        float currentDanger = (InfluenceMap.Instance != null) ? InfluenceMap.Instance.GetDangerValue(transform.position) : 0f;
+        bool isInLight = currentDanger > 0.1f; // Nếu danger > 0.1 nghĩa là đang bị đèn soi
+
         float facingDir = sr.flipX ? -1f : 1f;
         Vector2 actualOffset = new Vector2(actionOffset.x * facingDir, actionOffset.y);
         Vector2 attackCenter = (Vector2)transform.position + actualOffset;
 
-        if (target != null && Vector2.Distance(attackCenter, target.position) <= attackRange)
+        // Chỉ đánh nếu: Có mục tiêu + Trong tầm + KHÔNG bị đèn soi
+        if (target != null && Vector2.Distance(attackCenter, target.position) <= attackRange && !isInLight)
         {
             TryAttack();
             rb.linearVelocity = Vector2.zero;
@@ -81,6 +84,7 @@ public class SkeletonAI : MonoBehaviour, IDamagable
         }
         else
         {
+            // Nếu bị đèn soi, ExecuteContextSteering sẽ tự né dựa trên dangerWeight
             ExecuteContextSteering(target);
         }
     }
@@ -88,7 +92,6 @@ public class SkeletonAI : MonoBehaviour, IDamagable
     Transform DecideTarget()
     {
         if (playerA == null && playerB == null) return null;
-
         PlayerHP hpA = playerA?.GetComponent<PlayerHP>();
         PlayerHP hpB = playerB?.GetComponent<PlayerHP>();
 
@@ -96,15 +99,10 @@ public class SkeletonAI : MonoBehaviour, IDamagable
         float distB = (playerB && hpB != null && !hpB.IsDead) ? Vector2.Distance(transform.position, playerB.position) : float.MaxValue;
 
         if (!isAggroed && (distA <= detectionRadius || distB <= detectionRadius)) isAggroed = true;
-        if (!isAggroed || (distA == float.MaxValue && distB == float.MaxValue))
-        {
-            isAggroed = false;
-            return null;
-        }
+        if (!isAggroed || (distA == float.MaxValue && distB == float.MaxValue)) { isAggroed = false; return null; }
 
         float scoreB = (playerB && !hpB.IsDead) ? (distanceWeight / Mathf.Max(distB, 0.1f)) + (isPlayerBRepairing ? 50f : 0f) : 0f;
         float scoreA = (playerA && !hpA.IsDead) ? (distanceWeight / Mathf.Max(distA, 0.1f)) : 0f;
-
         return scoreB > scoreA ? playerB : playerA;
     }
 
@@ -117,10 +115,7 @@ public class SkeletonAI : MonoBehaviour, IDamagable
         }
     }
 
-    public void ExecuteHit()
-    {
-        PerformDamageToPlayer();
-    }
+    public void ExecuteHit() => PerformDamageToPlayer();
 
     void PerformDamageToPlayer()
     {
@@ -128,22 +123,20 @@ public class SkeletonAI : MonoBehaviour, IDamagable
         Vector2 actualOffset = new Vector2(actionOffset.x * facingDir, actionOffset.y);
         Vector2 attackCenter = (Vector2)transform.position + actualOffset;
 
-       
-        Collider2D[] hitObjects = Physics2D.OverlapCircleAll(attackCenter, attackRange);
+        Collider2D[] hitObjects = Physics2D.OverlapCircleAll(attackCenter, attackRange, playerLayer);
 
         foreach (Collider2D col in hitObjects)
         {
-           
             PlayerHP playerHP = col.GetComponentInParent<PlayerHP>();
-
             if (playerHP != null && !playerHP.IsDead)
             {
                 playerHP.TakeDamage(1);
-                Debug.Log("<color=red>Chém trúng thân Player:</color> " + col.name);
-                break; 
+                Debug.Log("<color=red>Chém trúng Player:</color> " + col.name);
+                break;
             }
         }
     }
+
     void ExecuteContextSteering(Transform target)
     {
         Vector2 currentPos = transform.position;
@@ -154,12 +147,8 @@ public class SkeletonAI : MonoBehaviour, IDamagable
         if (target == null)
         {
             bestDir = (patrolTarget - currentPos).normalized;
-            stuckTimer += Time.deltaTime;
-            if (Vector2.Distance(currentPos, patrolTarget) < 0.2f || stuckTimer > 3f)
-            {
-                PickNewPatrolPoint();
-                stuckTimer = 0f;
-            }
+            if (Vector2.Distance(currentPos, patrolTarget) < 0.2f || (stuckTimer += Time.deltaTime) > 3f)
+            { PickNewPatrolPoint(); stuckTimer = 0f; }
         }
         else
         {
@@ -171,7 +160,6 @@ public class SkeletonAI : MonoBehaviour, IDamagable
                 float rad = (360f / scanDirections * i) * Mathf.Deg2Rad;
                 Vector2 dir = new Vector2(Mathf.Cos(rad), Mathf.Sin(rad));
                 float score = Vector2.Dot(dir, idealDir) * distanceWeight;
-
                 if (currentVelocityDir != Vector2.zero) score += Vector2.Dot(dir, currentVelocityDir) * momentumWeight;
                 if (InfluenceMap.Instance) score -= InfluenceMap.Instance.GetDangerValue(currentPos + dir * scanStepSize) * dangerWeight;
                 if (Physics2D.CircleCast(currentPos, robotRadius, dir, scanStepSize, obstacleLayer)) score -= 10000f;
@@ -186,48 +174,19 @@ public class SkeletonAI : MonoBehaviour, IDamagable
             sr.flipX = bestDir.x < 0;
             anim.SetBool("isRunning", true);
         }
-        else
-        {
-            rb.linearVelocity = Vector2.zero;
-            anim.SetBool("isRunning", false);
-        }
+        else { rb.linearVelocity = Vector2.zero; anim.SetBool("isRunning", false); }
     }
 
     void PickNewPatrolPoint() { patrolTarget = startPos + Random.insideUnitCircle * patrolRadius; }
-
-    public void TakeDamage()
-    {
-        if (isDead) return;
-        health--;
-
-        // CẬP NHẬT THANH MÁU QUÁI
-        if (healthBar) healthBar.UpdateBar(health, maxHealth);
-
-        if (health <= 0) StartCoroutine(DieRoutine());
-        else anim.SetTrigger("isHurt");
-    }
-
-    IEnumerator DieRoutine()
-    {
-        isDead = true;
-        rb.linearVelocity = Vector2.zero;
-        anim.SetTrigger("isDead");
-        GetComponent<Collider2D>().enabled = false;
-        this.enabled = false;
-        yield return new WaitForSeconds(2f);
-        Destroy(gameObject);
-    }
+    public void TakeDamage() { if (isDead) return; health--; if (healthBar) healthBar.UpdateBar(health, maxHealth); if (health <= 0) StartCoroutine(DieRoutine()); else anim.SetTrigger("isHurt"); }
+    IEnumerator DieRoutine() { isDead = true; rb.linearVelocity = Vector2.zero; anim.SetTrigger("isDead"); GetComponent<Collider2D>().enabled = false; this.enabled = false; yield return new WaitForSeconds(2f); Destroy(gameObject); }
 
     private void OnDrawGizmos()
     {
         if (sr == null) sr = GetComponent<SpriteRenderer>();
         float facingDir = sr.flipX ? -1f : 1f;
         Vector2 actualOffset = new Vector2(actionOffset.x * facingDir, actionOffset.y);
-        Vector2 attackCenter = (Vector2)transform.position + actualOffset;
-
-        Gizmos.color = Color.yellow;
-        Gizmos.DrawWireSphere(transform.position, detectionRadius);
         Gizmos.color = Color.red;
-        Gizmos.DrawWireSphere(attackCenter, attackRange);
+        Gizmos.DrawWireSphere((Vector2)transform.position + actualOffset, attackRange);
     }
 }
