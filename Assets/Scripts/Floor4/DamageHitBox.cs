@@ -1,7 +1,4 @@
-using System;
 using UnityEngine;
-using UnityEngine.AI;
-using UnityEngine.Serialization;
 
 [RequireComponent(typeof(Collider2D))]
 public class DamageHitBox : MonoBehaviour
@@ -40,6 +37,8 @@ public class DamageHitBox : MonoBehaviour
         {
             _collider = GetComponent<Collider2D>();
         }
+        
+        _collider.isTrigger = true;
     }
 #endif
 }
