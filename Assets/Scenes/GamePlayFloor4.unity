@@ -4367,7 +4367,6 @@ MonoBehaviour:
   maxHealth: 10
   currentHealth: 0
   healthBar: {fileID: 53629254}
-  invulnerabilityDuration: 1
 --- !u!212 &196340237
 SpriteRenderer:
   serializedVersion: 2
@@ -56842,6 +56841,63 @@ Transform:
   - {fileID: 1511694289}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1001 &852722653
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 4250381880619091106, guid: f68534cd9e2461742b9c9dfb2a8e2e4f, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4250381880619091106, guid: f68534cd9e2461742b9c9dfb2a8e2e4f, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: -20
+      objectReference: {fileID: 0}
+    - target: {fileID: 4250381880619091106, guid: f68534cd9e2461742b9c9dfb2a8e2e4f, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4250381880619091106, guid: f68534cd9e2461742b9c9dfb2a8e2e4f, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4250381880619091106, guid: f68534cd9e2461742b9c9dfb2a8e2e4f, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4250381880619091106, guid: f68534cd9e2461742b9c9dfb2a8e2e4f, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4250381880619091106, guid: f68534cd9e2461742b9c9dfb2a8e2e4f, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4250381880619091106, guid: f68534cd9e2461742b9c9dfb2a8e2e4f, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4250381880619091106, guid: f68534cd9e2461742b9c9dfb2a8e2e4f, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4250381880619091106, guid: f68534cd9e2461742b9c9dfb2a8e2e4f, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4717875625688379640, guid: f68534cd9e2461742b9c9dfb2a8e2e4f, type: 3}
+      propertyPath: m_Name
+      value: BossPhase2
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: f68534cd9e2461742b9c9dfb2a8e2e4f, type: 3}
 --- !u!1 &896351490
 GameObject:
   m_ObjectHideFlags: 0
@@ -77389,7 +77445,6 @@ MonoBehaviour:
   maxHealth: 10
   currentHealth: 0
   healthBar: {fileID: 601037588}
-  invulnerabilityDuration: 1
 --- !u!212 &914473495
 SpriteRenderer:
   serializedVersion: 2
@@ -102922,3 +102977,4 @@ SceneRoots:
   - {fileID: 1735357656}
   - {fileID: 7728062174217593505}
   - {fileID: 593972985}
+  - {fileID: 852722653}
