@@ -90290,7 +90290,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1389118502}
   - component: {fileID: 1389118503}
-  m_Layer: 9
+  m_Layer: 0
   m_Name: Hitbox
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -102562,7 +102562,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1683851910}
   - component: {fileID: 1683851911}
-  m_Layer: 9
+  m_Layer: 0
   m_Name: Hitbox
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -102765,6 +102765,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 2962936462559722468, guid: f91ffd9ccc4a12f4da61706e85c8d8f2, type: 3}
+      propertyPath: _hitDistance
+      value: 5
+      objectReference: {fileID: 0}
     - target: {fileID: 7012915662020673757, guid: f91ffd9ccc4a12f4da61706e85c8d8f2, type: 3}
       propertyPath: m_Name
       value: BossPhase1

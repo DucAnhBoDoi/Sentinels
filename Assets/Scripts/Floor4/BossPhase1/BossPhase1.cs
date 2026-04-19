@@ -19,13 +19,15 @@ public class BossPhase1 : MonoBehaviour, IDamagable
     [SerializeField] private bool _spriteFacingRight;
     [SerializeField] private float _movementSpeed;
     [SerializeField] private float _hitDistance;
-    [SerializeField] private Collider2D _atkHitBox;
+    [SerializeField] private DamageHitBox _atkHitBox;
+    [SerializeField] private CheckHitable _checkHitable;
     [SerializeField] private float _atkDuration;
     [SerializeField] private BehaviorTree _tree;
 
     private GameObject[] _players;
     private GameObject _targetedPlayer;
     private bool _isDead;
+    private float _hitBoxXPos;
 
     private void Awake()
     {
@@ -33,6 +35,7 @@ public class BossPhase1 : MonoBehaviour, IDamagable
         _tree = new BehaviorTreeBuilder(gameObject)
             .Sequence()
             .Do(nameof(MoveTowardPlayerBehavior), MoveTowardPlayerBehavior)
+            .Condition(() => _checkHitable.Attackable)
             .Do(nameof(AttackBehavior), AttackBehavior)
             .WaitTime(_atkDuration)
             .End()
@@ -74,11 +77,21 @@ public class BossPhase1 : MonoBehaviour, IDamagable
 
     public void TakeDamage()
     {
-        _hm.ReduceHealth(1);
+        if (_hm.Health > 0)
+        {
+            _hm.ReduceHealth(1);
+            return;
+        }
 
-        if (_hm.Health > 0) return;
+        if (_isDead)
+        {
+            return;
+        }
+
         _anim.SetTrigger(Death);
         _collider.enabled = false;
+        _atkHitBox.gameObject.SetActive(false);
+        _checkHitable.gameObject.SetActive(false);
         _isDead = true;
     }
 
@@ -95,7 +108,7 @@ public class BossPhase1 : MonoBehaviour, IDamagable
 
     private TaskStatus MoveTowardPlayerBehavior()
     {
-        if (Vector2.Distance(_targetedPlayer.transform.position, transform.position) <= _hitDistance)
+        if (_checkHitable.Attackable)
         {
             return TaskStatus.Success;
         }
@@ -114,17 +127,24 @@ public class BossPhase1 : MonoBehaviour, IDamagable
             moveThreshold = offsetY;
         }
 
-        Debug.Log(moveThreshold);
-
         _anim.SetFloat(FMoveThreshold, moveThreshold);
+
+        float atkHitBoxX = _atkHitBox.transform.localPosition.x;
+        float atkHitBoxY = _atkHitBox.transform.localPosition.y;
+        float checkHitableX = _checkHitable.transform.localPosition.x;
+        float checkHitableY = _checkHitable.transform.localPosition.y;
 
         if (offsetX > 0)
         {
             _sr.flipX = !_spriteFacingRight;
+            _atkHitBox.transform.localPosition = new Vector3(Mathf.Abs(atkHitBoxX), atkHitBoxY);
+            _checkHitable.transform.localPosition = new Vector3(Mathf.Abs(checkHitableX), checkHitableY);
         }
         else if (offsetX < 0)
         {
             _sr.flipX = _spriteFacingRight;
+            _atkHitBox.transform.localPosition = new Vector3(-Mathf.Abs(atkHitBoxX), atkHitBoxY);
+            _checkHitable.transform.localPosition = new Vector3(-Mathf.Abs(checkHitableX), checkHitableY);
         }
 
         transform.position = targetPosition;
