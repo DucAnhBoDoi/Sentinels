@@ -9,67 +9,67 @@ public class EnergyOrb : MonoBehaviour
     [Header("Cấu hình loại vật phẩm")]
     public OrbType type; 
     public float speedBoostValue = 10f; 
-    public float duration = 5f; // Thời gian tác dụng cho cả Speed và StopTime
-
-    [Header("Cấu hình nhặt đồ")]
+    public float duration = 5f; 
     public float pickupRange = 2.5f;   
+    public LayerMask playerLayer;
 
     [Header("Hiệu ứng lơ lửng")]
     public float amplitude = 0.2f;
     public float frequency = 2f;
     
     private Vector3 startPos;
-    private Transform player;
     private bool isCollected = false;
 
-    void Start() {
-        startPos = transform.position;
-        GameObject p = GameObject.FindGameObjectWithTag("Player");
-        if (p != null) player = p.transform;
-        else Debug.LogWarning("EnergyOrb: Không tìm thấy đối tượng có Tag là 'Player'!");
-    }
+    void Start() { startPos = transform.position; }
 
-    void Update()
-    {
-        if (player == null || isCollected) return;
+    void Update() {
+        if (isCollected) return;
 
-        // 1. Hiệu ứng lơ lửng cho vật phẩm trên mặt đất
         float newY = startPos.y + Mathf.Sin(Time.time * frequency) * amplitude;
         transform.position = new Vector3(startPos.x, newY, startPos.z);
 
-        // 2. Kiểm tra khoảng cách và nhấn F để nhặt
-        float distance = Vector2.Distance(transform.position, player.position);
-        if (distance <= pickupRange && Keyboard.current.fKey.wasPressedThisFrame)
-        {
-            Collect();
+        Collider2D[] colliders = Physics2D.OverlapCircleAll(transform.position, pickupRange, playerLayer);
+        foreach (Collider2D col in colliders) {
+            
+            PlayerHP ph = col.GetComponentInParent<PlayerHP>();
+            
+            if (ph != null && !ph.IsDead && Keyboard.current.fKey.wasPressedThisFrame) {
+                Collect(ph.gameObject);
+                break; 
+            }
         }
     }
 
-    void Collect()
-    {
+    void Collect(GameObject collector) {
         isCollected = true;
-        ApplyEffect(player.gameObject);
+        ApplyEffect(collector);
         
-        // Ẩn vật phẩm nhưng không Destroy ngay để Coroutine chạy hết
         GetComponent<SpriteRenderer>().enabled = false;
         GetComponent<Collider2D>().enabled = false;
 
-        if (type == OrbType.Health) Destroy(gameObject);
-        else Destroy(gameObject, duration + 0.5f);
+        // Chỉ có StopTime mới cần giữ object sống để chạy Coroutine giải băng quái
+        if (type == OrbType.StopTime) Destroy(gameObject, duration + 0.5f);
+        else Destroy(gameObject); // Máu và Tốc độ ăn xong là xóa luôn cho nhẹ máy
     }
 
-    void ApplyEffect(GameObject playerObj)
-    {
-        switch (type)
-        {
+    void ApplyEffect(GameObject playerObj) {
+        switch (type) {
             case OrbType.Health:
-                PlayerHealth ph = playerObj.GetComponent<PlayerHealth>();
-                if (ph != null) ph.Heal(ph.maxHealth); 
+                PlayerHP ph = playerObj.GetComponent<PlayerHP>();
+                if (ph != null) ph.Heal(50f); 
                 break;
 
             case OrbType.SpeedBoost:
                 PlayerMovement pm = playerObj.GetComponent<PlayerMovement>();
-                if (pm != null) StartCoroutine(SpeedBoostCoroutine(pm));
+                if (pm != null) 
+                {
+                    // Tìm xem Player đã có cái đồng hồ đếm giờ chưa, chưa có thì gắn vào
+                    SpeedBoostTracker tracker = playerObj.GetComponent<SpeedBoostTracker>();
+                    if (tracker == null) tracker = playerObj.AddComponent<SpeedBoostTracker>();
+                    
+                    // Kích hoạt hoặc Reset thời gian
+                    tracker.ApplyBoost(pm, speedBoostValue, duration);
+                }
                 break;
 
             case OrbType.StopTime:
@@ -78,60 +78,65 @@ public class EnergyOrb : MonoBehaviour
         }
     }
 
-    // --- LOGIC NGƯNG ĐỘNG THỜI GIAN ---
-    IEnumerator StopTimeCoroutine()
-    {
-        Debug.Log("<color=blue>ZA WARUDO! Ngưng đọng thời gian!</color>");
-
-        // 1. Tìm tất cả quái vật (Phải có Tag là "Enemy")
+    IEnumerator StopTimeCoroutine() {
         GameObject[] enemies = GameObject.FindGameObjectsWithTag("Enemy");
-
-        // 2. Đóng băng tất cả quái đang có
-        foreach (GameObject enemy in enemies)
-        {
+        foreach (GameObject enemy in enemies) {
             if (enemy == null) continue;
-
-            // Tắt script di chuyển (Lấy tất cả script trừ Animator và Transform)
             MonoBehaviour[] scripts = enemy.GetComponents<MonoBehaviour>();
-            foreach (var s in scripts) {
-                if (s != this) s.enabled = false;
-            }
-
-            // Dừng vật lý (Dùng linearVelocity cho Unity 6)
+            foreach (var s in scripts) { if (s != this) s.enabled = false; }
             Rigidbody2D rb = enemy.GetComponent<Rigidbody2D>();
             if (rb != null) rb.linearVelocity = Vector2.zero;
-
-            // Dừng Animation
             Animator anim = enemy.GetComponent<Animator>();
             if (anim != null) anim.speed = 0;
         }
-
-        // 3. Đợi trong khoảng thời gian duration (5 giây)
         yield return new WaitForSeconds(duration);
-
-        // 4. Giải băng cho quái (Chỉ những con còn sống)
         GameObject[] activeEnemies = GameObject.FindGameObjectsWithTag("Enemy");
-        foreach (GameObject enemy in activeEnemies)
-        {
-            if (enemy == null) continue; // Bỏ qua nếu quái đã bị chém chết
-
-            // Bật lại các script
+        foreach (GameObject enemy in activeEnemies) {
+            if (enemy == null) continue;
             MonoBehaviour[] scripts = enemy.GetComponents<MonoBehaviour>();
             foreach (var s in scripts) s.enabled = true;
-
-            // Cho Animation chạy lại
             Animator anim = enemy.GetComponent<Animator>();
             if (anim != null) anim.speed = 1;
         }
+    }
+}
 
-        Debug.Log("<color=white>Thời gian tiếp tục trôi...</color>");
+// =====================================================================
+// CLASS MỚI: ĐỒNG HỒ THEO DÕI TỐC ĐỘ (Gắn tạm lên Player khi ăn buff)
+// =====================================================================
+public class SpeedBoostTracker : MonoBehaviour
+{
+    private PlayerMovement pm;
+    private float currentBoost = 0f;
+    private float timeLeft = 0f;
+
+    public void ApplyBoost(PlayerMovement playerMovement, float boostValue, float duration)
+    {
+        pm = playerMovement;
+        
+        // Nếu ĐANG CHƯA CÓ tốc độ cộng thêm thì mới cộng (Chống cộng dồn)
+        if (currentBoost == 0f)
+        {
+            currentBoost = boostValue;
+            pm.moveSpeed += currentBoost;
+        }
+        
+        // Dù mới ăn cục đầu hay ăn cục thứ 10, cứ reset đồng hồ về 5 giây
+        timeLeft = duration;
     }
 
-    IEnumerator SpeedBoostCoroutine(PlayerMovement pm)
+    void Update()
     {
-        float originalSpeed = pm.moveSpeed;
-        pm.moveSpeed += speedBoostValue; 
-        yield return new WaitForSeconds(duration); 
-        pm.moveSpeed = originalSpeed; 
+        if (timeLeft > 0)
+        {
+            timeLeft -= Time.deltaTime;
+            
+            // Khi đếm ngược về 0 (Hết tác dụng)
+            if (timeLeft <= 0)
+            {
+                if (pm != null) pm.moveSpeed -= currentBoost; // Trừ đi đúng lượng đã cộng
+                Destroy(this); // Xóa luôn cái đồng hồ này khỏi Player cho sạch sẽ
+            }
+        }
     }
 }

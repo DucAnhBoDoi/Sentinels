@@ -6,45 +6,44 @@ public class ChargePlatform : MonoBehaviour
     public float detectionRange = 1.5f; 
     public LayerMask playerLayer; 
     private bool isPlayerNearby = false;
-
-    // Lưu trữ Player đang đứng trên bệ này
-    private PlayerHealth lastPlayerOnPlatform;
+    private PlayerHP lastPlayerOnPlatform;
 
     void Start() {
         GameObject coreObj = GameObject.FindGameObjectWithTag("TheCore");
-        if (coreObj != null) {
-            coreScript = coreObj.GetComponent<LifeCore>();
-        }
+        if (coreObj != null) coreScript = coreObj.GetComponent<LifeCore>();
     }
 
     void Update() {
         if (coreScript == null) return;
 
         Collider2D playerCollider = Physics2D.OverlapCircle(transform.position, detectionRange, playerLayer);
+        PlayerHP currentPh = null;
 
-        if (playerCollider != null && playerCollider.CompareTag("Player")) {
+        // TÌM SCRIPT TRÊN CẢ OBJECT CHA (Bỏ qua vụ Tag)
+        if (playerCollider != null) {
+            currentPh = playerCollider.GetComponentInParent<PlayerHP>();
+        }
+
+        if (currentPh != null && !currentPh.IsDead) {
             if (!isPlayerNearby) {
                 isPlayerNearby = true;
                 coreScript.SetPlayerOnPlatform(true);
                 
-                // Đánh dấu Player này đang hiến máu
-                lastPlayerOnPlatform = playerCollider.GetComponent<PlayerHealth>();
-                if (lastPlayerOnPlatform != null) lastPlayerOnPlatform.isOnPlatform = true;
+                lastPlayerOnPlatform = currentPh;
+                lastPlayerOnPlatform.isOnPlatform = true;
                 
-                Debug.Log("Player đang sạc tại: " + gameObject.name);
+                Debug.Log("<color=yellow>Player đã dẫm lên bệ: </color>" + gameObject.name);
             }
         } else {
             if (isPlayerNearby) {
                 isPlayerNearby = false;
                 coreScript.SetPlayerOnPlatform(false);
                 
-                // Bỏ đánh dấu khi Player rời đi
                 if (lastPlayerOnPlatform != null) {
                     lastPlayerOnPlatform.isOnPlatform = false;
                     lastPlayerOnPlatform = null;
                 }
-                
-                Debug.Log("Player rời bệ: " + gameObject.name);
+                Debug.Log("Player đã rời bệ: " + gameObject.name);
             }
         }
     }

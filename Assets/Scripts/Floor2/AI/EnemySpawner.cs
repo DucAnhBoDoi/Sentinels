@@ -15,12 +15,15 @@ public class EnemySpawner : MonoBehaviour
 
     private float nextSpawnTime;
     private bool hasStartedTimer = false; 
-    private GameManager gm;
+    
+    // ĐỔI SANG Floor2Manager
+    private Floor2Manager fm;
     private float totalStartTime;
 
     void Start()
     {
-        gm = Object.FindAnyObjectByType<GameManager>();
+        // TÌM Floor2Manager THAY VÌ GameManager
+        fm = Object.FindAnyObjectByType<Floor2Manager>();
     }
 
     void Update()
@@ -28,15 +31,15 @@ public class EnemySpawner : MonoBehaviour
         float currentSpawnRate = initialSpawnRate;
 
         // TÍNH TOÁN TỐC ĐỘ SINH QUÁI
-        if (gm != null && gm.timerIsRunning)
+        if (fm != null && fm.timerIsRunning)
         {
             if (!hasStartedTimer) {
-                totalStartTime = gm.timeRemaining; // Lấy mốc 300s (5 phút)
+                totalStartTime = fm.timeRemaining; // Lấy mốc 300s (5 phút)
                 hasStartedTimer = true;
             }
 
             // Tỷ lệ thời gian: 0 (bắt đầu) -> 1 (hết giờ)
-            float timeRatio = 1f - (gm.timeRemaining / totalStartTime); 
+            float timeRatio = 1f - (fm.timeRemaining / totalStartTime); 
             timeRatio = Mathf.Clamp01(timeRatio);
 
             // SpawnRate giảm dần (nghĩa là quái ra nhanh dần)
@@ -57,10 +60,10 @@ public class EnemySpawner : MonoBehaviour
         int randomIndex = Random.Range(0, spawnPoints.Length);
         Transform selectedPipe = spawnPoints[randomIndex];
 
-        GameObject newEnemy = Instantiate(enemyPrefab, selectedPipe.position, Quaternion.identity);
+        Instantiate(enemyPrefab, selectedPipe.position, Quaternion.identity);
 
-        // KÍCH HOẠT TIMER NẾU CHƯA CHẠY
-        if (gm != null && !gm.timerIsRunning) gm.StartTimer();
+        // KÍCH HOẠT TIMER (Đã có RoomEventController kích hoạt nên dòng này có thể bỏ qua, nhưng giữ lại cho an toàn)
+        if (fm != null && !fm.timerIsRunning) fm.StartTimer();
     }
 
     public void StopSpawning() { canSpawn = false; }

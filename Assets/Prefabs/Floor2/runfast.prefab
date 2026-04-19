@@ -170,8 +170,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Game::EnergyOrb
   type: 1
-  speedBoostValue: 10
+  speedBoostValue: 5
   duration: 5
   pickupRange: 2.5
+  playerLayer:
+    serializedVersion: 2
+    m_Bits: 512
   amplitude: 0.2
   frequency: 2
