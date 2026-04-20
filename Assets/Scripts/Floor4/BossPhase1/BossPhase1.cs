@@ -16,6 +16,7 @@ public class BossPhase1 : MonoBehaviour, IDamagable
     [SerializeField, HideInInspector] private Rigidbody2D _rb;
     [SerializeField, HideInInspector] private SpriteRenderer _sr;
 
+    [SerializeField] private BossProjectile _projectile;
     [SerializeField] private bool _spriteFacingRight;
     [SerializeField] private float _movementSpeed;
     [SerializeField] private float _hitDistance;
@@ -31,19 +32,34 @@ public class BossPhase1 : MonoBehaviour, IDamagable
 
     private void Awake()
     {
-        _atkHitBox.gameObject.SetActive(false);
         _tree = new BehaviorTreeBuilder(gameObject)
+            .SelectorRandom()
             .Sequence()
             .Do(nameof(MoveTowardPlayerBehavior), MoveTowardPlayerBehavior)
+            .Selector()
+            .Sequence()
             .Condition(() => _checkHitable.Attackable)
             .Do(nameof(AttackBehavior), AttackBehavior)
             .WaitTime(_atkDuration)
+            .End()
+            .Sequence()
+            .Do(nameof(SpawnProjectileBehavior), SpawnProjectileBehavior)
+            .WaitTime()
+            .End()
+            .End()
+            .End()
+            .Sequence()
+            .Do(nameof(SpawnProjectileBehavior), SpawnProjectileBehavior)
+            .WaitTime()
+            .End()
             .End()
             .Build();
     }
 
     private void Start()
     {
+        _atkHitBox.gameObject.SetActive(false);
+        _checkHitable.gameObject.SetActive(true);
         _players = GameObject.FindGameObjectsWithTag("Player");
         if (_players.Length > 0 && _targetedPlayer == null)
         {
@@ -108,7 +124,8 @@ public class BossPhase1 : MonoBehaviour, IDamagable
 
     private TaskStatus MoveTowardPlayerBehavior()
     {
-        if (_checkHitable.Attackable)
+        Debug.Log(Vector2.Distance(transform.position, _targetedPlayer.transform.position));
+        if (Vector2.Distance(transform.position, _targetedPlayer.transform.position) <= _hitDistance)
         {
             return TaskStatus.Success;
         }
@@ -150,6 +167,13 @@ public class BossPhase1 : MonoBehaviour, IDamagable
         transform.position = targetPosition;
 
         return TaskStatus.Continue;
+    }
+
+    private TaskStatus SpawnProjectileBehavior()
+    {
+        BossProjectile projectile = Instantiate(_projectile);
+        projectile.Target = _targetedPlayer.transform;
+        return TaskStatus.Success;
     }
 
 #if UNITY_EDITOR

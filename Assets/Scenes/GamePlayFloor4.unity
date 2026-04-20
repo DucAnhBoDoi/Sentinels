@@ -163,7 +163,7 @@ GameObject:
   - component: {fileID: 53629256}
   - component: {fileID: 53629255}
   - component: {fileID: 53629254}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: HealthBar_Canvas
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -203,6 +203,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Game::HealthBar
   fillImage: {fileID: 447246817}
+  isWorldSpaceUI: 1
 --- !u!114 &53629255
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -277,7 +278,7 @@ GameObject:
   - component: {fileID: 125413651}
   - component: {fileID: 125413653}
   - component: {fileID: 125413652}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: HealthFill
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -4211,7 +4212,7 @@ GameObject:
   - component: {fileID: 196340232}
   - component: {fileID: 196340231}
   - component: {fileID: 196340238}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: Player_B_Mechanic
   m_TagString: Player
   m_Icon: {fileID: 0}
@@ -4367,6 +4368,7 @@ MonoBehaviour:
   maxHealth: 10
   currentHealth: 0
   healthBar: {fileID: 53629254}
+  isOnPlatform: 0
 --- !u!212 &196340237
 SpriteRenderer:
   serializedVersion: 2
@@ -4489,7 +4491,7 @@ GameObject:
   - component: {fileID: 319723579}
   - component: {fileID: 319723581}
   - component: {fileID: 319723580}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: Border
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -4673,7 +4675,7 @@ GameObject:
   - component: {fileID: 382759681}
   - component: {fileID: 382759680}
   - component: {fileID: 382759679}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: Flashlight
   m_TagString: Flashlight
   m_Icon: {fileID: 0}
@@ -5008,7 +5010,7 @@ GameObject:
   - component: {fileID: 447246816}
   - component: {fileID: 447246818}
   - component: {fileID: 447246817}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: HealthFill
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -5083,7 +5085,7 @@ GameObject:
   - component: {fileID: 448515174}
   - component: {fileID: 448515176}
   - component: {fileID: 448515175}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: Border
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -5339,7 +5341,7 @@ GameObject:
   - component: {fileID: 601037590}
   - component: {fileID: 601037589}
   - component: {fileID: 601037588}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: HealthBar_Canvas
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -5379,6 +5381,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Game::HealthBar
   fillImage: {fileID: 125413652}
+  isWorldSpaceUI: 1
 --- !u!114 &601037589
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -77292,7 +77295,7 @@ GameObject:
   - component: {fileID: 914473490}
   - component: {fileID: 914473489}
   - component: {fileID: 914473496}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: Player_A_Navigator
   m_TagString: Player
   m_Icon: {fileID: 0}
@@ -77449,6 +77452,7 @@ MonoBehaviour:
   maxHealth: 10
   currentHealth: 0
   healthBar: {fileID: 601037588}
+  isOnPlatform: 0
 --- !u!212 &914473495
 SpriteRenderer:
   serializedVersion: 2
@@ -90290,7 +90294,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1389118502}
   - component: {fileID: 1389118503}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: Hitbox
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -102562,7 +102566,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1683851910}
   - component: {fileID: 1683851911}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: Hitbox
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -102765,17 +102769,9 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
-    - target: {fileID: 2962936462559722468, guid: f91ffd9ccc4a12f4da61706e85c8d8f2, type: 3}
-      propertyPath: _hitDistance
-      value: 5
-      objectReference: {fileID: 0}
     - target: {fileID: 7012915662020673757, guid: f91ffd9ccc4a12f4da61706e85c8d8f2, type: 3}
       propertyPath: m_Name
       value: BossPhase1
-      objectReference: {fileID: 0}
-    - target: {fileID: 7012915662020673757, guid: f91ffd9ccc4a12f4da61706e85c8d8f2, type: 3}
-      propertyPath: m_IsActive
-      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 8888791738224800338, guid: f91ffd9ccc4a12f4da61706e85c8d8f2, type: 3}
       propertyPath: m_LocalPosition.x

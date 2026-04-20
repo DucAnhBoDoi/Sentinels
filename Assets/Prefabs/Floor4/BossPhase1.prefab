@@ -257,6 +257,7 @@ MonoBehaviour:
   _collider: {fileID: 430493961219152273}
   _rb: {fileID: 8282203416841788329}
   _sr: {fileID: 1352934095103616390}
+  _projectile: {fileID: 172693359892808427, guid: 8d4a57fca4ff19746b445048abcd6369, type: 3}
   _spriteFacingRight: 0
   _movementSpeed: 10
   _hitDistance: 10
