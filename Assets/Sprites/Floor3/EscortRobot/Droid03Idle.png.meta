@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: b2ee72b92c59831488e744d1c0eae15b
+guid: aae2ea8cdb7e2bc45b620c8cd25702ca
 TextureImporter:
   internalIDToNameTable:
   - first:
@@ -112,10 +112,10 @@ TextureImporter:
       name: Droid03Idle_0
       rect:
         serializedVersion: 2
-        x: 0
+        x: 9
         y: 0
-        width: 48
-        height: 24
+        width: 30
+        height: 19
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -134,10 +134,10 @@ TextureImporter:
       name: Droid03Idle_1
       rect:
         serializedVersion: 2
-        x: 48
+        x: 56
         y: 0
-        width: 48
-        height: 24
+        width: 32
+        height: 18
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -156,10 +156,10 @@ TextureImporter:
       name: Droid03Idle_2
       rect:
         serializedVersion: 2
-        x: 96
+        x: 104
         y: 0
-        width: 48
-        height: 24
+        width: 32
+        height: 18
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -178,10 +178,10 @@ TextureImporter:
       name: Droid03Idle_3
       rect:
         serializedVersion: 2
-        x: 144
+        x: 153
         y: 0
-        width: 48
-        height: 24
+        width: 30
+        height: 19
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -200,7 +200,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 0f8b9736c254f354a8e1b164bb874210
+    spriteID: 9f4fc40c71957b641873c873cefa7a07
     internalID: 0
     vertices: []
     indices: 
@@ -210,7 +210,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries:
       - key: SpriteEditor.SliceSettings
-        value: '{"sliceOnImport":false,"gridCellCount":{"x":1.0,"y":1.0},"gridSpriteSize":{"x":48.0,"y":24.0},"gridSpriteOffset":{"x":0.0,"y":24.0},"gridSpritePadding":{"x":0.0,"y":0.0},"pivot":{"x":0.5,"y":0.5},"pivotPixels":{"x":0.0,"y":0.0},"autoSlicingMethod":0,"spriteAlignment":0,"pivotUnitMode":0,"slicingType":1,"keepEmptyRects":false,"isAlternate":false}'
+        value: '{"sliceOnImport":false,"gridCellCount":{"x":1.0,"y":1.0},"gridSpriteSize":{"x":32.0,"y":32.0},"gridSpriteOffset":{"x":0.0,"y":0.0},"gridSpritePadding":{"x":0.0,"y":0.0},"pivot":{"x":0.5,"y":0.5},"pivotPixels":{"x":0.0,"y":0.0},"autoSlicingMethod":0,"spriteAlignment":0,"pivotUnitMode":0,"slicingType":0,"keepEmptyRects":false,"isAlternate":false}'
     nameFileIdTable:
       Droid03Idle_0: -8902593323976369345
       Droid03Idle_1: 4688183258032010364
