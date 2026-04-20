@@ -155,6 +155,9 @@ MonoBehaviour:
   floatAmplitude: 0.3
   floatFrequency: 2
   pickupRange: 2
+  playerLayer:
+    serializedVersion: 2
+    m_Bits: 512
 --- !u!50 &1058404708419907401
 Rigidbody2D:
   serializedVersion: 5

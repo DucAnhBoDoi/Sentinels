@@ -173,5 +173,8 @@ MonoBehaviour:
   speedBoostValue: 5
   duration: 3
   pickupRange: 2.5
+  playerLayer:
+    serializedVersion: 2
+    m_Bits: 512
   amplitude: 0.2
   frequency: 2
