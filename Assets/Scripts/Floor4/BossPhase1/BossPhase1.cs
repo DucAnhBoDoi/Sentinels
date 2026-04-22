@@ -36,6 +36,12 @@ public class BossPhase1 : MonoBehaviour, IDamagable
     private void Awake()
     {
         _tree = new BehaviorTreeBuilder(gameObject)
+            .Selector()
+            .Sequence()
+            .Condition(() => _checkHitable.Attackable)
+            .Do(nameof(AttackBehavior), AttackBehavior)
+            .WaitTime(_atkDuration)
+            .End()
             .SelectorRandom()
             .Sequence()
             .Do(nameof(MoveTowardPlayerBehavior), MoveTowardPlayerBehavior)
@@ -54,6 +60,7 @@ public class BossPhase1 : MonoBehaviour, IDamagable
             .Sequence()
             .Do(nameof(SpawnProjectileBehavior), SpawnProjectileBehavior)
             .WaitTime()
+            .End()
             .End()
             .End()
             .Build();
@@ -180,6 +187,7 @@ public class BossPhase1 : MonoBehaviour, IDamagable
         }
 
         BossProjectile projectile = Instantiate(_projectile);
+        projectile.transform.position = transform.position;
         projectile.Target = _targetedPlayer.transform;
         return TaskStatus.Success;
     }
