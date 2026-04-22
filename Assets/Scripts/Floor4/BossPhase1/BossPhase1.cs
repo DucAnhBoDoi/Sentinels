@@ -120,6 +120,11 @@ public class BossPhase1 : MonoBehaviour, IDamagable
         _checkHitable.gameObject.SetActive(false);
         _isDead = true;
         OnDeath?.Invoke();
+
+        foreach (var ps in GetComponentsInChildren<ParticleSystem>())
+        {
+            ps.Stop();
+        }
     }
 
     private void HandleAttack()
@@ -135,11 +140,6 @@ public class BossPhase1 : MonoBehaviour, IDamagable
 
     private TaskStatus MoveTowardPlayerBehavior()
     {
-        if (Vector2.Distance(transform.position, _targetedPlayer.transform.position) <= _hitDistance)
-        {
-            return TaskStatus.Success;
-        }
-
         Vector3 targetPosition = Vector2.MoveTowards(
             transform.position,
             _targetedPlayer.transform.position,
@@ -172,6 +172,11 @@ public class BossPhase1 : MonoBehaviour, IDamagable
             _sr.flipX = _spriteFacingRight;
             _atkHitBox.transform.localPosition = new Vector3(-Mathf.Abs(atkHitBoxX), atkHitBoxY);
             _checkHitable.transform.localPosition = new Vector3(-Mathf.Abs(checkHitableX), checkHitableY);
+        }
+
+        if (Vector2.Distance(transform.position, _targetedPlayer.transform.position) <= _hitDistance)
+        {
+            return TaskStatus.Success;
         }
 
         transform.position = targetPosition;
