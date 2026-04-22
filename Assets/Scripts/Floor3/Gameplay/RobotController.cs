@@ -250,25 +250,26 @@ namespace Scripts.Floor3.Gameplay
 
         private void CheckVirusProximity()
         {
-            // OverlapCircle checks for VirusAI components within _panicRadius
             Collider2D[] hits = Physics2D.OverlapCircleAll(
                 transform.position, _panicRadius, _virusLayer);
 
-            bool virusNearby = false;
+            bool enemyNearby = false;
+
             foreach (var hit in hits)
             {
-                if (hit.GetComponent<VirusAI>() != null)
+                if (hit.GetComponent<VirusAI>() != null ||
+                    hit.GetComponent<UtilityRobotAI_Floor3>() != null)
                 {
-                    virusNearby = true;
+                    enemyNearby = true;
                     break;
                 }
             }
 
-            if (virusNearby && !_isPanicked)
+            if (enemyNearby && !_isPanicked)
             {
                 EnterPanic();
             }
-            else if (!virusNearby && _isPanicked)
+            else if (!enemyNearby && _isPanicked)
             {
                 ExitPanic();
             }

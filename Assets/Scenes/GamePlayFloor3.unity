@@ -2187,12 +2187,12 @@ PrefabInstance:
       value: 'The core system is infected. Escort the Mechanical Soul to the terminal
         safely.
 
-        
+
 
         <b><color=#FFD700>Player 1</color> & <color=#FFA500>Player
         2</color>:</b> Slay the <b>Viruses</b> to protect the Robot from being destroyed!
 
-        
+
 
         <i><color=#FF5555>Warning:</color>
         The Robot will STOP moving if any player wanders too far! Stay close!</i>'
@@ -163224,6 +163224,14 @@ PrefabInstance:
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 2564126092389927938, guid: 3217c01adf567a84ba9ef2d237ef19ac, type: 3}
+      propertyPath: attackRange
+      value: 1.6
+      objectReference: {fileID: 0}
+    - target: {fileID: 2564126092389927938, guid: 3217c01adf567a84ba9ef2d237ef19ac, type: 3}
+      propertyPath: actionOffset.x
+      value: 0.8
+      objectReference: {fileID: 0}
+    - target: {fileID: 2564126092389927938, guid: 3217c01adf567a84ba9ef2d237ef19ac, type: 3}
       propertyPath: useQuestSystem
       value: 1
       objectReference: {fileID: 0}
@@ -210042,6 +210050,14 @@ PrefabInstance:
     - target: {fileID: 8728635386217666356, guid: d6cff015914d52d42b2689beb0821397, type: 3}
       propertyPath: canAttack
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8728635386217666356, guid: d6cff015914d52d42b2689beb0821397, type: 3}
+      propertyPath: attackRange
+      value: 1.6
+      objectReference: {fileID: 0}
+    - target: {fileID: 8728635386217666356, guid: d6cff015914d52d42b2689beb0821397, type: 3}
+      propertyPath: actionOffset.x
+      value: 0.8
       objectReference: {fileID: 0}
     - target: {fileID: 8728635386217666356, guid: d6cff015914d52d42b2689beb0821397, type: 3}
       propertyPath: useQuestSystem
