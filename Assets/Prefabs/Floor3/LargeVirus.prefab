@@ -10,11 +10,11 @@ GameObject:
   m_Component:
   - component: {fileID: 8891588931429743710}
   - component: {fileID: 3207705342381422007}
-  - component: {fileID: 6185796740172727157}
   - component: {fileID: 734993532183219589}
   - component: {fileID: 4240147689076470686}
   - component: {fileID: 5709943857965429650}
-  m_Layer: 0
+  - component: {fileID: 393444454713481263}
+  m_Layer: 8
   m_Name: LargeVirus
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -95,37 +95,6 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
---- !u!114 &6185796740172727157
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7014896533251624883}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: dfc03135ab98a104199b3346cb0931e0, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Game::UtilityRobotAI
-  playerA: {fileID: 0}
-  playerB: {fileID: 0}
-  moveSpeed: 6
-  patrolSpeed: 1.5
-  detectionRadius: 10
-  isPlayerBRepairing: 0
-  patrolRadius: 4
-  stuckTimeLimit: 3
-  scanDirections: 8
-  scanStepSize: 0.5
-  robotRadius: 0.4
-  distanceWeight: 10
-  dangerWeight: 1
-  separationWeight: 2
-  neighborRadius: 3
-  momentumWeight: 8
-  obstacleLayer:
-    serializedVersion: 2
-    m_Bits: 64
 --- !u!50 &734993532183219589
 Rigidbody2D:
   serializedVersion: 5
@@ -183,11 +152,11 @@ BoxCollider2D:
   m_CallbackLayers:
     serializedVersion: 2
     m_Bits: 4294967295
-  m_IsTrigger: 1
+  m_IsTrigger: 0
   m_UsedByEffector: 0
   m_CompositeOperation: 0
   m_CompositeOrder: 0
-  m_Offset: {x: 0.000000044703484, y: -0.07628686}
+  m_Offset: {x: 0, y: 0}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
@@ -197,7 +166,7 @@ BoxCollider2D:
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
-  m_Size: {x: 0.25285992, y: 0.15474828}
+  m_Size: {x: 0.25285992, y: 0.3240645}
   m_EdgeRadius: 0
 --- !u!95 &5709943857965429650
 Animator:
@@ -221,3 +190,30 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
+--- !u!114 &393444454713481263
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7014896533251624883}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9d82908b2dcb5c3499535457ef91a3a8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Game::UtilityRobotAI_Floor3
+  playerA: {fileID: 0}
+  playerB: {fileID: 0}
+  moveSpeed: 3
+  patrolSpeed: 1.5
+  detectionRadius: 10
+  patrolRadius: 4
+  stuckTimeLimit: 3
+  scanDirections: 12
+  scanStepSize: 1.5
+  robotRadius: 0.4
+  obstacleLayer:
+    serializedVersion: 2
+    m_Bits: 64
+  attackDamage: 1
+  attackCooldown: 1.5

@@ -39,8 +39,8 @@ namespace Scripts.Floor3.Gameplay
         [Tooltip("Distance at which a player is considered 'too far' for difficulty.")]
         [SerializeField] private float _farDistance    = 8f;
 
-        [Tooltip("Robot only moves when at least 1 player is within this distance.\n" +
-                 "If BOTH players leave this zone, robot stops until one returns.")]
+        [Tooltip("Robot only moves when BOTH players are within this distance.\n" +
+                 "If ANY player leaves this zone, robot stops until they return.")]
         [SerializeField] private float _escortDistance = 6f;
 
         [Header("Debug")]
@@ -71,23 +71,33 @@ namespace Scripts.Floor3.Gameplay
             bool bothFar        = _playerAFar && _playerBFar;
 
             // ── ESCORT GATE ───────────────────────────────────────────────
-            // Robot moves only when at least 1 player is within _escortDistance.
-            // Uses the CLOSER player — robot waits for either player, not both.
             bool playerAClose = distA <= _escortDistance;
             bool playerBClose = distB <= _escortDistance;
-            bool anyPlayerClose = playerAClose || playerBClose;
+            
+            // LUẬT MỚI: Bắt buộc CẢ 2 người phải ở trong vòng xanh lá cây (&&)
+            bool bothPlayersClose = playerAClose && playerBClose;
 
-            if (anyPlayerClose && !_escortGateOpen)
+            // NẾU CẢ 2 TỚI GẦN THÌ MỚI GỌI UIMANAGER BẬT BẢNG TOPIC
+            if (bothPlayersClose)
+            {
+                if (Floor3UIManager.Instance != null) {
+                    Floor3UIManager.Instance.ShowTopicSelection();
+                }
+            }
+
+            // ROBOT CHỈ ĐI TIẾP NẾU CẢ 2 NGƯỜI CÙNG Ở TRONG VÒNG
+            if (bothPlayersClose && !_escortGateOpen)
             {
                 _escortGateOpen = true;
                 _robotController?.SetEscortGate(true);
-                Debug.Log("[ProximityDetector] Player returned — robot may move.");
+                Debug.Log("[ProximityDetector] Cả 2 Player đã vào vùng — robot tiếp tục chạy.");
             }
-            else if (!anyPlayerClose && _escortGateOpen)
+            // NẾU 1 TRONG 2 NGƯỜI RỜI VÒNG, ROBOT DỪNG LẠI CHỜ
+            else if (!bothPlayersClose && _escortGateOpen)
             {
                 _escortGateOpen = false;
                 _robotController?.SetEscortGate(false);
-                Debug.Log("[ProximityDetector] Both players too far — robot waiting.");
+                Debug.Log("[ProximityDetector] Có Player đi lạc — robot dừng lại chờ.");
             }
 
             // Feed DifficultyManager
