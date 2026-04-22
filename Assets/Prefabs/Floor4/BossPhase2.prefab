@@ -270,9 +270,10 @@ MonoBehaviour:
   _collider: {fileID: 7865713663063778817}
   _rb: {fileID: 6073091960180583677}
   _sr: {fileID: 8721890965692487052}
+  _projectile: {fileID: 0}
   _spriteFacingRight: 1
   _movementSpeed: 20
-  _hitDistance: 10
+  _hitDistance: 5
   _atkHitBox: {fileID: 8804832218255929397}
   _checkHitable: {fileID: 8240627412147085836}
   _atkDuration: 1.1

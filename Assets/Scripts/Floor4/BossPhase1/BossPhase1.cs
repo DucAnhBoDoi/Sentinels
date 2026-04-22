@@ -1,6 +1,7 @@
 using CleverCrow.Fluid.BTs.Trees;
 using UnityEngine;
 using CleverCrow.Fluid.BTs.Tasks;
+using UnityEngine.Events;
 
 [RequireComponent(typeof(HealthManager), typeof(Animator), typeof(Collider2D))]
 [RequireComponent(typeof(Rigidbody2D), typeof(SpriteRenderer))]
@@ -9,6 +10,8 @@ public class BossPhase1 : MonoBehaviour, IDamagable
     private static readonly int Death = Animator.StringToHash("T_Death");
     private static readonly int Attack = Animator.StringToHash("T_Attack");
     private static readonly int FMoveThreshold = Animator.StringToHash("F_MoveThreshold");
+
+    public UnityAction OnDeath;
 
     [SerializeField, HideInInspector] private HealthManager _hm;
     [SerializeField, HideInInspector] private Animator _anim;
@@ -109,6 +112,7 @@ public class BossPhase1 : MonoBehaviour, IDamagable
         _atkHitBox.gameObject.SetActive(false);
         _checkHitable.gameObject.SetActive(false);
         _isDead = true;
+        OnDeath?.Invoke();
     }
 
     private void HandleAttack()
@@ -124,7 +128,6 @@ public class BossPhase1 : MonoBehaviour, IDamagable
 
     private TaskStatus MoveTowardPlayerBehavior()
     {
-        Debug.Log(Vector2.Distance(transform.position, _targetedPlayer.transform.position));
         if (Vector2.Distance(transform.position, _targetedPlayer.transform.position) <= _hitDistance)
         {
             return TaskStatus.Success;
@@ -171,6 +174,11 @@ public class BossPhase1 : MonoBehaviour, IDamagable
 
     private TaskStatus SpawnProjectileBehavior()
     {
+        if (_projectile == null)
+        {
+            return TaskStatus.Failure;
+        }
+
         BossProjectile projectile = Instantiate(_projectile);
         projectile.Target = _targetedPlayer.transform;
         return TaskStatus.Success;
