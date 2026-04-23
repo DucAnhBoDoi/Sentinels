@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: VirusData_Easy
   m_EditorClassIdentifier: Game::Scripts.ScriptableObjects.VirusData
   MoveSpeed: 4
-  DamageOnContact: 5
+  DamageOnContact: 1
   DamageCooldown: 1.5
   MaxHp: 1
   SpawnCountPerWave: 3

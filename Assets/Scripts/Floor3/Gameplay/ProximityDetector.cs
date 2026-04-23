@@ -14,6 +14,7 @@
 //   - Fires UI warning when either player is too far
 //   - Feeds DifficultyManager with proximity data
 //   - ProximityEventBus events for HUD
+//   - Updates Robot Emotion (Confused/Stable) based on distance
 // ============================================================
 
 using UnityEngine;
@@ -26,30 +27,34 @@ namespace Scripts.Floor3.Gameplay
         // ── Inspector ────────────────────────────────────────────────────
 
         [Header("References")]
-        [SerializeField] private Transform       _robotTransform;
-        [SerializeField] private Transform       _playerA;
-        [SerializeField] private Transform       _playerB;
+        [SerializeField] private Transform _robotTransform;
+        [SerializeField] private Transform _playerA;
+        [SerializeField] private Transform _playerB;
         [SerializeField] private DifficultyManager _difficultyManager;
         [SerializeField] private RobotController _robotController;
 
+        // --- THÊM MỚI ---: Cần tham chiếu tới RobotStateMachine để đổi cảm xúc
+        [SerializeField] private RobotStateMachine _robotStateMachine;
+        // ----------------
+
         [Header("Distance Thresholds")]
         [Tooltip("Distance at which a single player triggers a warning.")]
-        [SerializeField] private float _warnDistance   = 5f;
+        [SerializeField] private float _warnDistance = 5f;
 
         [Tooltip("Distance at which a player is considered 'too far' for difficulty.")]
-        [SerializeField] private float _farDistance    = 8f;
+        [SerializeField] private float _farDistance = 8f;
 
         [Tooltip("Robot only moves when BOTH players are within this distance.\n" +
                  "If ANY player leaves this zone, robot stops until they return.")]
         [SerializeField] private float _escortDistance = 6f;
 
         [Header("Debug")]
-        [SerializeField] private bool _drawGizmos      = true;
+        [SerializeField] private bool _drawGizmos = true;
 
         // ── Private State ─────────────────────────────────────────────────
 
-        private bool _playerAFar    = false;
-        private bool _playerBFar    = false;
+        private bool _playerAFar = false;
+        private bool _playerBFar = false;
         private bool _escortGateOpen = true; // true = robot allowed to move
 
         // ── Lifecycle ────────────────────────────────────────────────────
@@ -68,19 +73,20 @@ namespace Scripts.Floor3.Gameplay
             _playerAFar = distA > _farDistance;
             _playerBFar = distB > _farDistance;
 
-            bool bothFar        = _playerAFar && _playerBFar;
+            bool bothFar = _playerAFar && _playerBFar;
 
             // ── ESCORT GATE ───────────────────────────────────────────────
             bool playerAClose = distA <= _escortDistance;
             bool playerBClose = distB <= _escortDistance;
-            
+
             // LUẬT MỚI: Bắt buộc CẢ 2 người phải ở trong vòng xanh lá cây (&&)
             bool bothPlayersClose = playerAClose && playerBClose;
 
             // NẾU CẢ 2 TỚI GẦN THÌ MỚI GỌI UIMANAGER BẬT BẢNG TOPIC
             if (bothPlayersClose)
             {
-                if (Floor3UIManager.Instance != null) {
+                if (Floor3UIManager.Instance != null)
+                {
                     Floor3UIManager.Instance.ShowTopicSelection();
                 }
             }
@@ -100,6 +106,26 @@ namespace Scripts.Floor3.Gameplay
                 Debug.Log("[ProximityDetector] Có Player đi lạc — robot dừng lại chờ.");
             }
 
+            // --- THÊM MỚI ---: CẬP NHẬT CẢM XÚC ROBOT ----------------------
+            if (_robotStateMachine != null)
+            {
+                // Chỉ đổi sang Confused/Stable nếu robot KHÔNG đang hoảng loạn
+                if (_robotStateMachine.CurrentEmotion != RobotEmotion.Panicked)
+                {
+                    if (bothFar)
+                    {
+                        // Cả hai người đều xa -> Bối rối
+                        _robotStateMachine.ChangeEmotion(RobotEmotion.Confused);
+                    }
+                    else
+                    {
+                        // Ít nhất một người ở gần -> Bình tĩnh
+                        _robotStateMachine.ChangeEmotion(RobotEmotion.Stable);
+                    }
+                }
+            }
+            // -------------------------------------------------------------
+
             // Feed DifficultyManager
             _difficultyManager?.UpdateProximity(bothFar);
 
@@ -109,8 +135,8 @@ namespace Scripts.Floor3.Gameplay
 
         // ── Getters ───────────────────────────────────────────────────────
 
-        public bool IsPlayerAFar()    => _playerAFar;
-        public bool IsPlayerBFar()    => _playerBFar;
+        public bool IsPlayerAFar() => _playerAFar;
+        public bool IsPlayerBFar() => _playerBFar;
         public bool IsEscortGateOpen() => _escortGateOpen;
 
         // ── Gizmos ───────────────────────────────────────────────────────
