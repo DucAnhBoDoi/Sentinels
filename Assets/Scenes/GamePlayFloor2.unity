@@ -102069,115 +102069,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 3940626023132454528, guid: a5cc1c8b543582042a872634b80a8451, type: 3}
-      propertyPath: m_AnchorMax.y
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 3940626023132454528, guid: a5cc1c8b543582042a872634b80a8451, type: 3}
-      propertyPath: m_AnchorMin.y
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 3940626023132454528, guid: a5cc1c8b543582042a872634b80a8451, type: 3}
-      propertyPath: m_AnchoredPosition.x
-      value: 443.6402
-      objectReference: {fileID: 0}
-    - target: {fileID: 3940626023132454528, guid: a5cc1c8b543582042a872634b80a8451, type: 3}
-      propertyPath: m_AnchoredPosition.y
-      value: -188.1869
-      objectReference: {fileID: 0}
-    - target: {fileID: 4246644376284209800, guid: a5cc1c8b543582042a872634b80a8451, type: 3}
-      propertyPath: m_AnchorMax.y
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 4246644376284209800, guid: a5cc1c8b543582042a872634b80a8451, type: 3}
-      propertyPath: m_AnchorMin.y
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 4246644376284209800, guid: a5cc1c8b543582042a872634b80a8451, type: 3}
-      propertyPath: m_AnchoredPosition.x
-      value: 443.6402
-      objectReference: {fileID: 0}
-    - target: {fileID: 4246644376284209800, guid: a5cc1c8b543582042a872634b80a8451, type: 3}
-      propertyPath: m_AnchoredPosition.y
-      value: -73.6091
-      objectReference: {fileID: 0}
-    - target: {fileID: 4470686545804257725, guid: a5cc1c8b543582042a872634b80a8451, type: 3}
-      propertyPath: m_IsActive
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5312401164559329218, guid: a5cc1c8b543582042a872634b80a8451, type: 3}
-      propertyPath: m_IsActive
-      value: 0
-      objectReference: {fileID: 0}
     - target: {fileID: 6668333041797721317, guid: a5cc1c8b543582042a872634b80a8451, type: 3}
       propertyPath: m_IsActive
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 6768521983317457098, guid: a5cc1c8b543582042a872634b80a8451, type: 3}
-      propertyPath: m_AnchorMax.y
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 6768521983317457098, guid: a5cc1c8b543582042a872634b80a8451, type: 3}
-      propertyPath: m_AnchorMin.y
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 6768521983317457098, guid: a5cc1c8b543582042a872634b80a8451, type: 3}
-      propertyPath: m_AnchoredPosition.x
-      value: 443.6402
-      objectReference: {fileID: 0}
-    - target: {fileID: 6768521983317457098, guid: a5cc1c8b543582042a872634b80a8451, type: 3}
-      propertyPath: m_AnchoredPosition.y
-      value: -341.0042
-      objectReference: {fileID: 0}
-    - target: {fileID: 7000227155509413365, guid: a5cc1c8b543582042a872634b80a8451, type: 3}
-      propertyPath: m_text
-      value: 'The biological system is in danger. Protect the <b>Core of Life</b>
-        to collect <b>Fragments of Compassion</b>.
-
-
-        <b><color=#FFD700>Combat:</color></b>
-        Move and eliminate monsters attacking the Core.
-
-        <b><color=#FFA500>Charging:</color></b>
-        Take turns standing in the charging area to keep the Core alive (sacrifices
-        HP).
-
-
-        <i>Cooperate closely! Fragments will appear when the countdown
-        reaches zero.</i>'
-      objectReference: {fileID: 0}
-    - target: {fileID: 7000227155509413365, guid: a5cc1c8b543582042a872634b80a8451, type: 3}
-      propertyPath: m_margin.z
-      value: -36.66748
-      objectReference: {fileID: 0}
-    - target: {fileID: 7000227155509413365, guid: a5cc1c8b543582042a872634b80a8451, type: 3}
-      propertyPath: m_TextWrappingMode
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 7000227155509413365, guid: a5cc1c8b543582042a872634b80a8451, type: 3}
-      propertyPath: m_HorizontalAlignment
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 7221435850308320229, guid: a5cc1c8b543582042a872634b80a8451, type: 3}
-      propertyPath: m_Enabled
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 7685713478387134171, guid: a5cc1c8b543582042a872634b80a8451, type: 3}
-      propertyPath: m_AnchorMax.y
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 7685713478387134171, guid: a5cc1c8b543582042a872634b80a8451, type: 3}
-      propertyPath: m_AnchorMin.y
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 7685713478387134171, guid: a5cc1c8b543582042a872634b80a8451, type: 3}
-      propertyPath: m_AnchoredPosition.x
-      value: 148.67122
-      objectReference: {fileID: 0}
-    - target: {fileID: 7685713478387134171, guid: a5cc1c8b543582042a872634b80a8451, type: 3}
-      propertyPath: m_AnchoredPosition.y
-      value: -63.2395
-      objectReference: {fileID: 0}
     - target: {fileID: 7711122386710702378, guid: a5cc1c8b543582042a872634b80a8451, type: 3}
       propertyPath: m_AnchorMax.y
       value: 0
@@ -102193,22 +102088,6 @@ PrefabInstance:
     - target: {fileID: 7711122386710702378, guid: a5cc1c8b543582042a872634b80a8451, type: 3}
       propertyPath: m_AnchoredPosition.y
       value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7954837699965162282, guid: a5cc1c8b543582042a872634b80a8451, type: 3}
-      propertyPath: m_AnchorMax.y
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 7954837699965162282, guid: a5cc1c8b543582042a872634b80a8451, type: 3}
-      propertyPath: m_AnchorMin.y
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 7954837699965162282, guid: a5cc1c8b543582042a872634b80a8451, type: 3}
-      propertyPath: m_AnchoredPosition.x
-      value: 446.01364
-      objectReference: {fileID: 0}
-    - target: {fileID: 7954837699965162282, guid: a5cc1c8b543582042a872634b80a8451, type: 3}
-      propertyPath: m_AnchoredPosition.y
-      value: -63.2395
       objectReference: {fileID: 0}
     - target: {fileID: 8149811093272142265, guid: a5cc1c8b543582042a872634b80a8451, type: 3}
       propertyPath: m_AnchorMax.y
@@ -102315,8 +102194,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: THE CORE
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: cdd6ff1867aa98e48b631efce41a66a2, type: 2}
-  m_sharedMaterial: {fileID: -6155794773443140859, guid: cdd6ff1867aa98e48b631efce41a66a2, type: 2}
+  m_fontAsset: {fileID: 0}
+  m_sharedMaterial: {fileID: 0}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
