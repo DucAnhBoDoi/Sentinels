@@ -98905,7 +98905,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 49eff85f886a02c4b86514354f698122, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Game::Floor2Manager
-  timeRemaining: 300
+  timeRemaining: 1000
   timerIsRunning: 0
   timeText: {fileID: 1601721300}
   coreHealthBar: {fileID: 728145812}
