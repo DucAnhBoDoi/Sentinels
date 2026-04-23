@@ -1840,7 +1840,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &269301504
 RectTransform:
   m_ObjectHideFlags: 0
@@ -1884,9 +1884,9 @@ MonoBehaviour:
   _hpColorMedium: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   _hpColorLow: {r: 1, g: 0, b: 0, a: 1}
   _emotionIcon: {fileID: 1291706133}
-  _emotionStable: {fileID: -5623194428626525839, guid: 0ddd58a4429da40458a326deffb213e5, type: 3}
-  _emotionConfused: {fileID: 6937817954938267909, guid: ec7f4fabe25626b40825486d250a9343, type: 3}
-  _emotionPanicked: {fileID: -6470460504253458178, guid: 5d6ac80791b439248a2a747039d01dfa, type: 3}
+  _emotionStable: {fileID: -7163038271130336663, guid: 75a95a5b5ea65a54f8e528e1aa2f33b0, type: 3}
+  _emotionConfused: {fileID: 594318413343068850, guid: bcc72936be738db49b6c492ab53ec649, type: 3}
+  _emotionPanicked: {fileID: -2809686463682248875, guid: ad8fdd6b16976ea4c864947c6be2dac4, type: 3}
   _warningPanel: {fileID: 412030971}
   _stunnedPanel: {fileID: 802643940}
   _escortComplete: {fileID: 0}
@@ -163132,7 +163132,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: -855298285791758126, guid: 593a68e026467334bb8d2fa881f6d5f1, type: 3}
+  m_Sprite: {fileID: -7163038271130336663, guid: 75a95a5b5ea65a54f8e528e1aa2f33b0, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
