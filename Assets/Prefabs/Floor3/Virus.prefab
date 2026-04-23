@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 3022512770075305053}
   - component: {fileID: 7698671788292035931}
   - component: {fileID: 2368311426552663878}
+  - component: {fileID: 965911443020826405}
   m_Layer: 8
   m_Name: Virus
   m_TagString: Untagged
@@ -171,3 +172,24 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
+--- !u!114 &965911443020826405
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3226354648831108416}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c0551b5881b67f04eb2885769b98129b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Game::HitReactionController
+  manageHp: 0
+  maxHp: 0
+  flashDuration: 0.1
+  flashFadeOutDuration: 0.18
+  knockbackForce: 10
+  knockbackDuration: 0.15
+  useShake: 1
+  shakeMagnitude: 0.03
+  shakeDuration: 0.5

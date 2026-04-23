@@ -30,6 +30,7 @@ namespace Scripts.Floor3.AI
         private float _currentHp;
         private float _damageTimer = 0f;
         private bool _initialized = false;
+        private HitReactionController _hitReaction;
 
         // ── Public Init ───────────────────────────────────────────────────
         public void Initialize(VirusData data, RobotController robotTarget)
@@ -38,14 +39,17 @@ namespace Scripts.Floor3.AI
             _robotTarget = robotTarget;
             _currentHp = data.MaxHp;
             _initialized = true;
+            _hitReaction = GetComponent<HitReactionController>();
         }
 
         // ── Unity Lifecycle ──────────────────────────────────────────────
         private void Update()
         {
             if (!Scripts.Floor3.UI.TopicSelectionUI.hasStartedMission) return;
-
             if (!_initialized || _state == VirusState.Dead) return;
+
+            // Nhường cho knockback nếu đang bị đẩy
+            if (_hitReaction != null && _hitReaction.IsBeingKnockedBack) return;
 
             if (_state == VirusState.Chasing) ChaseRobot();
             if (_state == VirusState.Attacking) TickDamage();
@@ -140,15 +144,23 @@ namespace Scripts.Floor3.AI
         // ── HÀM NHẬN ĐÒN TỪ HỆ THỐNG PLAYER CỦA ANH (MỚI THÊM) ─────────────
         public void TakeDamage()
         {
-            // PlayerMovement của anh gọi hàm này (không có tham số)
-            // Em mặc định mỗi cú chém gây 1 sát thương
             TakeDamage(1f);
         }
 
-        // ── Public API (Hàm gốc của bạn anh, CẦN GIỮ NGUYÊN) ──────────────
         public void TakeDamage(float amount)
         {
             if (_state == VirusState.Dead) return;
+
+            // Flash + knockback (không đụng HP)
+            if (_hitReaction != null)
+            {
+                Vector2 knockbackDir = Vector2.up;
+                if (_robotTarget != null)
+                    knockbackDir = ((Vector2)transform.position - (Vector2)_robotTarget.transform.position).normalized;
+                _hitReaction.ReactOnly(knockbackDir);
+            }
+
+            // HP vẫn do VirusAI tự quản lý như cũ
             _currentHp -= amount;
             if (_currentHp <= 0f) Die();
         }

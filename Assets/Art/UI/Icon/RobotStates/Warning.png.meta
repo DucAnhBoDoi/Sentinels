@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 36ad3b65eb89c734599c3f27f0d0a2a6
+guid: c9fcb5eee7c2bf9418e1e70f908006ba
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 8882574683631662715
-    second: Panicked 1_0
+      213: -2965393001259691005
+    second: Warning_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -100,13 +100,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: Panicked 1_0
+      name: Warning_0
       rect:
         serializedVersion: 2
-        x: 25
-        y: 28
-        width: 168
-        height: 168
+        x: 46
+        y: 45
+        width: 257
+        height: 258
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -115,8 +115,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: b763eb4ec9e354b70800000000000000
-      internalID: 8882574683631662715
+      spriteID: 3049c74d6cec8d6d0800000000000000
+      internalID: -2965393001259691005
       vertices: []
       indices: 
       edges: []
@@ -135,7 +135,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      Panicked 1_0: 8882574683631662715
+      Warning_0: -2965393001259691005
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

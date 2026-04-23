@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 [RequireComponent(typeof(SpriteRenderer))]
 [RequireComponent(typeof(Rigidbody2D))]
-public class UtilityRobotAI_Floor3 : MonoBehaviour, IDamagable 
+public class UtilityRobotAI_Floor3 : MonoBehaviour, IDamagable
 {
     [Header("Targets")]
     public Transform playerA;
@@ -13,7 +13,7 @@ public class UtilityRobotAI_Floor3 : MonoBehaviour, IDamagable
     public float moveSpeed = 3f;
     public float patrolSpeed = 1.5f;
     public float detectionRadius = 7f;
-    public float stoppingDistance = 1.2f; 
+    public float stoppingDistance = 1.2f;
 
     [Header("Patrol")]
     public float patrolRadius = 4f;
@@ -29,14 +29,14 @@ public class UtilityRobotAI_Floor3 : MonoBehaviour, IDamagable
 
     // ── HỆ THỐNG TẤN CÔNG ──
     [Header("Attack Settings")]
-    public float attackDamage = 1f; 
+    public float attackDamage = 1f;
     public float attackCooldown = 1.5f;
 
     public static List<UtilityRobotAI_Floor3> allRobots = new List<UtilityRobotAI_Floor3>();
 
     private SpriteRenderer sr;
     private Rigidbody2D rb;
-
+    private HitReactionController _hitReaction;
     private Vector2 startPos;
     private Vector2 patrolTarget;
 
@@ -56,6 +56,8 @@ public class UtilityRobotAI_Floor3 : MonoBehaviour, IDamagable
 
         if (playerA == null) playerA = GameObject.Find("Player_A_Navigator")?.transform;
         if (playerB == null) playerB = GameObject.Find("Player_B_Mechanic")?.transform;
+
+        _hitReaction = GetComponent<HitReactionController>();
     }
 
     void OnDestroy()
@@ -63,10 +65,13 @@ public class UtilityRobotAI_Floor3 : MonoBehaviour, IDamagable
         allRobots.Remove(this);
     }
 
-    void FixedUpdate() 
+    void FixedUpdate()
     {
         // Giữ quái đứng im khi chưa bấm Start Mission (Bảo vệ lúc đang đọc Quest)
         if (!Scripts.Floor3.UI.TopicSelectionUI.hasStartedMission) return;
+
+        // THÊM DÒNG NÀY: nhường quyền điều khiển cho knockback
+        if (_hitReaction != null && _hitReaction.IsBeingKnockedBack) return;
 
         if (currentCooldown > 0)
             currentCooldown -= Time.fixedDeltaTime;
@@ -80,14 +85,14 @@ public class UtilityRobotAI_Floor3 : MonoBehaviour, IDamagable
         }
         else
         {
-            ExecuteMovement(null); 
+            ExecuteMovement(null);
         }
     }
 
     // ── LOGIC CẮN BẰNG RADAR (CHUẨN 100%, KHÔNG TRƯỢT) ──
     void TickAttack()
     {
-        if (currentCooldown > 0) return; 
+        if (currentCooldown > 0) return;
 
         // Tạo vòng tròn quét. Bán kính to hơn stoppingDistance 0.3m để chắc chắn bao trùm được Player
         float attackRadius = stoppingDistance + 0.3f;
@@ -99,7 +104,7 @@ public class UtilityRobotAI_Floor3 : MonoBehaviour, IDamagable
             if (hp != null && !hp.IsDead)
             {
                 hp.TakeDamage(attackDamage);
-                currentCooldown = attackCooldown; 
+                currentCooldown = attackCooldown;
                 return; // Cắn được 1 người là dừng chờ hồi chiêu, không cắn lan
             }
         }
@@ -184,7 +189,7 @@ public class UtilityRobotAI_Floor3 : MonoBehaviour, IDamagable
         }
         else if (Mathf.Abs(bestDir.x) > 0.1f)
         {
-            sr.flipX = bestDir.x < 0; 
+            sr.flipX = bestDir.x < 0;
         }
     }
 
@@ -194,9 +199,18 @@ public class UtilityRobotAI_Floor3 : MonoBehaviour, IDamagable
         stuckTimer = 0f;
     }
 
+    // TakeDamage() — giữ nguyên như hướng dẫn lần trước, chỉ chắc chắn manageHp = true trên Inspector
     public void TakeDamage()
     {
-        Destroy(gameObject);
+        if (_hitReaction == null) { Destroy(gameObject); return; }
+
+        Transform attacker = FindNearestPlayer();
+        Vector2 knockbackDir = Vector2.up;
+        if (attacker != null)
+            knockbackDir = ((Vector2)transform.position - (Vector2)attacker.position).normalized;
+
+        bool died = _hitReaction.ReactToHit(knockbackDir, 1f);
+        if (died) Destroy(gameObject);
     }
 
     private void OnDrawGizmosSelected()
