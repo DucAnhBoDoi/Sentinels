@@ -6,7 +6,7 @@ AnimationClip:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: Virus1_Run
+  m_Name: Virus1_running
   serializedVersion: 7
   m_Legacy: 0
   m_Compressed: 0
@@ -22,11 +22,11 @@ AnimationClip:
     curve:
     - time: 0
       value: {fileID: 2807994088814316644, guid: 120931a5898e4f5418600fbea4d42105, type: 3}
-    - time: 0.15
+    - time: 0.1
       value: {fileID: -1663252901769221706, guid: 99f76d324dffa394ebb96b288e41136b, type: 3}
-    - time: 0.31666666
+    - time: 0.23333333
       value: {fileID: 6372115117525653377, guid: eb3005a8eb23c934aae16ace3f7f95e6, type: 3}
-    - time: 0.46666667
+    - time: 0.33333334
       value: {fileID: -8637876272605317312, guid: 06b4bb6b951534f41b500e9dbf2c16a4, type: 3}
     attribute: m_Sprite
     path: 
@@ -59,7 +59,7 @@ AnimationClip:
     m_AdditiveReferencePoseClip: {fileID: 0}
     m_AdditiveReferencePoseTime: 0
     m_StartTime: 0
-    m_StopTime: 0.48333335
+    m_StopTime: 0.35000002
     m_OrientationOffsetY: 0
     m_Level: 0
     m_CycleOffset: 0
