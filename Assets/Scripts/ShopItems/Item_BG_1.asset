@@ -1,0 +1,19 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6fcb481018f42774abeebc44373667b0, type: 3}
+  m_Name: Item_BG_1
+  m_EditorClassIdentifier: Game::ShopItemSO
+  itemId: BG_1
+  category: Background
+  price: 500
+  icon: {fileID: 5260750666308694636, guid: bf90d166f9d20594da6d4fd3bea3d452, type: 3}
+  backgroundSprite: {fileID: 5260750666308694636, guid: bf90d166f9d20594da6d4fd3bea3d452, type: 3}
