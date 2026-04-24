@@ -112,6 +112,9 @@ public class MenuPopupAuthController : MonoBehaviour
                 _inpLoginUsername.SetTextWithoutNotify("");
                 _inpLoginPassword.SetTextWithoutNotify("");
                 _utils.HidePopup();
+
+                MenuPopupShopController shop = FindFirstObjectByType<MenuPopupShopController>();
+                if (shop != null) shop.ReloadShopData();
             }
         }
     }
@@ -158,6 +161,9 @@ public class MenuPopupAuthController : MonoBehaviour
                 _inpRegisterPassword.SetTextWithoutNotify("");
                 _inpRegisterConfirmPassword.SetTextWithoutNotify("");
                 _utils.HidePopup();
+
+                MenuPopupShopController shop = FindFirstObjectByType<MenuPopupShopController>();
+                if (shop != null) shop.ReloadShopData();
             }
         }
     }

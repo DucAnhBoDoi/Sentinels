@@ -20,9 +20,19 @@ public class MenuPopupLogoutController : MonoBehaviour
 
     private void OnBtnYesClick()
     {
+        // 1. Xóa thông tin tài khoản lưu trong máy
         PlayerPrefs.DeleteKey(nameof(PlayerPrefsKeys.S_UserId));
         PlayerPrefs.DeleteKey(nameof(PlayerPrefsKeys.S_UserName));
         PlayerPrefs.DeleteKey(nameof(PlayerPrefsKeys.I_Coin));
+        PlayerPrefs.Save();
+
+        MenuPopupShopController shop = Object.FindFirstObjectByType<MenuPopupShopController>();
+        if (shop != null) 
+        {
+            shop.ResetShopData();
+        }
+
+        // 3. Tắt bảng thông báo
         _utils.HidePopup();
     }
 

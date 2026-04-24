@@ -98905,7 +98905,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 49eff85f886a02c4b86514354f698122, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Game::Floor2Manager
-  timeRemaining: 10
+  timeRemaining: 420
   timerIsRunning: 0
   timeText: {fileID: 1601721300}
   coreHealthBar: {fileID: 728145812}
@@ -152670,7 +152670,7 @@ Camera:
   far clip plane: 1000
   field of view: 60
   orthographic: 1
-  orthographic size: 10
+  orthographic size: 14.83601
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
@@ -152695,7 +152695,7 @@ Transform:
   m_GameObject: {fileID: 1816652351}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -1.7, y: 1.47, z: -10}
+  m_LocalPosition: {x: 0, y: 0, z: -10}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -153009,8 +153009,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Game::EnemySpawner
   enemyPrefab: {fileID: 2579152013032259313, guid: b1cbfcdc4a367ed4987d0273728cb038, type: 3}
   canSpawn: 1
-  initialSpawnRate: 2.5
-  finalSpawnRate: 0.25
+  rateEasy: 2.5
+  rateHard: 0.5
+  rateInsane: 0.15
   spawnPoints:
   - {fileID: 632602178}
   - {fileID: 213506616}
