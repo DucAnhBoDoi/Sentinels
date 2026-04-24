@@ -10,6 +10,7 @@ public class BossPhase1 : MonoBehaviour, IDamagable
     private static readonly int Death = Animator.StringToHash("T_Death");
     private static readonly int Attack = Animator.StringToHash("T_Attack");
     private static readonly int FMoveThreshold = Animator.StringToHash("F_MoveThreshold");
+    private static readonly int Hurt = Animator.StringToHash("T_Hurt");
 
     public UnityAction OnDeath;
 
@@ -26,11 +27,14 @@ public class BossPhase1 : MonoBehaviour, IDamagable
     [SerializeField] private DamageHitBox _atkHitBox;
     [SerializeField] private CheckHitable _checkHitable;
     [SerializeField] private float _atkDuration;
+    [SerializeField] private float _hurtDuration;
     [SerializeField] private BehaviorTree _tree;
 
     private GameObject[] _players;
     private GameObject _targetedPlayer;
     private bool _isDead;
+    private bool _isHurt;
+    private float _hurtTimer;
     private float _hitBoxXPos;
 
     private void Awake()
@@ -98,6 +102,19 @@ public class BossPhase1 : MonoBehaviour, IDamagable
             }
         }
 
+        if (_isHurt)
+        {
+            _hurtTimer -= Time.deltaTime;
+            if (_hurtTimer <= 0)
+            {
+                _isHurt = false;
+            }
+            else
+            {
+                return;
+            }
+        }
+
         _tree.Tick();
     }
 
@@ -106,6 +123,13 @@ public class BossPhase1 : MonoBehaviour, IDamagable
         if (_hm.Health > 0)
         {
             _hm.ReduceHealth(1);
+            if (!_isHurt)
+            {
+                _anim.SetTrigger(Hurt);
+                _isHurt = true;
+                _hurtTimer = _hurtDuration;
+            }
+
             return;
         }
 

@@ -114,7 +114,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &4250381880619091106
 Transform:
   m_ObjectHideFlags: 0
@@ -277,6 +277,7 @@ MonoBehaviour:
   _atkHitBox: {fileID: 8804832218255929397}
   _checkHitable: {fileID: 8240627412147085836}
   _atkDuration: 1.1
+  _hurtDuration: 0.6
 --- !u!70 &7865713663063778817
 CapsuleCollider2D:
   m_ObjectHideFlags: 0

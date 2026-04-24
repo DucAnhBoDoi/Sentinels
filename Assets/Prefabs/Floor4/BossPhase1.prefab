@@ -5101,6 +5101,7 @@ MonoBehaviour:
   _atkHitBox: {fileID: 6663599058258241685}
   _checkHitable: {fileID: 5549581217420284120}
   _atkDuration: 1.6
+  _hurtDuration: 0.6
 --- !u!114 &9025564103345820
 MonoBehaviour:
   m_ObjectHideFlags: 0
