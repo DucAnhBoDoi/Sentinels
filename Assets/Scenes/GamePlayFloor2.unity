@@ -102075,14 +102075,13 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6668333041797721317, guid: a5cc1c8b543582042a872634b80a8451, type: 3}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7000227155509413365, guid: a5cc1c8b543582042a872634b80a8451, type: 3}
       propertyPath: m_text
       value: 'The biological system is in danger. Protect the <b>Core of Life</b>
         to collect <b>Fragments of Compassion</b>.
 
-        
 
         <b><color=#FFD700>Combat:</color></b>
         Move and eliminate monsters attacking the Core.
@@ -102091,22 +102090,25 @@ PrefabInstance:
         Take turns standing in the charging area to keep the Core alive (sacrifices
         HP).
 
-        
 
-        <i>Cooperate closely! Fragments will appear when
-        the countdown reaches zero.</i>'
+        <i>Cooperate closely! Fragments will appear when the countdown
+        reaches zero.</i>'
       objectReference: {fileID: 0}
     - target: {fileID: 7000227155509413365, guid: a5cc1c8b543582042a872634b80a8451, type: 3}
       propertyPath: m_sharedMaterial
       value: 
       objectReference: {fileID: -2826647968993330491, guid: cdd6ff1867aa98e48b631efce41a66a2, type: 2}
-    - target: {fileID: 7711122386710702378, guid: a5cc1c8b543582042a872634b80a8451, type: 3}
-      propertyPath: m_AnchorMax.y
+    - target: {fileID: 7000227155509413365, guid: a5cc1c8b543582042a872634b80a8451, type: 3}
+      propertyPath: m_hasFontAssetChanged
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7711122386710702378, guid: a5cc1c8b543582042a872634b80a8451, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7711122386710702378, guid: a5cc1c8b543582042a872634b80a8451, type: 3}
       propertyPath: m_AnchorMin.y
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 7711122386710702378, guid: a5cc1c8b543582042a872634b80a8451, type: 3}
       propertyPath: m_AnchoredPosition.x
@@ -102114,7 +102116,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7711122386710702378, guid: a5cc1c8b543582042a872634b80a8451, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: 0
+      value: -303.3136
       objectReference: {fileID: 0}
     - target: {fileID: 7804720771912441833, guid: a5cc1c8b543582042a872634b80a8451, type: 3}
       propertyPath: m_sharedMaterial
@@ -102122,11 +102124,11 @@ PrefabInstance:
       objectReference: {fileID: -2826647968993330491, guid: cdd6ff1867aa98e48b631efce41a66a2, type: 2}
     - target: {fileID: 8149811093272142265, guid: a5cc1c8b543582042a872634b80a8451, type: 3}
       propertyPath: m_AnchorMax.y
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 8149811093272142265, guid: a5cc1c8b543582042a872634b80a8451, type: 3}
       propertyPath: m_AnchorMin.y
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 8149811093272142265, guid: a5cc1c8b543582042a872634b80a8451, type: 3}
       propertyPath: m_AnchoredPosition.x
@@ -102142,11 +102144,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 9213734937109196856, guid: a5cc1c8b543582042a872634b80a8451, type: 3}
       propertyPath: m_AnchorMax.y
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 9213734937109196856, guid: a5cc1c8b543582042a872634b80a8451, type: 3}
       propertyPath: m_AnchorMin.y
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 9213734937109196856, guid: a5cc1c8b543582042a872634b80a8451, type: 3}
       propertyPath: m_AnchoredPosition.x
@@ -152701,7 +152703,7 @@ Camera:
   far clip plane: 1000
   field of view: 60
   orthographic: 1
-  orthographic size: 15
+  orthographic size: 10
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
@@ -152726,7 +152728,7 @@ Transform:
   m_GameObject: {fileID: 1816652351}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -58.940002, y: -10.649998, z: -10}
+  m_LocalPosition: {x: -1.7, y: 1.47, z: -10}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []

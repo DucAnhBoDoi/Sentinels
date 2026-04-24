@@ -2176,7 +2176,7 @@ PrefabInstance:
     - target: {fileID: 1552259539206519640, guid: a5cc1c8b543582042a872634b80a8451, type: 3}
       propertyPath: m_sharedMaterial
       value: 
-      objectReference: {fileID: 0}
+      objectReference: {fileID: -2826647968993330491, guid: cdd6ff1867aa98e48b631efce41a66a2, type: 2}
     - target: {fileID: 2503401170204891439, guid: a5cc1c8b543582042a872634b80a8451, type: 3}
       propertyPath: m_Pivot.x
       value: 0.5
@@ -2265,17 +2265,71 @@ PrefabInstance:
       propertyPath: m_sharedMaterial
       value: 
       objectReference: {fileID: 0}
+    - target: {fileID: 6668333041797721317, guid: a5cc1c8b543582042a872634b80a8451, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 6911238020840294411, guid: a5cc1c8b543582042a872634b80a8451, type: 3}
       propertyPath: m_sharedMaterial
       value: 
       objectReference: {fileID: 0}
     - target: {fileID: 7000227155509413365, guid: a5cc1c8b543582042a872634b80a8451, type: 3}
+      propertyPath: m_text
+      value: 'The core system is infected<b>.</b> Escort the Mechanical Soul to the
+        terminal safely<b>!</b>
+
+
+        <b><color=#FFD700>Player 1</color> & <color=#FFA500>Player
+        2</color>:</b> Slay the <b>"Viruses"</b> to protect the <b>"Robot"</b> from
+        being destroyed<b>!</b>
+
+
+        <i><color=#FF5555>Warning:</color> The
+        Robot will STOP moving if any player wanders too far<b>!</b> Stay close<b>!</b></i>'
+      objectReference: {fileID: 0}
+    - target: {fileID: 7000227155509413365, guid: a5cc1c8b543582042a872634b80a8451, type: 3}
       propertyPath: m_sharedMaterial
       value: 
+      objectReference: {fileID: -2826647968993330491, guid: cdd6ff1867aa98e48b631efce41a66a2, type: 2}
+    - target: {fileID: 7000227155509413365, guid: a5cc1c8b543582042a872634b80a8451, type: 3}
+      propertyPath: m_hasFontAssetChanged
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7711122386710702378, guid: a5cc1c8b543582042a872634b80a8451, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7711122386710702378, guid: a5cc1c8b543582042a872634b80a8451, type: 3}
+      propertyPath: m_AnchorMin.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7711122386710702378, guid: a5cc1c8b543582042a872634b80a8451, type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7711122386710702378, guid: a5cc1c8b543582042a872634b80a8451, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7804720771912441833, guid: a5cc1c8b543582042a872634b80a8451, type: 3}
       propertyPath: m_sharedMaterial
       value: 
+      objectReference: {fileID: -2826647968993330491, guid: cdd6ff1867aa98e48b631efce41a66a2, type: 2}
+    - target: {fileID: 8149811093272142265, guid: a5cc1c8b543582042a872634b80a8451, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8149811093272142265, guid: a5cc1c8b543582042a872634b80a8451, type: 3}
+      propertyPath: m_AnchorMin.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8149811093272142265, guid: a5cc1c8b543582042a872634b80a8451, type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8149811093272142265, guid: a5cc1c8b543582042a872634b80a8451, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8213624374109187592, guid: a5cc1c8b543582042a872634b80a8451, type: 3}
       propertyPath: m_Name
@@ -2284,6 +2338,22 @@ PrefabInstance:
     - target: {fileID: 8670277927998926518, guid: a5cc1c8b543582042a872634b80a8451, type: 3}
       propertyPath: m_sharedMaterial
       value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 9213734937109196856, guid: a5cc1c8b543582042a872634b80a8451, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 9213734937109196856, guid: a5cc1c8b543582042a872634b80a8451, type: 3}
+      propertyPath: m_AnchorMin.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 9213734937109196856, guid: a5cc1c8b543582042a872634b80a8451, type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 9213734937109196856, guid: a5cc1c8b543582042a872634b80a8451, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
