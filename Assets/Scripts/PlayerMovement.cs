@@ -9,7 +9,7 @@ public class PlayerMovement : MonoBehaviour
 {
     [Header("Cấu hình di chuyển")]
     public float moveSpeed = 5f;
-    public bool useQuestSystem = true; // Tầng 3: HÃY BỎ TICK Ô NÀY TRONG INSPECTOR
+    public bool useQuestSystem = true; 
 
     [Header("Thành phần hỗ trợ")]
     public Rigidbody2D rb;
