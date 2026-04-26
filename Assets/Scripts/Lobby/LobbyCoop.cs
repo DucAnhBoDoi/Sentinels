@@ -140,8 +140,9 @@ public class LobbyCoop : MonoBehaviour
         {
             return;
         }
-        
+
         PlayerObject playerObject = Instantiate(_playerObjectPrefab);
+
         playerObject.NetworkObject.SpawnAsPlayerObject(clientId);
 
         LobbyPlayer player = Instantiate(_lobbyPlayerPrefab);

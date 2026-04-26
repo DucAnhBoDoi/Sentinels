@@ -8,6 +8,8 @@ public class LobbyNetworkDiscovery : NetworkDiscovery<DiscoveryBroadcastData, Di
 {
     public event UnityAction<IPEndPoint, DiscoveryResponseData> OnServerFound;
 
+    private string _playerName;
+
     private string GetServerName()
     {
         if (NetworkManager.Singleton == null)
@@ -15,16 +17,8 @@ public class LobbyNetworkDiscovery : NetworkDiscovery<DiscoveryBroadcastData, Di
             return "[ERROR]";
         }
 
-        string playerName = NetworkManager
-            .Singleton
-            .LocalClient
-            .PlayerObject
-            .GetComponent<PlayerObject>()
-            .NetUsername
-            .Value
-            .ToString();
         return
-            $"[LAN] - {playerName} - [{NetworkManager.Singleton.ConnectedClients.Count}/{GameNetworkManager.MAX_PLAYER_COUNT}]";
+            $"[LAN] - {_playerName} - [{NetworkManager.Singleton.ConnectedClients.Count}/{GameNetworkManager.MAX_PLAYER_COUNT}]";
     }
 
     private void Update()
@@ -34,6 +28,14 @@ public class LobbyNetworkDiscovery : NetworkDiscovery<DiscoveryBroadcastData, Di
             if (NetworkManager.Singleton.IsHost && !IsRunning)
             {
                 StartServer();
+                _playerName = NetworkManager
+                    .Singleton
+                    .LocalClient
+                    .PlayerObject
+                    .GetComponent<PlayerObject>()
+                    .NetUsername
+                    .Value
+                    .ToString();
             }
             else if (!NetworkManager.Singleton.IsHost && IsRunning && IsServer)
             {
