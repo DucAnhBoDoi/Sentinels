@@ -152670,7 +152670,7 @@ Camera:
   far clip plane: 1000
   field of view: 60
   orthographic: 1
-  orthographic size: 14.83601
+  orthographic size: 10
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
@@ -152695,7 +152695,7 @@ Transform:
   m_GameObject: {fileID: 1816652351}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: -10}
+  m_LocalPosition: {x: -1.7, y: 1.47, z: -10}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -153012,6 +153012,7 @@ MonoBehaviour:
   rateEasy: 2.5
   rateHard: 0.5
   rateInsane: 0.15
+  maxEnemies: 20
   spawnPoints:
   - {fileID: 632602178}
   - {fileID: 213506616}
@@ -153021,6 +153022,9 @@ MonoBehaviour:
   - {fileID: 514768785}
   - {fileID: 1512967250}
   - {fileID: 166782627}
+  spawnRadius: 1.5
+  minSpawnDistance: 1.2
+  minSpawnInterval: 0.8
 --- !u!4 &2034537304
 Transform:
   m_ObjectHideFlags: 0

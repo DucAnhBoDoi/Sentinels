@@ -8,17 +8,22 @@ public class BoidEnemy : MonoBehaviour, IDamagable
     public float speed = 3.0f;
     public float neighborRadius = 3.5f;
     public float attackDamage = 5f;
-    [Range(0, 5)] public float separationWeight = 2.5f;
-    [Range(0, 5)] public float cohesionWeight = 1.5f;
-    [Range(0, 5)] public float alignmentWeight = 1.2f;
-    public float targetWeight = 1.5f;
+
+    [Range(0, 10)] public float separationWeight = 8.0f; // 🔥 Tăng mạnh để quái dạt ra
+    [Range(0, 5)] public float cohesionWeight = 0.5f;    // 🔥 Giảm cực thấp để tránh tụ đàn
+    [Range(0, 5)] public float alignmentWeight = 1.0f;
+    public float targetWeight = 2.0f;
+
+    [Header("Anti-Clump")]
+    public float separationDistance = 1.3f;     
+    public float extraSeparationForce = 6.0f;   
 
     [Header("Cấu hình sinh tồn")]
     public int health = 3;
     private bool isDead = false;
 
     [Header("Cấu hình tấn công")]
-    public float attackDistance = 1.0f; // CHÚ Ý: ĐÃ GIẢM MẶC ĐỊNH XUỐNG 1.0
+    public float attackDistance = 1.2f; // 🔥 Tăng nhẹ để quái không phải đứng quá sát
     public Vector2 attackOffset;
     public Vector2 damageRangeScale = new Vector2(1.5f, 1.5f); 
     public float attackCooldown = 1.5f;
@@ -40,6 +45,8 @@ public class BoidEnemy : MonoBehaviour, IDamagable
 
         GameObject core = GameObject.FindGameObjectWithTag("TheCore");
         if (core != null) target = core.transform;
+
+        // Random hướng ban đầu cực mạnh để phá đội hình
         currentVelocity = Random.insideUnitCircle.normalized * speed;
     }
 
@@ -69,31 +76,25 @@ public class BoidEnemy : MonoBehaviour, IDamagable
     {
         if (isDead || target == null) return;
 
-        // === BẮT ĐẦU SỬA LỖI: TÍNH KHOẢNG CÁCH TỚI VIỀN COLLIDER ===
-        float distanceToEdge = 0f;
-        Vector2 targetCenter = target.position; 
+        // Tính khoảng cách đến lõi
+        float distToTarget = Vector2.Distance(transform.position, target.position);
         Collider2D targetCol = target.GetComponent<Collider2D>();
+        Vector2 targetCenter = target.position;
 
         if (targetCol != null)
         {
-            targetCenter = targetCol.bounds.center; // Lấy tâm vật lý giữa Collider
-            
-            // Tìm điểm gần con quái nhất trên viền của cái Lõi
+            targetCenter = targetCol.bounds.center;
             Vector2 closestPoint = targetCol.ClosestPoint(transform.position);
-            distanceToEdge = Vector2.Distance(transform.position, closestPoint);
-        }
-        else
-        {
-            distanceToEdge = Vector2.Distance(transform.position, target.position);
+            distToTarget = Vector2.Distance(transform.position, closestPoint);
         }
 
-        // Đánh giá dựa trên khoảng cách tới viền
-        if (distanceToEdge <= attackDistance)
+        if (distToTarget <= attackDistance)
         {
-            currentVelocity = Vector2.MoveTowards(currentVelocity, Vector2.zero, Time.deltaTime * 5f);
+            // 🔥 KHI ĐANG ĐÁNH: Vẫn phải giữ khoảng cách với con bên cạnh
+            Vector2 escapeDir = CalculatePureSeparation();
+            currentVelocity = Vector2.Lerp(currentVelocity, escapeDir * speed * 0.5f, Time.deltaTime * 5f);
+
             if (anim) anim.SetBool("isRunning", false);
-            
-            // Nhìn về tâm vật lý của Lõi thay vì gốc tọa độ
             sr.flipX = (targetCenter.x > transform.position.x);
 
             if (Time.time >= lastAttackTime + attackCooldown)
@@ -108,50 +109,84 @@ public class BoidEnemy : MonoBehaviour, IDamagable
         }
     }
 
-    // Truyền thêm targetCenter để bầy quái bu về đúng tâm
+    // Hàm chỉ tính toán lực tách để dùng khi đang đứng đánh
+    Vector2 CalculatePureSeparation()
+    {
+        Vector2 sep = Vector2.zero;
+        foreach (BoidEnemy boid in allBoids)
+        {
+            if (boid == this || boid == null) continue;
+            float dist = Vector2.Distance(transform.position, boid.transform.position);
+            if (dist < separationDistance)
+            {
+                sep += ((Vector2)transform.position - (Vector2)boid.transform.position).normalized / dist;
+            }
+        }
+        return sep.normalized;
+    }
+
     void HandleFlocking(Vector2 targetCenter)
     {
         if (anim) anim.SetBool("isRunning", true);
-        Vector2 separation = Vector2.zero, cohesion = Vector2.zero, alignment = Vector2.zero;
+
+        Vector2 separation = Vector2.zero;
+        Vector2 cohesion = Vector2.zero;
+        Vector2 alignment = Vector2.zero;
         int neighborCount = 0;
 
         foreach (BoidEnemy boid in allBoids)
         {
             if (boid == this || boid == null) continue;
             float dist = Vector2.Distance(transform.position, boid.transform.position);
+
             if (dist < neighborRadius)
             {
-                separation += (Vector2)(transform.position - boid.transform.position) / dist;
+                Vector2 diff = ((Vector2)transform.position - (Vector2)boid.transform.position).normalized;
+                
+                // 🔥 Lực tách tỷ lệ nghịch với khoảng cách (càng gần đẩy càng mạnh)
+                float force = (dist < separationDistance) ? extraSeparationForce : 1.0f;
+                separation += diff * (force / Mathf.Max(dist, 0.1f));
+
                 cohesion += (Vector2)boid.transform.position;
                 alignment += boid.currentVelocity;
                 neighborCount++;
             }
         }
 
-        // Hướng bay về tâm của Lõi
         Vector2 targetDir = (targetCenter - (Vector2)transform.position).normalized;
-        sr.flipX = (targetDir.x > 0);
-
-        Vector2 finalFlockingDir = Vector2.zero;
+        
+        Vector2 flockingDir = Vector2.zero;
         if (neighborCount > 0)
         {
-            cohesion = (cohesion / neighborCount - (Vector2)transform.position).normalized;
+            cohesion = ((cohesion / neighborCount) - (Vector2)transform.position).normalized;
             alignment = (alignment / neighborCount).normalized;
-            finalFlockingDir = (separation.normalized * separationWeight) + (cohesion * cohesionWeight) + (alignment * alignmentWeight);
+            flockingDir = (separation * separationWeight) + (cohesion * cohesionWeight) + (alignment * alignmentWeight);
         }
 
-        Vector2 combinedDir = (finalFlockingDir + targetDir * targetWeight).normalized;
-        currentVelocity = Vector2.Lerp(currentVelocity, combinedDir * speed, Time.deltaTime * 3f);
+        Vector2 combinedDir = flockingDir + targetDir * targetWeight;
+        combinedDir += Random.insideUnitCircle * 0.2f; // Tăng độ nhiễu
+
+        currentVelocity = Vector2.Lerp(currentVelocity, combinedDir.normalized * speed, Time.deltaTime * 4f);
+        if (currentVelocity.magnitude > 0.1f) sr.flipX = currentVelocity.x > 0;
     }
 
-    void FixedUpdate() { if (!isDead) rb.linearVelocity = currentVelocity; }
+    void FixedUpdate()
+    {
+        if (!isDead) rb.linearVelocity = currentVelocity;
+    }
 
+    // 🔥 SỬA LỖI ĐÁNH KHÔNG MẤT MÁU TẠI ĐÂY
     public void ExecuteBoidHit()
     {
-        if (target == null) return;
-        
-        float dir = sr.flipX ? 1f : -1f;
-        Vector2 attackCenter = (Vector2)transform.position + new Vector2(Mathf.Abs(attackOffset.x) * dir, attackOffset.y);
+        if (target == null || isDead) return;
+
+        // Xác định hướng: Nếu đang nhìn phải (flipX true) thì đánh sang phải (+), ngược lại sang trái (-)
+        float lookDir = sr.flipX ? 1f : -1f;
+
+        // Tính toán vị trí tâm đòn đánh (Attack Hitbox)
+        // Lưu ý: Không dùng Mathf.Abs ở đây để đảm bảo offset đi đúng hướng nhìn
+        Vector2 attackCenter = (Vector2)transform.position + new Vector2(attackOffset.x * lookDir, attackOffset.y);
+
         Collider2D[] hitObjects = Physics2D.OverlapBoxAll(attackCenter, damageRangeScale, 0f);
 
         foreach (Collider2D col in hitObjects)
@@ -162,27 +197,20 @@ public class BoidEnemy : MonoBehaviour, IDamagable
                 if (coreScript != null)
                 {
                     coreScript.TakeDirectDamage(attackDamage);
-                    Debug.Log("<color=red>Lõi bị tấn công!</color>");
                 }
             }
         }
     }
 
-    void OnDrawGizmos()
+    // Vẽ vùng đánh để bạn dễ căn chỉnh trong Scene
+    void OnDrawGizmosSelected()
     {
-        if (sr == null) sr = GetComponent<SpriteRenderer>();
-        if (sr == null) return;
-
-        float dir = sr.flipX ? 1f : -1f;
-        Vector2 attackCenter = (Vector2)transform.position + new Vector2(Mathf.Abs(attackOffset.x) * dir, attackOffset.y);
-
+        float lookDir = (sr != null && sr.flipX) ? 1f : -1f;
+        Vector2 attackCenter = (Vector2)transform.position + new Vector2(attackOffset.x * lookDir, attackOffset.y);
         Gizmos.color = Color.red;
-        Gizmos.DrawWireCube(attackCenter, (Vector3)damageRangeScale);
-
-        Gizmos.color = Color.blue;
-        Gizmos.DrawWireSphere(transform.position, attackDistance);
+        Gizmos.DrawWireCube(attackCenter, damageRangeScale);
     }
-    
-    void OnEnable() { allBoids.Add(this); }
+
+    void OnEnable() { if(!allBoids.Contains(this)) allBoids.Add(this); }
     void OnDisable() { allBoids.Remove(this); }
 }
