@@ -1,10 +1,8 @@
-// ══════════════════════════════════════════════════════
-// FILE: Floor1_Control.cs (Đã fix lỗi chớp đèn bằng LateUpdate)
-// ══════════════════════════════════════════════════════
 using UnityEngine;
 using UnityEngine.InputSystem;
+using Unity.Netcode;
 
-public class Floor1_Control : MonoBehaviour
+public class Floor1_Control : NetworkBehaviour
 {
     public enum PlayerType { PlayerA, PlayerB }
     public PlayerType playerType;
@@ -12,21 +10,47 @@ public class Floor1_Control : MonoBehaviour
     [Header("Cài đặt Player A (Đèn pin)")]
     public Transform flashlightTransform;
 
+    public NetworkVariable<bool> isFlashlightOn = new NetworkVariable<bool>(
+        false, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
+
+    public NetworkVariable<float> flashlightAngle = new NetworkVariable<float>(
+        0f, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
+
     [Header("Cài đặt Player B (Sửa điện)")]
     public float interactRange = 1.5f;
     public Vector2 actionOffset;
 
-    void Start()
+    public override void OnNetworkSpawn()
     {
-        // Tự động tắt đèn lúc mới vào game (Chỉ áp dụng cho Player A)
-        if (playerType == PlayerType.PlayerA && flashlightTransform != null)
+        // Lắng nghe sự kiện Bật/Tắt đèn
+        isFlashlightOn.OnValueChanged += OnFlashlightStateChanged;
+
+        // Khởi tạo trạng thái ban đầu của đèn
+        if (flashlightTransform != null && playerType == PlayerType.PlayerA)
         {
-            flashlightTransform.gameObject.SetActive(false);
+            flashlightTransform.gameObject.SetActive(isFlashlightOn.Value);
+        }
+    }
+
+    public override void OnNetworkDespawn()
+    {
+        isFlashlightOn.OnValueChanged -= OnFlashlightStateChanged;
+    }
+
+    // Hàm tự động chạy trên mọi máy khi biến công tắc thay đổi
+    private void OnFlashlightStateChanged(bool previousState, bool newState)
+    {
+        if (flashlightTransform != null && playerType == PlayerType.PlayerA)
+        {
+            flashlightTransform.gameObject.SetActive(newState);
         }
     }
 
     void Update()
     {
+        // KẾT HỢP: Ngăn lỗi NullReferenceException nếu có Player khác mà mình không điều khiển
+        if (!IsOwner) return;
+
         if (!QuestPopupManager.isGameStarted) return;
 
         var keyboard = Keyboard.current;
@@ -37,10 +61,10 @@ public class Floor1_Control : MonoBehaviour
         // ----------------------------------------------------
         if (playerType == PlayerType.PlayerA)
         {
-            if (keyboard.fKey.wasPressedThisFrame && flashlightTransform != null)
+            if (keyboard.fKey.wasPressedThisFrame)
             {
-                bool isLightOn = flashlightTransform.gameObject.activeSelf;
-                flashlightTransform.gameObject.SetActive(!isLightOn);
+                // Thay vì tự tắt bật, giờ mình gạt công tắc mạng
+                isFlashlightOn.Value = !isFlashlightOn.Value;
             }
         }
 
@@ -57,12 +81,11 @@ public class Floor1_Control : MonoBehaviour
         }
     }
 
-    // ----------------------------------------------------
-    // LATE UPDATE: Đảm bảo đèn pin xoay mượt mà, KHÔNG bị chớp
-    // ----------------------------------------------------
     void LateUpdate()
     {
-        if (playerType == PlayerType.PlayerA && flashlightTransform != null && flashlightTransform.gameObject.activeSelf)
+        if (playerType != PlayerType.PlayerA || flashlightTransform == null) return;
+
+        if (IsOwner)
         {
             if (Mouse.current == null || Camera.main == null) return;
 
@@ -73,7 +96,20 @@ public class Floor1_Control : MonoBehaviour
             Vector3 lookDirection = mouseWorldPosition - flashlightTransform.position;
             float angle = Mathf.Atan2(lookDirection.y, lookDirection.x) * Mathf.Rad2Deg;
 
+            // Xoay đèn trực tiếp cho chính mình xem thật mượt (60 FPS)
             flashlightTransform.rotation = Quaternion.Euler(0, 0, angle - 90f);
+
+            // Báo góc xoay lên mạng (30 FPS)
+            flashlightAngle.Value = angle;
+        }
+        // NẾU MÌNH LÀ NGƯỜI NHÌN (Thấy người khác chĩa đèn)
+        else
+        {
+            // SỬA CHỖ NÀY: Dùng Lerp để làm mượt góc xoay
+            Quaternion targetRotation = Quaternion.Euler(0, 0, flashlightAngle.Value - 90f);
+
+            // Xoay trượt từ góc hiện tại tới góc mục tiêu với tốc độ 15f
+            flashlightTransform.rotation = Quaternion.Lerp(flashlightTransform.rotation, targetRotation, Time.deltaTime * 15f);
         }
     }
 

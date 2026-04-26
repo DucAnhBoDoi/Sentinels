@@ -4,16 +4,18 @@
 // ══════════════════════════════════════════════════════
 using UnityEngine;
 using UnityEngine.InputSystem;
+using Unity.Netcode;
 
-public class PlayerMovement : MonoBehaviour
+public class PlayerMovement : NetworkBehaviour
 {
     [Header("Cấu hình di chuyển")]
     public float moveSpeed = 5f;
-    public bool useQuestSystem = true; 
+    public bool useQuestSystem = true;
 
     [Header("Thành phần hỗ trợ")]
     public Rigidbody2D rb;
     public Animator anim;
+    private Unity.Netcode.Components.NetworkAnimator netAnim;
 
     [Header("Cấu hình Chiến đấu")]
     public bool canAttack = true;
@@ -30,6 +32,8 @@ public class PlayerMovement : MonoBehaviour
         if (!rb) rb = GetComponent<Rigidbody2D>();
         if (!anim) anim = GetComponent<Animator>();
 
+        netAnim = GetComponent<Unity.Netcode.Components.NetworkAnimator>();
+
         rb.gravityScale = 0;
         rb.constraints = RigidbodyConstraints2D.FreezeRotation;
         baseScaleX = Mathf.Abs(transform.localScale.x);
@@ -37,6 +41,7 @@ public class PlayerMovement : MonoBehaviour
 
     void Update()
     {
+        if (!IsOwner) return;
         // Kiểm tra xem có đang bị kẹt bởi bảng Quest không (chỉ dùng nếu useQuestSystem = true)
         if (useQuestSystem && !QuestPopupManager.isGameStarted) return;
 
@@ -57,7 +62,17 @@ public class PlayerMovement : MonoBehaviour
         FlipCharacter();
 
         // Cập nhật Animation chạy
-        if (anim) anim.SetBool("isRunning", movement.sqrMagnitude > 0);
+        // Dùng netAnim cho đồng bộ mạng, nếu không có thì dùng anim thường
+        if (movement.sqrMagnitude > 0)
+        {
+            if (netAnim) netAnim.Animator.SetBool("isRunning", true);
+            else if (anim) anim.SetBool("isRunning", true);
+        }
+        else
+        {
+            if (netAnim) netAnim.Animator.SetBool("isRunning", false);
+            else if (anim) anim.SetBool("isRunning", false);
+        }
 
         // 2. LỘN (Phím Space)
         if (keyboard.spaceKey.wasPressedThisFrame && movement != Vector2.zero)
@@ -74,9 +89,18 @@ public class PlayerMovement : MonoBehaviour
 
     void FixedUpdate()
     {
+        if (!IsOwner) return;
+
         if (!isRolling)
         {
-            rb.MovePosition(rb.position + movement.normalized * moveSpeed * Time.fixedDeltaTime);
+            if (movement != Vector2.zero)
+            {
+                rb.MovePosition(rb.position + movement.normalized * moveSpeed * Time.fixedDeltaTime);
+            }
+            else
+            {
+                rb.linearVelocity = Vector2.zero;
+            }
         }
     }
 
@@ -92,9 +116,10 @@ public class PlayerMovement : MonoBehaviour
     void PerformRoll()
     {
         isRolling = true;
-        if (anim) anim.SetTrigger("isRolling");
 
-        // Unity 6 dùng linearVelocity, các bản cũ dùng velocity
+        if (netAnim) netAnim.SetTrigger("isRolling");
+        else if (anim) anim.SetTrigger("isRolling"); // Phòng hờ nếu test offline
+
         rb.linearVelocity = movement.normalized * (moveSpeed * 1.5f);
         Invoke("FinishRoll", 0.5f);
     }
@@ -105,10 +130,11 @@ public class PlayerMovement : MonoBehaviour
         rb.linearVelocity = Vector2.zero;
     }
 
+    // ĐÃ XÓA HÀM TRÙNG LẶP, CHỈ GIỮ LẠI HÀM NÀY
     void PerformAttack()
     {
-        if (anim) anim.SetTrigger("isAttacking");
-
+        if (netAnim) netAnim.SetTrigger("isAttacking");
+        else if (anim) anim.SetTrigger("isAttacking");
     }
 
     public void ExecutePlayerHit()
