@@ -134,7 +134,7 @@ namespace Scripts.Floor3.UI
             {
                 if (_answerTexts[i] != null)
                     _answerTexts[i].text = (i < question.Answers.Length)
-                        ? $"{i + 1}. {question.Answers[i]}"
+                        ? question.Answers[i]
                         : "";
             }
 

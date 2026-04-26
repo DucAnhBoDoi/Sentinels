@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 7253723165123919835}
   - component: {fileID: 1878817869886024548}
   - component: {fileID: 4872269198101413322}
+  - component: {fileID: 5854628952543132716}
   - component: {fileID: 9205807047498248555}
   m_Layer: 0
   m_Name: Wire_Prefab
@@ -139,6 +140,31 @@ BoxCollider2D:
   m_AutoTiling: 0
   m_Size: {x: 0.5, y: 0.5}
   m_EdgeRadius: 0
+--- !u!114 &5854628952543132716
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5045750335103724567}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.Netcode.Runtime::Unity.Netcode.NetworkObject
+  GlobalObjectIdHash: 1500923132
+  InScenePlacedSourceGlobalObjectIdHash: 0
+  DeferredDespawnTick: 0
+  Ownership: 1
+  AlwaysReplicateAsRoot: 0
+  SynchronizeTransform: 1
+  ActiveSceneSynchronization: 0
+  SceneMigrationSynchronization: 1
+  SpawnWithObservers: 1
+  DontDestroyWithOwner: 0
+  AutoObjectParentSync: 1
+  SyncOwnerTransformWhenParented: 1
+  AllowOwnerToParent: 0
 --- !u!114 &9205807047498248555
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -151,7 +177,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c114d9920a92a49449dfd1e2abc06e08, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Game::CircuitNode
-  isFixed: 0
+  ShowTopMostFoldoutHeaderGroup: 1
+  isFixedNet:
+    m_InternalValue: 0
+  isVisibleNet:
+    m_InternalValue: 0
   isWire: 1
   darkSprite: {fileID: -551802036172981106, guid: 9a27cfed8b870e64d8a89b8be16b7ed3, type: 3}
   glowingSprite: {fileID: 5173137230447449765, guid: 7c3f733edbc11124fa8b005dd96f794e, type: 3}

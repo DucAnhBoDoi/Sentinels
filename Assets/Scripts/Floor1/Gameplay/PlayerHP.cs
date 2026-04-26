@@ -1,10 +1,17 @@
 using UnityEngine;
+using Unity.Netcode;
 
-public class PlayerHP : MonoBehaviour
+public class PlayerHP : NetworkBehaviour
 {
     [Header("Chỉ số sinh tồn")]
     public float maxHealth = 100f;
-    public float currentHealth;
+    
+    public NetworkVariable<float> currentHealth = new NetworkVariable<float>(
+        0f, 
+        NetworkVariableReadPermission.Everyone, 
+        NetworkVariableWritePermission.Server 
+    );
+
     public HealthBar healthBar; 
 
     [Header("Cơ chế Tầng 2")]
@@ -16,37 +23,71 @@ public class PlayerHP : MonoBehaviour
     private Animator anim;
     private Rigidbody2D rb;
     private PlayerMovement movementScript;
+    private Unity.Netcode.Components.NetworkAnimator netAnim;
 
     void Start()
     {
         anim = GetComponent<Animator>();
         rb = GetComponent<Rigidbody2D>();
         movementScript = GetComponent<PlayerMovement>();
-
-        currentHealth = maxHealth;
-        if (healthBar) healthBar.UpdateBar(currentHealth, maxHealth);
+        netAnim = GetComponent<Unity.Netcode.Components.NetworkAnimator>();
     }
 
+    public override void OnNetworkSpawn()
+    {
+        if (IsServer)
+        {
+            currentHealth.Value = maxHealth;
+        }
+
+        currentHealth.OnValueChanged += OnHealthChanged;
+
+        if (healthBar) healthBar.UpdateBar(currentHealth.Value, maxHealth);
+    }
+
+    public override void OnNetworkDespawn()
+    {
+        currentHealth.OnValueChanged -= OnHealthChanged;
+    }
+
+    private void OnHealthChanged(float previousValue, float newValue)
+    {
+        // Cập nhật UI thanh máu
+        if (healthBar) healthBar.UpdateBar(newValue, maxHealth);
+
+        // Nổ log nếu bị trừ máu
+        if (newValue < previousValue && newValue > 0)
+        {
+            Debug.Log($"<color=red>{gameObject.name} trúng đòn!</color> HP còn: {newValue}");
+        }
+
+        // Nếu máu <= 0 và chưa chết -> Gọi hàm Die() trên CẢ 2 MÁY
+        if (newValue <= 0 && !isDead)
+        {
+            Die();
+        }
+    }
+
+    // Bất kỳ ai (Client hay Quái) gọi hàm này đều sẽ gửi thư lên Server
     public void TakeDamage(float damageAmount)
     {
         if (isDead) return;
+        TakeDamageServerRpc(damageAmount);
+    }
 
-        currentHealth -= damageAmount;
-        currentHealth = Mathf.Clamp(currentHealth, 0, maxHealth);
+    // 6. GỬI SERVER (ĐÃ CẬP NHẬT THEO CHUẨN UNITY MỚI NHẤT)
+    [Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Everyone)]
+    private void TakeDamageServerRpc(float damageAmount)
+    {
+        if (isDead) return;
 
-        if (healthBar) healthBar.UpdateBar(currentHealth, maxHealth);
-
-        if (damageAmount > 0)
-        {
-            Debug.Log($"<color=red>{gameObject.name} trúng đòn!</color> HP còn: {currentHealth}");
-        }
-
-        if (currentHealth <= 0) Die();
+        float newHealth = currentHealth.Value - damageAmount;
+        currentHealth.Value = Mathf.Clamp(newHealth, 0, maxHealth);
     }
 
     public void Heal(float amount)
     {
-        TakeDamage(-amount);
+        TakeDamage(-amount); 
     }
 
     void Die()
@@ -54,8 +95,9 @@ public class PlayerHP : MonoBehaviour
         if (isDead) return;
         isDead = true;
 
-        // 1. Chạy Animation chết (Ngã xuống)
-        if (anim) anim.SetTrigger("isDead");
+        // 1. Chạy Animation chết qua mạng
+        if (netAnim) netAnim.SetTrigger("isDead");
+        else if (anim) anim.SetTrigger("isDead");
 
         // 2. Khóa di chuyển
         if (movementScript) movementScript.enabled = false;
@@ -64,14 +106,13 @@ public class PlayerHP : MonoBehaviour
         rb.linearVelocity = Vector2.zero;
         GetComponent<Collider2D>().enabled = false;
 
-        // 4. CHỜ 1.5 GIÂY RỒI MỚI HIỆN BẢNG (Dùng chung cho mọi tầng)
+        // 4. CHỜ 1.5 GIÂY RỒI MỚI HIỆN BẢNG
         if (GameOverManager.Instance != null)
         {
             Invoke("TriggerGameOverUI", 1.5f);
         }
     }
 
-    // Hàm này sẽ được gọi sau 1.5 giây
     void TriggerGameOverUI()
     {
         if (GameOverManager.Instance != null)

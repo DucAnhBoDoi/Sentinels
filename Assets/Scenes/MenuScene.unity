@@ -4048,7 +4048,7 @@ PrefabInstance:
     - target: {fileID: 3863948449372759580, guid: ccefdf407f1a34ae4a6d1cb9e853f905, type: 3}
       propertyPath: m_sharedMaterial
       value: 
-      objectReference: {fileID: -6316761728853851081, guid: cdd6ff1867aa98e48b631efce41a66a2, type: 2}
+      objectReference: {fileID: -6155794773443140859, guid: cdd6ff1867aa98e48b631efce41a66a2, type: 2}
     - target: {fileID: 3863948449372759580, guid: ccefdf407f1a34ae4a6d1cb9e853f905, type: 3}
       propertyPath: m_hasFontAssetChanged
       value: 0
@@ -6964,7 +6964,7 @@ PrefabInstance:
     - target: {fileID: 3863948449372759580, guid: ccefdf407f1a34ae4a6d1cb9e853f905, type: 3}
       propertyPath: m_sharedMaterial
       value: 
-      objectReference: {fileID: -6316761728853851081, guid: cdd6ff1867aa98e48b631efce41a66a2, type: 2}
+      objectReference: {fileID: -6155794773443140859, guid: cdd6ff1867aa98e48b631efce41a66a2, type: 2}
     - target: {fileID: 3863948449372759580, guid: ccefdf407f1a34ae4a6d1cb9e853f905, type: 3}
       propertyPath: m_hasFontAssetChanged
       value: 0
@@ -8650,7 +8650,7 @@ PrefabInstance:
     - target: {fileID: 3863948449372759580, guid: ccefdf407f1a34ae4a6d1cb9e853f905, type: 3}
       propertyPath: m_sharedMaterial
       value: 
-      objectReference: {fileID: -6316761728853851081, guid: cdd6ff1867aa98e48b631efce41a66a2, type: 2}
+      objectReference: {fileID: -6155794773443140859, guid: cdd6ff1867aa98e48b631efce41a66a2, type: 2}
     - target: {fileID: 3863948449372759580, guid: ccefdf407f1a34ae4a6d1cb9e853f905, type: 3}
       propertyPath: m_hasFontAssetChanged
       value: 0
@@ -10768,7 +10768,7 @@ PrefabInstance:
     - target: {fileID: 3863948449372759580, guid: ccefdf407f1a34ae4a6d1cb9e853f905, type: 3}
       propertyPath: m_sharedMaterial
       value: 
-      objectReference: {fileID: -6316761728853851081, guid: cdd6ff1867aa98e48b631efce41a66a2, type: 2}
+      objectReference: {fileID: -6155794773443140859, guid: cdd6ff1867aa98e48b631efce41a66a2, type: 2}
     - target: {fileID: 3863948449372759580, guid: ccefdf407f1a34ae4a6d1cb9e853f905, type: 3}
       propertyPath: m_hasFontAssetChanged
       value: 0
@@ -13633,7 +13633,7 @@ MonoBehaviour:
   m_text: Sentinels
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: cdd6ff1867aa98e48b631efce41a66a2, type: 2}
-  m_sharedMaterial: {fileID: -6316761728853851081, guid: cdd6ff1867aa98e48b631efce41a66a2, type: 2}
+  m_sharedMaterial: {fileID: -6155794773443140859, guid: cdd6ff1867aa98e48b631efce41a66a2, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -13957,8 +13957,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Game::LobbyCoop
   _utils: {fileID: 817125202}
   _lobbyPlayerPrefab: {fileID: 6589945512264897453, guid: 363bce2c01aff661dab498698659805d, type: 3}
-  _player1SpawnPoint: {fileID: 4670063721654559581}
-  _player2SpawnPoint: {fileID: 7102831628827197364}
+  _player1SpawnPoint: {fileID: 1773784169382010289}
+  _player2SpawnPoint: {fileID: 7102831628827197363}
   _btnBack: {fileID: 2143199569}
   _btnStartGame: {fileID: 1187693825}
 --- !u!1 &1663533509
@@ -16031,7 +16031,7 @@ PrefabInstance:
     - target: {fileID: 3863948449372759580, guid: ccefdf407f1a34ae4a6d1cb9e853f905, type: 3}
       propertyPath: m_sharedMaterial
       value: 
-      objectReference: {fileID: -6316761728853851081, guid: cdd6ff1867aa98e48b631efce41a66a2, type: 2}
+      objectReference: {fileID: -6155794773443140859, guid: cdd6ff1867aa98e48b631efce41a66a2, type: 2}
     - target: {fileID: 3863948449372759580, guid: ccefdf407f1a34ae4a6d1cb9e853f905, type: 3}
       propertyPath: m_hasFontAssetChanged
       value: 0
@@ -18562,7 +18562,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: 0, y: 0.0008092704}
-  m_SizeDelta: {x: 0, y: 100}
+  m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0, y: 1}
 --- !u!114 &1998001837
 MonoBehaviour:
@@ -20439,7 +20439,7 @@ PrefabInstance:
     - target: {fileID: 3863948449372759580, guid: ccefdf407f1a34ae4a6d1cb9e853f905, type: 3}
       propertyPath: m_sharedMaterial
       value: 
-      objectReference: {fileID: -6316761728853851081, guid: cdd6ff1867aa98e48b631efce41a66a2, type: 2}
+      objectReference: {fileID: -6155794773443140859, guid: cdd6ff1867aa98e48b631efce41a66a2, type: 2}
     - target: {fileID: 3863948449372759580, guid: ccefdf407f1a34ae4a6d1cb9e853f905, type: 3}
       propertyPath: m_hasFontAssetChanged
       value: 0
@@ -20561,7 +20561,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7102831628827197363}
-  - component: {fileID: 7102831628827197364}
   m_Layer: 5
   m_Name: Player_2_wrapper
   m_TagString: Untagged
@@ -20578,7 +20577,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1773784169382010289}
-  - component: {fileID: 4670063721654559581}
   m_Layer: 5
   m_Name: Player_1_wrapper
   m_TagString: Untagged
@@ -20586,31 +20584,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &4670063721654559581
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4670063721654559580}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Unity.Netcode.Runtime::Unity.Netcode.NetworkObject
-  GlobalObjectIdHash: 754241678
-  InScenePlacedSourceGlobalObjectIdHash: 0
-  DeferredDespawnTick: 0
-  Ownership: 1
-  AlwaysReplicateAsRoot: 0
-  SynchronizeTransform: 1
-  ActiveSceneSynchronization: 0
-  SceneMigrationSynchronization: 0
-  SpawnWithObservers: 1
-  DontDestroyWithOwner: 0
-  AutoObjectParentSync: 1
-  SyncOwnerTransformWhenParented: 1
-  AllowOwnerToParent: 0
 --- !u!224 &7102831628827197363
 RectTransform:
   m_ObjectHideFlags: 0
@@ -20630,31 +20603,6 @@ RectTransform:
   m_AnchoredPosition: {x: 678.02563, y: -251.4834}
   m_SizeDelta: {x: 376.0213, y: 384.8683}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &7102831628827197364
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4233536207171486046}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Unity.Netcode.Runtime::Unity.Netcode.NetworkObject
-  GlobalObjectIdHash: 2136187859
-  InScenePlacedSourceGlobalObjectIdHash: 0
-  DeferredDespawnTick: 0
-  Ownership: 1
-  AlwaysReplicateAsRoot: 0
-  SynchronizeTransform: 1
-  ActiveSceneSynchronization: 0
-  SceneMigrationSynchronization: 0
-  SpawnWithObservers: 1
-  DontDestroyWithOwner: 0
-  AutoObjectParentSync: 1
-  SyncOwnerTransformWhenParented: 1
-  AllowOwnerToParent: 0
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

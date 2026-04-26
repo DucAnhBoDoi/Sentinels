@@ -1,4 +1,5 @@
 using TMPro;
+using Unity.Collections;
 using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.UI;
@@ -8,11 +9,15 @@ public class LobbyPlayer : NetworkBehaviour
     [HideInInspector]
     public NetworkVariable<bool> NetIsReady = new(false, writePerm: NetworkVariableWritePermission.Owner);
 
-    [SerializeField]
-    private TMP_Text _txtPlayerName;
+    [HideInInspector]
+    public NetworkVariable<FixedString32Bytes> NetPlayerName = new(
+        "", 
+        NetworkVariableReadPermission.Everyone, 
+        NetworkVariableWritePermission.Owner
+    );
 
-    [SerializeField]
-    private Button _btnPlayerReady;
+    [SerializeField] private TMP_Text _txtPlayerName;
+    [SerializeField] private Button _btnPlayerReady;
     private Image _imgBtnPlayerReady;
 
     private Color _colorReady;
@@ -25,16 +30,47 @@ public class LobbyPlayer : NetworkBehaviour
         _colorNotReady = Color.white;
     }
 
-    private void Start()
+    public override void OnNetworkSpawn()
     {
-        string playerName = "Default Player";
-        if (PlayerPrefs.HasKey(nameof(PlayerPrefsKeys.S_UserName)))
+        LobbyCoop lobby = Object.FindFirstObjectByType<LobbyCoop>();
+        if (lobby != null)
         {
-            playerName = PlayerPrefs.GetString(nameof(PlayerPrefsKeys.S_UserName));
+            lobby.RegisterPlayer(this);
         }
 
-        _txtPlayerName.SetText(playerName);
+        _btnPlayerReady.interactable = IsOwner;
+
+        if (IsOwner)
+        {
+            string playerName = "Default Player";
+            if (PlayerPrefs.HasKey(nameof(PlayerPrefsKeys.S_UserName)))
+            {
+                playerName = PlayerPrefs.GetString(nameof(PlayerPrefsKeys.S_UserName));
+            }
+            NetPlayerName.Value = playerName; 
+        }
+
+        NetPlayerName.OnValueChanged += OnNameChanged;
+        _txtPlayerName.SetText(NetPlayerName.Value.ToString());
+
         _btnPlayerReady.onClick.AddListener(OnBtnPlayerReadyClick);
+    }
+
+    public override void OnNetworkDespawn()
+    {
+        LobbyCoop lobby = Object.FindFirstObjectByType<LobbyCoop>();
+        if (lobby != null)
+        {
+            lobby.UnregisterPlayer(this);
+        }
+
+        NetPlayerName.OnValueChanged -= OnNameChanged;
+        _btnPlayerReady.onClick.RemoveListener(OnBtnPlayerReadyClick);
+    }
+
+    private void OnNameChanged(FixedString32Bytes previousValue, FixedString32Bytes newValue)
+    {
+        _txtPlayerName.SetText(newValue.ToString());
     }
 
     private void Update()
@@ -47,11 +83,6 @@ public class LobbyPlayer : NetworkBehaviour
         {
             _imgBtnPlayerReady.color = _colorNotReady;
         }
-    }
-
-    public override void OnNetworkSpawn()
-    {
-        _btnPlayerReady.interactable = IsOwner;
     }
 
     private void OnBtnPlayerReadyClick()
