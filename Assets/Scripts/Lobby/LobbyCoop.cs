@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Unity.Netcode;
 using UnityEngine;
@@ -18,23 +19,19 @@ public class LobbyCoop : MonoBehaviour
         Create,
     }
 
-    [SerializeField]
-    private MenuSceneUtils _utils;
+    [SerializeField] private MenuSceneUtils _utils;
 
-    [SerializeField]
-    private LobbyPlayer _lobbyPlayerPrefab;
+    [SerializeField] private LobbyPlayer _lobbyPlayerPrefab;
 
-    [SerializeField]
-    private NetworkObject _player1SpawnPoint;
+    [SerializeField] private PlayerObject _playerObjectPrefab;
 
-    [SerializeField]
-    private NetworkObject _player2SpawnPoint;
+    [SerializeField] private NetworkObject _player1SpawnPoint;
 
-    [SerializeField]
-    private Button _btnBack;
+    [SerializeField] private NetworkObject _player2SpawnPoint;
 
-    [SerializeField]
-    private Button _btnStartGame;
+    [SerializeField] private Button _btnBack;
+
+    [SerializeField] private Button _btnStartGame;
 
     private CoopMode _coopMode;
     private LobbyAction _lobbyAction;
@@ -55,12 +52,13 @@ public class LobbyCoop : MonoBehaviour
     private void Update()
     {
         if ((NetworkManager.Singleton != null && !NetworkManager.Singleton.IsHost) ||
-                _lobbyPlayers.Count != GameNetworkManager.MAX_PLAYER_COUNT)
+            _lobbyPlayers.Count != GameNetworkManager.MAX_PLAYER_COUNT)
         {
             if (_btnStartGame.interactable)
             {
                 _btnStartGame.interactable = false;
             }
+
             return;
         }
 
@@ -86,6 +84,8 @@ public class LobbyCoop : MonoBehaviour
 
     private void OnEnable()
     {
+        NetworkManager.Singleton.ConnectionApprovalCallback += OnConnectionApprovalCallback;
+
         if (_lobbyAction == LobbyAction.Join)
         {
             NetworkManager.Singleton.StartClient();
@@ -107,6 +107,7 @@ public class LobbyCoop : MonoBehaviour
     {
         if (NetworkManager.Singleton != null)
         {
+            NetworkManager.Singleton.ConnectionApprovalCallback -= OnConnectionApprovalCallback;
             NetworkManager.Singleton.OnClientConnectedCallback -= OnLocalClientConnected;
             NetworkManager.Singleton.OnClientDisconnectCallback -= OnLocalClientDisconnect;
         }
@@ -125,12 +126,23 @@ public class LobbyCoop : MonoBehaviour
         }
     }
 
+    private static void OnConnectionApprovalCallback(
+        NetworkManager.ConnectionApprovalRequest req,
+        NetworkManager.ConnectionApprovalResponse res)
+    {
+        res.Approved = NetworkManager.Singleton.ConnectedClients.Count < 2;
+        res.Reason = "Room is full";
+    }
+
     private void OnLocalClientConnected(ulong clientId)
     {
         if (!NetworkManager.Singleton.IsHost)
         {
             return;
         }
+        
+        PlayerObject playerObject = Instantiate(_playerObjectPrefab);
+        playerObject.NetworkObject.SpawnAsPlayerObject(clientId);
 
         LobbyPlayer player = Instantiate(_lobbyPlayerPrefab);
         player.NetworkObject.SpawnWithOwnership(clientId, true);

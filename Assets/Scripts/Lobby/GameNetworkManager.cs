@@ -7,8 +7,7 @@ public class GameNetworkManager : MonoBehaviour
 {
     public const int MAX_PLAYER_COUNT = 2;
 
-    [SerializeField]
-    private MenuSceneUtils _utils;
+    [SerializeField] private MenuSceneUtils _utils;
 
     private void OnDestroy()
     {
@@ -50,7 +49,7 @@ public class GameNetworkManager : MonoBehaviour
 
     private IEnumerator WaitForShutdownAndShowMain()
     {
-        while (NetworkManager.Singleton.ShutdownInProgress)
+        while (NetworkManager.Singleton && NetworkManager.Singleton.ShutdownInProgress)
         {
             yield return null;
         }

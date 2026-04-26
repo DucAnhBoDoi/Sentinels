@@ -1,18 +1,19 @@
 using TMPro;
+using Unity.Collections;
 using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class LobbyPlayer : NetworkBehaviour
 {
+    [HideInInspector] public NetworkVariable<bool> NetIsReady = new(writePerm: NetworkVariableWritePermission.Owner);
+
     [HideInInspector]
-    public NetworkVariable<bool> NetIsReady = new(false, writePerm: NetworkVariableWritePermission.Owner);
+    public NetworkVariable<FixedString64Bytes> NetPlayerName = new(writePerm: NetworkVariableWritePermission.Owner);
 
-    [SerializeField]
-    private TMP_Text _txtPlayerName;
+    [SerializeField] private TMP_Text _txtPlayerName;
 
-    [SerializeField]
-    private Button _btnPlayerReady;
+    [SerializeField] private Button _btnPlayerReady;
     private Image _imgBtnPlayerReady;
 
     private Color _colorReady;
@@ -23,18 +24,7 @@ public class LobbyPlayer : NetworkBehaviour
         _imgBtnPlayerReady = _btnPlayerReady.GetComponent<Image>();
         _colorReady = Color.green;
         _colorNotReady = Color.white;
-    }
-
-    private void Start()
-    {
-        string playerName = "Default Player";
-        if (PlayerPrefs.HasKey(nameof(PlayerPrefsKeys.S_UserName)))
-        {
-            playerName = PlayerPrefs.GetString(nameof(PlayerPrefsKeys.S_UserName));
-        }
-
-        _txtPlayerName.SetText(playerName);
-        _btnPlayerReady.onClick.AddListener(OnBtnPlayerReadyClick);
+        NetPlayerName.OnValueChanged += (_, playerName) => _txtPlayerName.SetText(playerName.Value);
     }
 
     private void Update()
@@ -51,7 +41,29 @@ public class LobbyPlayer : NetworkBehaviour
 
     public override void OnNetworkSpawn()
     {
+        base.OnNetworkSpawn();
+
+        PlayerObject playerObject = NetworkManager.ConnectedClients[NetworkObject.OwnerClientId].PlayerObject
+            .GetComponent<PlayerObject>();
+
+        if (IsOwner)
+        {
+            NetPlayerName.Value = playerObject.NetUsername.Value;
+        }
+        else
+        {
+            _txtPlayerName.SetText(NetPlayerName.Value.ToString());
+        }
+
+        _btnPlayerReady.onClick.AddListener(OnBtnPlayerReadyClick);
         _btnPlayerReady.interactable = IsOwner;
+    }
+
+    public override void OnNetworkDespawn()
+    {
+        base.OnNetworkDespawn();
+        _btnPlayerReady.onClick.RemoveListener(OnBtnPlayerReadyClick);
+        _btnPlayerReady.interactable = false;
     }
 
     private void OnBtnPlayerReadyClick()

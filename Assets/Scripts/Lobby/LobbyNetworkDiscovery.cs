@@ -10,16 +10,21 @@ public class LobbyNetworkDiscovery : NetworkDiscovery<DiscoveryBroadcastData, Di
 
     private string GetServerName()
     {
-        string playerName = "Default Player";
-        if (PlayerPrefs.HasKey(nameof(PlayerPrefsKeys.S_UserName)))
-        {
-            playerName = PlayerPrefs.GetString(nameof(PlayerPrefsKeys.S_UserName));
-        }
         if (NetworkManager.Singleton == null)
         {
             return "[ERROR]";
         }
-        return $"[LAN] - {playerName} - [{NetworkManager.Singleton.ConnectedClients.Count}/{GameNetworkManager.MAX_PLAYER_COUNT}]";
+
+        string playerName = NetworkManager
+            .Singleton
+            .LocalClient
+            .PlayerObject
+            .GetComponent<PlayerObject>()
+            .NetUsername
+            .Value
+            .ToString();
+        return
+            $"[LAN] - {playerName} - [{NetworkManager.Singleton.ConnectedClients.Count}/{GameNetworkManager.MAX_PLAYER_COUNT}]";
     }
 
     private void Update()
@@ -37,7 +42,8 @@ public class LobbyNetworkDiscovery : NetworkDiscovery<DiscoveryBroadcastData, Di
         }
     }
 
-    protected override bool ProcessBroadcast(IPEndPoint sender, DiscoveryBroadcastData broadCast, out DiscoveryResponseData response)
+    protected override bool ProcessBroadcast(IPEndPoint sender, DiscoveryBroadcastData broadCast,
+        out DiscoveryResponseData response)
     {
         response = new DiscoveryResponseData()
         {
