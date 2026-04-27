@@ -50,10 +50,12 @@ public class GameNetworkManager : MonoBehaviour
 
     private IEnumerator WaitForShutdownAndShowMain()
     {
-        while (NetworkManager.Singleton.ShutdownInProgress)
+        while (NetworkManager.Singleton != null && NetworkManager.Singleton.ShutdownInProgress)
         {
             yield return null;
         }
+
+        QuestPopupManager.ResetQuestState();
 
         if (SceneManager.GetActiveScene().name != nameof(SceneNames.MenuScene))
         {
@@ -61,7 +63,19 @@ public class GameNetworkManager : MonoBehaviour
         }
         else
         {
-            _utils.ShowMainLayout();
+            if (_utils == null)
+            {
+                _utils = Object.FindAnyObjectByType<MenuSceneUtils>();
+            }
+
+            if (_utils != null)
+            {
+                _utils.ShowMainLayout();
+            }
+            else
+            {
+                Debug.LogWarning("[GameNetworkManager] Không tìm thấy MenuSceneUtils trong màn hình hiện tại!");
+            }
         }
     }
 }

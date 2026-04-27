@@ -1,10 +1,10 @@
 using System.Collections.Generic;
 using UnityEngine;
-using Unity.Netcode; // THÊM THƯ VIỆN MẠNG
+using Unity.Netcode;
 
-// ĐỔI THÀNH NETWORK BEHAVIOUR
 public class GraphGenerator : NetworkBehaviour
 {
+    public NetworkObject SpawnLocation; 
     [Header("Prefabs từ thư mục Floor1")]
     public GameObject nodePrefab; 
     public GameObject wirePrefab; 
@@ -27,13 +27,11 @@ public class GraphGenerator : NetworkBehaviour
     private List<Vector2> visitedPositions = new List<Vector2>();
     private List<GameObject> spawnedObjects = new List<GameObject>(); 
 
-    // HÀM START ĐÃ BỊ THAY BẰNG HÀM MẠNG NÀY:
     public override void OnNetworkSpawn()
     {
-        // CHỈ HOST MỚI ĐƯỢC PHÉP VẼ MAP VÀ ĐẺ MẠCH ĐIỆN
-        if (IsServer)
+       if (IsServer)
         {
-            GenerateWithRetries();
+            Invoke(nameof(GenerateWithRetries), 0.5f);
         }
     }
 
@@ -44,10 +42,23 @@ public class GraphGenerator : NetworkBehaviour
             if (TryGeneratePath())
             {
                 Debug.Log($"<color=green>Sinh map Tầng 1 THÀNH CÔNG sau {attempt} lần thử lại!</color>");
+                
+                // SỬA LỖI TRIỆT ĐỂ TẠI ĐÂY: 
+                // Khi thuật toán đã vẽ map thành công 100%, ta mới bắt đầu báo cho Client Spawn mạng
+                foreach (GameObject obj in spawnedObjects)
+                {
+                    var netObj = obj.GetComponent<NetworkObject>();
+                    if (!netObj.IsSpawned)
+                    {
+                        netObj.Spawn(true);
+                        netObj.TrySetParent(SpawnLocation);
+                    }
+                }
                 return;
             }
             else
             {
+                // Nếu vẽ lỗi, ta xóa nháp đi (Lúc này vật thể chưa lên mạng nên không sợ sập mạng Client)
                 ClearPath();
             }
         }
@@ -58,9 +69,8 @@ public class GraphGenerator : NetworkBehaviour
     {
         foreach (GameObject obj in spawnedObjects) 
         {
-            var netObj = obj.GetComponent<NetworkObject>();
-            if (netObj != null && netObj.IsSpawned) netObj.Despawn(true);
-            else Destroy(obj);
+            // Vì chưa gọi Spawn lên mạng, ta chỉ cần Destroy bình thường
+            Destroy(obj);
         }
         spawnedObjects.Clear();
         visitedPositions.Clear();
@@ -73,11 +83,8 @@ public class GraphGenerator : NetworkBehaviour
 
         for (int i = 0; i < numberOfNodes; i++)
         {
-            // Bỏ transform ở đây đi để an toàn tuyệt đối trên mạng
+            // 1. TẠO NHÁP: Khởi tạo thẳng ở currentPos, KHÔNG GỌI Spawn() ở đây
             GameObject node = Instantiate(nodePrefab, currentPos, Quaternion.identity);
-            
-            // LÀM GIẤY KHAI SINH MẠNG CHO HỘP ĐIỆN
-            node.GetComponent<NetworkObject>().Spawn(true);
             
             spawnedObjects.Add(node);
             visitedPositions.Add(currentPos);
@@ -102,11 +109,10 @@ public class GraphGenerator : NetworkBehaviour
             {
                 currentPos += direction * tileSize;
                 float angle = (direction.y != 0) ? 90f : 0f;
+
+                // 2. TẠO NHÁP: Khởi tạo thẳng ở currentPos, KHÔNG GỌI Spawn() ở đây
                 GameObject wire = Instantiate(wirePrefab, currentPos, Quaternion.Euler(0, 0, angle));
                 
-                // LÀM GIẤY KHAI SINH MẠNG CHO DÂY ĐIỆN
-                wire.GetComponent<NetworkObject>().Spawn(true);
-
                 spawnedObjects.Add(wire);
                 visitedPositions.Add(currentPos);
             }

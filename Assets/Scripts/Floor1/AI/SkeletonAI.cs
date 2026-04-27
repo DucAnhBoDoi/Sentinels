@@ -4,8 +4,7 @@ using System.Collections;
 using Unity.Netcode;
 
 [RequireComponent(typeof(SpriteRenderer), typeof(Rigidbody2D), typeof(Animator))]
-
-public class SkeletonAI : NetworkBehaviour, IDamagable 
+public class SkeletonAI : NetworkBehaviour, IDamagable
 {
     [Header("Tham chiếu")]
     public Transform playerA;
@@ -16,7 +15,7 @@ public class SkeletonAI : NetworkBehaviour, IDamagable
     private Animator anim;
     private SpriteRenderer sr;
     private Rigidbody2D rb;
-    private Unity.Netcode.Components.NetworkAnimator netAnim; // Khai báo NetAnim
+    private Unity.Netcode.Components.NetworkAnimator netAnim;
 
     [Header("Chỉ số AI")]
     public float moveSpeed = 2.5f;
@@ -28,10 +27,10 @@ public class SkeletonAI : NetworkBehaviour, IDamagable
     private float lastAttackTime;
 
     [Header("Trạng thái")]
-    public int maxHealth = 3; // Đổi health thành NetworkVariable
+    public int maxHealth = 3;
     public NetworkVariable<int> currentHealth = new NetworkVariable<int>(
-        3, 
-        NetworkVariableReadPermission.Everyone, 
+        3,
+        NetworkVariableReadPermission.Everyone,
         NetworkVariableWritePermission.Server
     );
     private bool isDead = false;
@@ -49,8 +48,7 @@ public class SkeletonAI : NetworkBehaviour, IDamagable
     public static List<SkeletonAI> allRobots = new List<SkeletonAI>();
     private Vector2 startPos, patrolTarget;
     private float stuckTimer = 0f;
-    
-    // MỚI: Biến đồng bộ việc lật mặt quái (Để cả 2 máy nhìn thấy quái quay đúng hướng)
+
     private NetworkVariable<bool> isFlipped = new NetworkVariable<bool>(false, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
 
     void Start()
@@ -75,7 +73,7 @@ public class SkeletonAI : NetworkBehaviour, IDamagable
         }
 
         currentHealth.OnValueChanged += OnHealthChanged;
-        isFlipped.OnValueChanged += OnFlipChanged; // Lắng nghe lật mặt
+        isFlipped.OnValueChanged += OnFlipChanged;
 
         if (healthBar) healthBar.UpdateBar(currentHealth.Value, maxHealth);
     }
@@ -97,13 +95,11 @@ public class SkeletonAI : NetworkBehaviour, IDamagable
         }
         else if (newValue < previousValue)
         {
-             // Dùng netAnim nếu có, không thì dùng anim
-            if (netAnim) netAnim.SetTrigger("isHurt"); 
+            if (netAnim) netAnim.SetTrigger("isHurt");
             else anim.SetTrigger("isHurt");
         }
     }
-    
-    // Hàm cập nhật lật mặt cho Client
+
     private void OnFlipChanged(bool previous, bool current)
     {
         if (sr) sr.flipX = current;
@@ -113,13 +109,12 @@ public class SkeletonAI : NetworkBehaviour, IDamagable
     {
         if (isDead) return;
 
-        // 3. KHÓA TƯ DUY CLIENT: Chỉ Server mới được phép chạy Logic AI
         if (!IsServer) return;
 
         Transform target = DecideTarget();
 
         float currentDanger = (InfluenceMap.Instance != null) ? InfluenceMap.Instance.GetDangerValue(transform.position) : 0f;
-        bool isInLight = currentDanger > 0.1f; 
+        bool isInLight = currentDanger > 0.1f;
 
         float facingDir = sr.flipX ? -1f : 1f;
         Vector2 actualOffset = new Vector2(actionOffset.x * facingDir, actionOffset.y);
@@ -129,8 +124,7 @@ public class SkeletonAI : NetworkBehaviour, IDamagable
         {
             TryAttack();
             rb.linearVelocity = Vector2.zero;
-            
-            // Dùng netAnim cho hoạt ảnh chạy
+
             if (netAnim) netAnim.Animator.SetBool("isRunning", false);
             else anim.SetBool("isRunning", false);
         }
@@ -169,7 +163,7 @@ public class SkeletonAI : NetworkBehaviour, IDamagable
 
     public void ExecuteHit()
     {
-        if (!IsServer) return; // Chỉ Server mới được tính toán damage
+        if (!IsServer) return;
         PerformDamageToPlayer();
     }
 
@@ -227,31 +221,28 @@ public class SkeletonAI : NetworkBehaviour, IDamagable
         if (bestDir != Vector2.zero)
         {
             rb.linearVelocity = bestDir.normalized * currentSpeed;
-            
-            // Server quyết định việc lật mặt và báo cho Client
-            isFlipped.Value = bestDir.x < 0; 
-            
+
+            isFlipped.Value = bestDir.x < 0;
+
             if (netAnim) netAnim.Animator.SetBool("isRunning", true);
             else anim.SetBool("isRunning", true);
         }
-        else 
-        { 
-            rb.linearVelocity = Vector2.zero; 
+        else
+        {
+            rb.linearVelocity = Vector2.zero;
             if (netAnim) netAnim.Animator.SetBool("isRunning", false);
-            else anim.SetBool("isRunning", false); 
+            else anim.SetBool("isRunning", false);
         }
     }
 
     void PickNewPatrolPoint() { patrolTarget = startPos + Random.insideUnitCircle * patrolRadius; }
 
-    // Người chơi chém quái sẽ gọi hàm này
-    public void TakeDamage() 
-    { 
-        if (isDead) return; 
-        TakeDamageServerRpc(1); // Gửi yêu cầu trừ máu lên Server
+    public void TakeDamage()
+    {
+        if (isDead) return;
+        TakeDamageServerRpc(1);
     }
 
-    // 4. SERVER NHẬN LỆNH TRỪ MÁU QUÁI
     [Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Everyone)]
     private void TakeDamageServerRpc(int damage)
     {
@@ -259,20 +250,32 @@ public class SkeletonAI : NetworkBehaviour, IDamagable
         currentHealth.Value -= damage;
     }
 
-    IEnumerator DieRoutine() 
-    { 
-        isDead = true; 
-        rb.linearVelocity = Vector2.zero; 
-        
+    IEnumerator DieRoutine()
+    {
+        isDead = true;
+        rb.linearVelocity = Vector2.zero;
+
         if (netAnim) netAnim.SetTrigger("isDead");
         else anim.SetTrigger("isDead");
-        
-        GetComponent<Collider2D>().enabled = false; 
-        this.enabled = false; 
-        
-        // Hủy quái qua mạng
-        yield return new WaitForSeconds(2f); 
-        if (IsServer) GetComponent<NetworkObject>().Despawn(true);
+
+        GetComponent<Collider2D>().enabled = false;
+        this.enabled = false;
+
+        yield return new WaitForSeconds(2f);
+
+        gameObject.SetActive(false);
+
+        if (IsServer && NetworkObject != null && NetworkObject.IsSpawned)
+        {
+            if (NetworkObject.IsSceneObject == true)
+            {
+                NetworkObject.Despawn(false);
+            }
+            else
+            {             
+                NetworkObject.Despawn(true);
+            }
+        }
     }
 
     private void OnDrawGizmos()

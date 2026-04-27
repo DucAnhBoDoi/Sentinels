@@ -22,10 +22,8 @@ public class Floor1_Control : NetworkBehaviour
 
     public override void OnNetworkSpawn()
     {
-        // Lắng nghe sự kiện Bật/Tắt đèn
         isFlashlightOn.OnValueChanged += OnFlashlightStateChanged;
 
-        // Khởi tạo trạng thái ban đầu của đèn
         if (flashlightTransform != null && playerType == PlayerType.PlayerA)
         {
             flashlightTransform.gameObject.SetActive(isFlashlightOn.Value);
@@ -37,7 +35,6 @@ public class Floor1_Control : NetworkBehaviour
         isFlashlightOn.OnValueChanged -= OnFlashlightStateChanged;
     }
 
-    // Hàm tự động chạy trên mọi máy khi biến công tắc thay đổi
     private void OnFlashlightStateChanged(bool previousState, bool newState)
     {
         if (flashlightTransform != null && playerType == PlayerType.PlayerA)
@@ -48,7 +45,13 @@ public class Floor1_Control : NetworkBehaviour
 
     void Update()
     {
-        // KẾT HỢP: Ngăn lỗi NullReferenceException nếu có Player khác mà mình không điều khiển
+        // --- CHỐT CHẶN BẢO VỆ MẠNG ---
+        // Nếu Server/Client đã đóng, lập tức dừng mọi thao tác gửi dữ liệu
+        if (!IsSpawned || NetworkManager.Singleton == null || !NetworkManager.Singleton.IsListening) 
+        {
+            return;
+        }
+
         if (!IsOwner) return;
 
         if (!QuestPopupManager.isGameStarted) return;
@@ -56,21 +59,13 @@ public class Floor1_Control : NetworkBehaviour
         var keyboard = Keyboard.current;
         if (keyboard == null) return;
 
-        // ----------------------------------------------------
-        // LOGIC PLAYER A (Chỉ bắt phím bật/tắt)
-        // ----------------------------------------------------
         if (playerType == PlayerType.PlayerA)
         {
             if (keyboard.fKey.wasPressedThisFrame)
             {
-                // Thay vì tự tắt bật, giờ mình gạt công tắc mạng
                 isFlashlightOn.Value = !isFlashlightOn.Value;
             }
         }
-
-        // ----------------------------------------------------
-        // LOGIC PLAYER B (Bắt phím E để sửa điện)
-        // ----------------------------------------------------
         else if (playerType == PlayerType.PlayerB)
         {
             if (keyboard.eKey.wasPressedThisFrame) PerformRepair();
@@ -83,6 +78,12 @@ public class Floor1_Control : NetworkBehaviour
 
     void LateUpdate()
     {
+        // --- CHỐT CHẶN BẢO VỆ MẠNG LÚC OUT GAME ---
+        if (!IsSpawned || NetworkManager.Singleton == null || !NetworkManager.Singleton.IsListening) 
+        {
+            return;
+        }
+
         if (playerType != PlayerType.PlayerA || flashlightTransform == null) return;
 
         if (IsOwner)
@@ -96,19 +97,14 @@ public class Floor1_Control : NetworkBehaviour
             Vector3 lookDirection = mouseWorldPosition - flashlightTransform.position;
             float angle = Mathf.Atan2(lookDirection.y, lookDirection.x) * Mathf.Rad2Deg;
 
-            // Xoay đèn trực tiếp cho chính mình xem thật mượt (60 FPS)
             flashlightTransform.rotation = Quaternion.Euler(0, 0, angle - 90f);
-
-            // Báo góc xoay lên mạng (30 FPS)
+            
+            // Lệnh ghi vào biến mạng này từng gây lỗi vàng nếu không có chốt chặn ở trên
             flashlightAngle.Value = angle;
         }
-        // NẾU MÌNH LÀ NGƯỜI NHÌN (Thấy người khác chĩa đèn)
         else
         {
-            // SỬA CHỖ NÀY: Dùng Lerp để làm mượt góc xoay
             Quaternion targetRotation = Quaternion.Euler(0, 0, flashlightAngle.Value - 90f);
-
-            // Xoay trượt từ góc hiện tại tới góc mục tiêu với tốc độ 15f
             flashlightTransform.rotation = Quaternion.Lerp(flashlightTransform.rotation, targetRotation, Time.deltaTime * 15f);
         }
     }

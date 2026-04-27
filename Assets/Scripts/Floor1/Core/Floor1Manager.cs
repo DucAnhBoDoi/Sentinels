@@ -3,8 +3,10 @@ using UnityEngine.SceneManagement;
 using UnityEngine.InputSystem;
 using UnityEngine.UI;
 using System.Collections;
+using Unity.Netcode; // BẮT BUỘC THÊM ĐỂ CHẠY MẠNG
 
-public class Floor1Manager : MonoBehaviour
+// 1. ĐỔI TỪ MonoBehaviour SANG NetworkBehaviour
+public class Floor1Manager : NetworkBehaviour
 {
     public static Floor1Manager Instance;
 
@@ -20,7 +22,8 @@ public class Floor1Manager : MonoBehaviour
     public Image fadeImage;
     public float fadeDuration = 1.5f;
 
-    private bool isLevelComplete = false;
+    // 2. BIẾN isLevelComplete ĐƯỢC NÂNG CẤP THÀNH BIẾN MẠNG
+    private NetworkVariable<bool> isLevelComplete = new NetworkVariable<bool>(false);
     private bool isTransitioning = false;
 
     void Awake()
@@ -28,7 +31,8 @@ public class Floor1Manager : MonoBehaviour
         if (Instance == null) Instance = this;
     }
 
-    void Start()
+    // 3. THAY Start BẰNG OnNetworkSpawn ĐỂ ĐẢM BẢO MẠNG ĐÃ KẾT NỐI
+    public override void OnNetworkSpawn()
     {
         if (!playerA) playerA = GameObject.Find("Player_A_Navigator")?.transform;
         if (!playerB) playerB = GameObject.Find("Player_B_Mechanic")?.transform;
@@ -40,25 +44,62 @@ public class Floor1Manager : MonoBehaviour
         }
     }
 
-    public void LevelComplete()
+    // 4. HÀM MỚI CHO POWERGRIDMANAGER GỌI: BÁO CHO SERVER BIẾT ĐÃ XONG MÀN
+    [Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Everyone)]
+    public void LevelCompleteServerRpc()
     {
-        isLevelComplete = true;
+        isLevelComplete.Value = true;
         Debug.Log("<color=green>ĐIỆN ĐÃ CÓ! CẢ 2 NGƯỜI CHƠI HÃY LẠI GẦN CỬA VÀ BẤM PHÍM [2] ĐỂ QUA TẦNG!</color>");
     }
 
+    // ========================================================
+    // CÁC HÀM GỌI TỪ BÊN NGOÀI (GAMEOVERMANAGER) VÀO
+    // ========================================================
     public void QuitToMenuWithFade(string menuSceneName)
     {
+        // Gửi lệnh lên Server xin phép Quit
+        QuitToMenuServerRpc(menuSceneName);
+    }
+
+    [Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Everyone)]
+    private void QuitToMenuServerRpc(string menuSceneName)
+    {
+        // Server ra lệnh cho toàn bộ Client cùng Quit
+        QuitToMenuClientRpc(menuSceneName);
+    }
+
+    [ClientRpc]
+    private void QuitToMenuClientRpc(string menuSceneName)
+    {
+        // Chạy Coroutine cũ của anh trên mọi máy
         StartCoroutine(TransitionToMenuSequence(menuSceneName));
     }
 
+
     public void RestartLevelWithFade()
+    {
+        RestartLevelServerRpc();
+    }
+
+    [Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Everyone)]
+    private void RestartLevelServerRpc()
+    {
+        RestartLevelClientRpc();
+    }
+
+    [ClientRpc]
+    private void RestartLevelClientRpc()
     {
         StartCoroutine(TransitionToRestartSequence());
     }
 
+    // ========================================================
+    // LOGIC CHECK KHOẢNG CÁCH (CHỈ SERVER LÀM ĐỂ TRÁNH LOẠN)
+    // ========================================================
     void Update()
     {
-        if (!isLevelComplete || isTransitioning) return;
+        // Thêm IsServer để ép chỉ máy Host mới được phép kiểm tra qua màn
+        if (!IsServer || !isLevelComplete.Value || isTransitioning) return;
 
         var keyboard = Keyboard.current;
         if (keyboard == null) return;
@@ -73,7 +114,8 @@ public class Floor1Manager : MonoBehaviour
             if (distA <= interactDistance && distB <= interactDistance)
             {
                 Debug.Log("Cả 2 đã ở cửa! Đang tải Tầng 2...");
-                StartCoroutine(TransitionToNextFloor());
+                // Báo cho mọi máy bắt đầu chạy hiệu ứng Fade qua màn
+                StartNextFloorSequenceClientRpc();
             }
             else
             {
@@ -82,7 +124,16 @@ public class Floor1Manager : MonoBehaviour
         }
     }
 
+    [ClientRpc]
+    private void StartNextFloorSequenceClientRpc()
+    {
+        StartCoroutine(TransitionToNextFloor());
+    }
 
+    // ========================================================
+    // CÁC COROUTINE CŨ CỦA ANH (GIỮ NGUYÊN 100% LOGIC)
+    // ========================================================
+    
     // 1. Tối dần đi rồi chuyển Scene
     IEnumerator TransitionToNextFloor()
     {
@@ -102,7 +153,12 @@ public class Floor1Manager : MonoBehaviour
                 yield return null;
             }
         }
-        SceneManager.LoadScene("GamePlayFloor2");
+        
+        // QUAN TRỌNG: Chỉ Server mới gọi lệnh LoadScene mạng
+        if (IsServer)
+        {
+            NetworkManager.Singleton.SceneManager.LoadScene("GamePlayFloor2", LoadSceneMode.Single);
+        }
     }
 
     // 2. Sáng dần lên lúc mới mở game
@@ -147,8 +203,16 @@ public class Floor1Manager : MonoBehaviour
         // Trả lại thời gian về 1 để Scene Menu chạy bình thường
         Time.timeScale = 1f;
         QuestPopupManager.hasAcceptedOnce = false;
+
+        // TẮT KẾT NỐI MẠNG TRƯỚC KHI VỀ MENU OFFLINE
+        if (NetworkManager.Singleton != null)
+        {
+            NetworkManager.Singleton.Shutdown();
+        }
+
         SceneManager.LoadScene(sceneName);
     }
+
     IEnumerator TransitionToRestartSequence()
     {
         if (fadeImage != null)
@@ -170,7 +234,10 @@ public class Floor1Manager : MonoBehaviour
         // QUAN TRỌNG: Trả lại thời gian về 1 để Scene mới chạy được
         Time.timeScale = 1f;
 
-        // Tải lại Scene hiện tại
-        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+        // Tải lại Scene hiện tại qua Mạng
+        if (IsServer)
+        {
+            NetworkManager.Singleton.SceneManager.LoadScene(SceneManager.GetActiveScene().name, LoadSceneMode.Single);
+        }
     }
 }
