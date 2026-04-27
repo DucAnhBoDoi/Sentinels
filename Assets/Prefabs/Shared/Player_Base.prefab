@@ -116,6 +116,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Game::HealthBar
   fillImage: {fileID: 5570254792774248013}
+  isWorldSpaceUI: 1
 --- !u!1 &1867486724572306899
 GameObject:
   m_ObjectHideFlags: 0
@@ -202,11 +203,14 @@ GameObject:
   m_Component:
   - component: {fileID: 2687663279687540997}
   - component: {fileID: 5804968018917270260}
-  - component: {fileID: 8820285107169415122}
+  - component: {fileID: 3041332698797393711}
   - component: {fileID: 7871425432186701587}
+  - component: {fileID: 8820285107169415122}
+  - component: {fileID: -1654742883904272430}
   - component: {fileID: 817826734284136216}
   - component: {fileID: 8807215235511917971}
   - component: {fileID: 5948954965589540947}
+  - component: {fileID: 6335019764961866872}
   m_Layer: 0
   m_Name: Player_Base
   m_TagString: Untagged
@@ -290,6 +294,54 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
+--- !u!114 &3041332698797393711
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3793757085749545316}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.Netcode.Runtime::Unity.Netcode.NetworkObject
+  GlobalObjectIdHash: 2269859424
+  InScenePlacedSourceGlobalObjectIdHash: 0
+  DeferredDespawnTick: 0
+  Ownership: 1
+  AlwaysReplicateAsRoot: 0
+  SynchronizeTransform: 1
+  ActiveSceneSynchronization: 0
+  SceneMigrationSynchronization: 1
+  SpawnWithObservers: 1
+  DontDestroyWithOwner: 0
+  AutoObjectParentSync: 1
+  SyncOwnerTransformWhenParented: 1
+  AllowOwnerToParent: 0
+--- !u!114 &7871425432186701587
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3793757085749545316}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 53696a7ade691fb48806543844f60973, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Game::PlayerMovement
+  ShowTopMostFoldoutHeaderGroup: 1
+  moveSpeed: 10
+  useQuestSystem: 1
+  rb: {fileID: 817826734284136216}
+  anim: {fileID: 5948954965589540947}
+  canAttack: 1
+  attackRange: 1.5
+  actionOffset: {x: 1.5, y: -1.3}
+  enemyLayer:
+    serializedVersion: 2
+    m_Bits: 1024
 --- !u!114 &8820285107169415122
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -305,7 +357,8 @@ MonoBehaviour:
   maxHealth: 10
   currentHealth: 0
   healthBar: {fileID: 1924381376755899375}
---- !u!114 &7871425432186701587
+  isOnPlatform: 0
+--- !u!114 &-1654742883904272430
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -314,19 +367,43 @@ MonoBehaviour:
   m_GameObject: {fileID: 3793757085749545316}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 53696a7ade691fb48806543844f60973, type: 3}
+  m_Script: {fileID: 11500000, guid: 6a846f431cba70e4ca1b0ed0c5519f52, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Game::PlayerMovement
-  moveSpeed: 10
-  useQuestSystem: 1
-  rb: {fileID: 817826734284136216}
-  anim: {fileID: 5948954965589540947}
-  canAttack: 1
-  attackRange: 1.5
-  actionOffset: {x: 1.5, y: -1.3}
-  enemyLayer:
-    serializedVersion: 2
-    m_Bits: 1024
+  m_EditorClassIdentifier: Game::ClientNetworkTransform
+  ShowTopMostFoldoutHeaderGroup: 1
+  NetworkTransformExpanded: 1
+  AutoOwnerAuthorityTickOffset: 1
+  PositionInterpolationType: 0
+  RotationInterpolationType: 0
+  ScaleInterpolationType: 0
+  PositionLerpSmoothing: 1
+  PositionMaxInterpolationTime: 0.05
+  RotationLerpSmoothing: 1
+  RotationMaxInterpolationTime: 0.1
+  ScaleLerpSmoothing: 0
+  ScaleMaxInterpolationTime: 0.1
+  AuthorityMode: 1
+  TickSyncChildren: 0
+  UseUnreliableDeltas: 0
+  SyncPositionX: 1
+  SyncPositionY: 1
+  SyncPositionZ: 1
+  SyncRotAngleX: 1
+  SyncRotAngleY: 1
+  SyncRotAngleZ: 1
+  SyncScaleX: 1
+  SyncScaleY: 1
+  SyncScaleZ: 1
+  PositionThreshold: 0.001
+  RotAngleThreshold: 0.01
+  ScaleThreshold: 0.01
+  UseQuaternionSynchronization: 0
+  UseQuaternionCompression: 0
+  UseHalfFloatPrecision: 0
+  InLocalSpace: 0
+  SwitchTransformSpaceWhenParented: 0
+  Interpolate: 1
+  SlerpPosition: 0
 --- !u!50 &817826734284136216
 Rigidbody2D:
   serializedVersion: 5
@@ -350,7 +427,7 @@ Rigidbody2D:
   m_ExcludeLayers:
     serializedVersion: 2
     m_Bits: 0
-  m_Interpolate: 1
+  m_Interpolate: 0
   m_SleepingMode: 1
   m_CollisionDetection: 0
   m_Constraints: 4
@@ -422,6 +499,23 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
+--- !u!114 &6335019764961866872
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3793757085749545316}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 80d7c879794dfda4687da0e400131852, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.Netcode.Runtime::Unity.Netcode.Components.NetworkRigidbody2D
+  ShowTopMostFoldoutHeaderGroup: 1
+  NetworkRigidbodyBaseExpanded: 0
+  UseRigidBodyForMotion: 0
+  AutoUpdateKinematicState: 1
+  AutoSetKinematicOnDespawn: 1
 --- !u!1 &5225471631246282625
 GameObject:
   m_ObjectHideFlags: 0

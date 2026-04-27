@@ -8,6 +8,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 817826734284136216, guid: f7c9740856e52f148a3600a63e40adba, type: 3}
+      propertyPath: m_Interpolate
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 2141998775718801224, guid: f7c9740856e52f148a3600a63e40adba, type: 3}
       propertyPath: m_Enabled
       value: 1
@@ -52,6 +56,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 3041332698797393711, guid: f7c9740856e52f148a3600a63e40adba, type: 3}
+      propertyPath: GlobalObjectIdHash
+      value: 4246663098
+      objectReference: {fileID: 0}
     - target: {fileID: 3793757085749545316, guid: f7c9740856e52f148a3600a63e40adba, type: 3}
       propertyPath: m_Name
       value: Player_B_Mechanic
@@ -59,5 +67,54 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 3793757085749545316, guid: f7c9740856e52f148a3600a63e40adba, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: -4411585184005105339}
   m_SourcePrefab: {fileID: 100100000, guid: f7c9740856e52f148a3600a63e40adba, type: 3}
+--- !u!95 &2028765687861889858 stripped
+Animator:
+  m_CorrespondingSourceObject: {fileID: 5948954965589540947, guid: f7c9740856e52f148a3600a63e40adba, type: 3}
+  m_PrefabInstance: {fileID: 5668185444311927569}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &8795338042076922485 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 3793757085749545316, guid: f7c9740856e52f148a3600a63e40adba, type: 3}
+  m_PrefabInstance: {fileID: 5668185444311927569}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &-4411585184005105339
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8795338042076922485}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e8d0727d5ae3244e3b569694d3912374, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.Netcode.Runtime::Unity.Netcode.Components.NetworkAnimator
+  ShowTopMostFoldoutHeaderGroup: 1
+  NetworkAnimatorExpanded: 0
+  AuthorityMode: 1
+  m_Animator: {fileID: 2028765687861889858}
+  TransitionStateInfoList: []
+  AnimatorParameterEntries:
+    ParameterEntries:
+    - name: isRunning
+      NameHash: 1239866031
+      Synchronize: 1
+      ParameterType: 4
+    - name: isRolling
+      NameHash: 996303033
+      Synchronize: 1
+      ParameterType: 9
+    - name: isAttacking
+      NameHash: 973584577
+      Synchronize: 1
+      ParameterType: 9
+    - name: isDead
+      NameHash: 1276664872
+      Synchronize: 1
+      ParameterType: 9
+  AnimatorParametersExpanded: 0

@@ -1,8 +1,10 @@
 using System.Collections.Generic;
 using UnityEngine;
+using Unity.Netcode;
 
-public class GraphGenerator : MonoBehaviour
+public class GraphGenerator : NetworkBehaviour
 {
+    public NetworkObject SpawnLocation; 
     [Header("Prefabs từ thư mục Floor1")]
     public GameObject nodePrefab; 
     public GameObject wirePrefab; 
@@ -20,16 +22,17 @@ public class GraphGenerator : MonoBehaviour
     public int maxRetries = 100; 
     [Range(0f, 1f)]
     public float turnProbability = 0.8f; 
-    
-    //Quy định khoảng cách tối thiểu để ép dây lan tỏa ra xa
     public float wireSpacing = 2f; 
 
     private List<Vector2> visitedPositions = new List<Vector2>();
     private List<GameObject> spawnedObjects = new List<GameObject>(); 
 
-    void Start()
+    public override void OnNetworkSpawn()
     {
-        GenerateWithRetries();
+       if (IsServer)
+        {
+            Invoke(nameof(GenerateWithRetries), 0.5f);
+        }
     }
 
     void GenerateWithRetries()
@@ -39,10 +42,23 @@ public class GraphGenerator : MonoBehaviour
             if (TryGeneratePath())
             {
                 Debug.Log($"<color=green>Sinh map Tầng 1 THÀNH CÔNG sau {attempt} lần thử lại!</color>");
+                
+                // SỬA LỖI TRIỆT ĐỂ TẠI ĐÂY: 
+                // Khi thuật toán đã vẽ map thành công 100%, ta mới bắt đầu báo cho Client Spawn mạng
+                foreach (GameObject obj in spawnedObjects)
+                {
+                    var netObj = obj.GetComponent<NetworkObject>();
+                    if (!netObj.IsSpawned)
+                    {
+                        netObj.Spawn(true);
+                        netObj.TrySetParent(SpawnLocation);
+                    }
+                }
                 return;
             }
             else
             {
+                // Nếu vẽ lỗi, ta xóa nháp đi (Lúc này vật thể chưa lên mạng nên không sợ sập mạng Client)
                 ClearPath();
             }
         }
@@ -51,7 +67,11 @@ public class GraphGenerator : MonoBehaviour
 
     void ClearPath()
     {
-        foreach (GameObject obj in spawnedObjects) Destroy(obj);
+        foreach (GameObject obj in spawnedObjects) 
+        {
+            // Vì chưa gọi Spawn lên mạng, ta chỉ cần Destroy bình thường
+            Destroy(obj);
+        }
         spawnedObjects.Clear();
         visitedPositions.Clear();
     }
@@ -63,7 +83,9 @@ public class GraphGenerator : MonoBehaviour
 
         for (int i = 0; i < numberOfNodes; i++)
         {
-            GameObject node = Instantiate(nodePrefab, currentPos, Quaternion.identity, transform);
+            // 1. TẠO NHÁP: Khởi tạo thẳng ở currentPos, KHÔNG GỌI Spawn() ở đây
+            GameObject node = Instantiate(nodePrefab, currentPos, Quaternion.identity);
+            
             spawnedObjects.Add(node);
             visitedPositions.Add(currentPos);
 
@@ -87,7 +109,10 @@ public class GraphGenerator : MonoBehaviour
             {
                 currentPos += direction * tileSize;
                 float angle = (direction.y != 0) ? 90f : 0f;
-                GameObject wire = Instantiate(wirePrefab, currentPos, Quaternion.Euler(0, 0, angle), transform);
+
+                // 2. TẠO NHÁP: Khởi tạo thẳng ở currentPos, KHÔNG GỌI Spawn() ở đây
+                GameObject wire = Instantiate(wirePrefab, currentPos, Quaternion.Euler(0, 0, angle));
+                
                 spawnedObjects.Add(wire);
                 visitedPositions.Add(currentPos);
             }
@@ -126,11 +151,9 @@ public class GraphGenerator : MonoBehaviour
             {
                 Vector2 checkPos = current + (dir * tileSize * step);
                 
-                //Kiểm tra đâm Tường
                 Collider2D hitCollider = Physics2D.OverlapCircle(checkPos, 0.3f, obstacleLayer);
                 if (hitCollider != null) { isPathClear = false; break; }
 
-                //Kiểm tra khoảng cách với toàn bộ hệ thống dây cũ
                 foreach (Vector2 oldPos in visitedPositions)
                 {
                     if (Vector2.Distance(checkPos, oldPos) < wireSpacing * tileSize)

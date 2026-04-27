@@ -153045,6 +153045,7 @@ MonoBehaviour:
   rateEasy: 2.5
   rateHard: 0.5
   rateInsane: 0.15
+  maxEnemies: 20
   spawnPoints:
   - {fileID: 632602178}
   - {fileID: 213506616}
@@ -153054,6 +153055,9 @@ MonoBehaviour:
   - {fileID: 514768785}
   - {fileID: 1512967250}
   - {fileID: 166782627}
+  spawnRadius: 1.5
+  minSpawnDistance: 1.2
+  minSpawnInterval: 0.8
 --- !u!4 &2034537304
 Transform:
   m_ObjectHideFlags: 0

@@ -1,10 +1,8 @@
-// ══════════════════════════════════════════════════════
-// FILE: Floor1_Control.cs (Đã fix lỗi chớp đèn bằng LateUpdate)
-// ══════════════════════════════════════════════════════
 using UnityEngine;
 using UnityEngine.InputSystem;
+using Unity.Netcode;
 
-public class Floor1_Control : MonoBehaviour
+public class Floor1_Control : NetworkBehaviour
 {
     public enum PlayerType { PlayerA, PlayerB }
     public PlayerType playerType;
@@ -12,41 +10,62 @@ public class Floor1_Control : MonoBehaviour
     [Header("Cài đặt Player A (Đèn pin)")]
     public Transform flashlightTransform;
 
+    public NetworkVariable<bool> isFlashlightOn = new NetworkVariable<bool>(
+        false, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
+
+    public NetworkVariable<float> flashlightAngle = new NetworkVariable<float>(
+        0f, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
+
     [Header("Cài đặt Player B (Sửa điện)")]
     public float interactRange = 1.5f;
     public Vector2 actionOffset;
 
-    void Start()
+    public override void OnNetworkSpawn()
     {
-        // Tự động tắt đèn lúc mới vào game (Chỉ áp dụng cho Player A)
-        if (playerType == PlayerType.PlayerA && flashlightTransform != null)
+        isFlashlightOn.OnValueChanged += OnFlashlightStateChanged;
+
+        if (flashlightTransform != null && playerType == PlayerType.PlayerA)
         {
-            flashlightTransform.gameObject.SetActive(false);
+            flashlightTransform.gameObject.SetActive(isFlashlightOn.Value);
+        }
+    }
+
+    public override void OnNetworkDespawn()
+    {
+        isFlashlightOn.OnValueChanged -= OnFlashlightStateChanged;
+    }
+
+    private void OnFlashlightStateChanged(bool previousState, bool newState)
+    {
+        if (flashlightTransform != null && playerType == PlayerType.PlayerA)
+        {
+            flashlightTransform.gameObject.SetActive(newState);
         }
     }
 
     void Update()
     {
+        // --- CHỐT CHẶN BẢO VỆ MẠNG ---
+        // Nếu Server/Client đã đóng, lập tức dừng mọi thao tác gửi dữ liệu
+        if (!IsSpawned || NetworkManager.Singleton == null || !NetworkManager.Singleton.IsListening) 
+        {
+            return;
+        }
+
+        if (!IsOwner) return;
+
         if (!QuestPopupManager.isGameStarted) return;
 
         var keyboard = Keyboard.current;
         if (keyboard == null) return;
 
-        // ----------------------------------------------------
-        // LOGIC PLAYER A (Chỉ bắt phím bật/tắt)
-        // ----------------------------------------------------
         if (playerType == PlayerType.PlayerA)
         {
-            if (keyboard.fKey.wasPressedThisFrame && flashlightTransform != null)
+            if (keyboard.fKey.wasPressedThisFrame)
             {
-                bool isLightOn = flashlightTransform.gameObject.activeSelf;
-                flashlightTransform.gameObject.SetActive(!isLightOn);
+                isFlashlightOn.Value = !isFlashlightOn.Value;
             }
         }
-
-        // ----------------------------------------------------
-        // LOGIC PLAYER B (Bắt phím E để sửa điện)
-        // ----------------------------------------------------
         else if (playerType == PlayerType.PlayerB)
         {
             if (keyboard.eKey.wasPressedThisFrame) PerformRepair();
@@ -57,12 +76,17 @@ public class Floor1_Control : MonoBehaviour
         }
     }
 
-    // ----------------------------------------------------
-    // LATE UPDATE: Đảm bảo đèn pin xoay mượt mà, KHÔNG bị chớp
-    // ----------------------------------------------------
     void LateUpdate()
     {
-        if (playerType == PlayerType.PlayerA && flashlightTransform != null && flashlightTransform.gameObject.activeSelf)
+        // --- CHỐT CHẶN BẢO VỆ MẠNG LÚC OUT GAME ---
+        if (!IsSpawned || NetworkManager.Singleton == null || !NetworkManager.Singleton.IsListening) 
+        {
+            return;
+        }
+
+        if (playerType != PlayerType.PlayerA || flashlightTransform == null) return;
+
+        if (IsOwner)
         {
             if (Mouse.current == null || Camera.main == null) return;
 
@@ -74,6 +98,14 @@ public class Floor1_Control : MonoBehaviour
             float angle = Mathf.Atan2(lookDirection.y, lookDirection.x) * Mathf.Rad2Deg;
 
             flashlightTransform.rotation = Quaternion.Euler(0, 0, angle - 90f);
+            
+            // Lệnh ghi vào biến mạng này từng gây lỗi vàng nếu không có chốt chặn ở trên
+            flashlightAngle.Value = angle;
+        }
+        else
+        {
+            Quaternion targetRotation = Quaternion.Euler(0, 0, flashlightAngle.Value - 90f);
+            flashlightTransform.rotation = Quaternion.Lerp(flashlightTransform.rotation, targetRotation, Time.deltaTime * 15f);
         }
     }
 

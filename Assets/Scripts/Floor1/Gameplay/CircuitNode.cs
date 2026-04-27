@@ -1,9 +1,15 @@
 using UnityEngine;
+using Unity.Netcode;
 
-public class CircuitNode : MonoBehaviour
+public class CircuitNode : NetworkBehaviour
 {
     private SpriteRenderer spriteRenderer;
-    public bool isFixed = false;
+    
+    public NetworkVariable<bool> isFixedNet = new NetworkVariable<bool>(
+        false, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
+
+    public NetworkVariable<bool> isVisibleNet = new NetworkVariable<bool>(
+        false, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
 
     [Header("Đánh dấu loại Prefab")]
     public bool isWire = false;
@@ -12,31 +18,69 @@ public class CircuitNode : MonoBehaviour
     public Sprite darkSprite;
     public Sprite glowingSprite;
 
-    void Start()
+    void Awake()
     {
         spriteRenderer = GetComponent<SpriteRenderer>();
-        spriteRenderer.sprite = darkSprite;
-        SetVisibility(false);
+        if (spriteRenderer != null) 
+        {
+            spriteRenderer.sprite = darkSprite;
+            // Chỉnh cứng: Tắt hiển thị thay vì đổi màu mờ
+            spriteRenderer.enabled = false; 
+        }
     }
 
-    public void FixNode()
+    public override void OnNetworkSpawn()
     {
-        if (!isFixed)
-        {
-            isFixed = true;
-            spriteRenderer.sprite = glowingSprite;
-            PropagateElectricity();
+        isFixedNet.OnValueChanged += OnNodeFixed;
+        
+        isVisibleNet.OnValueChanged += (oldVal, newVal) => {
+            SetVisibility(newVal);
+        };
 
-            if (!isWire && PowerGridManager.Instance != null)
+        if (isFixedNet.Value)
+        {
+            if (spriteRenderer != null) spriteRenderer.sprite = glowingSprite;
+        }
+        
+        SetVisibility(isVisibleNet.Value);
+    }
+
+    public override void OnNetworkDespawn()
+    {
+        isFixedNet.OnValueChanged -= OnNodeFixed;
+        isVisibleNet.OnValueChanged -= (oldVal, newVal) => SetVisibility(newVal);
+    }
+
+    private void OnNodeFixed(bool previous, bool current)
+    {
+        if (current && !previous) 
+        {
+            if (spriteRenderer != null) spriteRenderer.sprite = glowingSprite; 
+
+            if (IsServer)
             {
-                PowerGridManager.Instance.AddFixedNode();
+                PropagateElectricity();
+                if (!isWire && PowerGridManager.Instance != null)
+                {
+                    PowerGridManager.Instance.AddFixedNode();
+                }
             }
         }
     }
 
+    public void FixNode()
+    {
+        if (!isFixedNet.Value) FixNodeServerRpc();
+    }
+
+    [Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Everyone)]
+    private void FixNodeServerRpc()
+    {
+        if (!isFixedNet.Value) isFixedNet.Value = true; 
+    }
+
     void PropagateElectricity()
     {
-        // Kiểm tra 4 ô xung quanh (trên, dưới, trái, phải) cách 1 đơn vị
         Vector2[] positionsToCheck = {
             (Vector2)transform.position + Vector2.up,
             (Vector2)transform.position + Vector2.down,
@@ -46,15 +90,13 @@ public class CircuitNode : MonoBehaviour
 
         foreach (Vector2 pos in positionsToCheck)
         {
-            // Tìm xem có mạch điện nào ở ô đó không
             Collider2D[] colliders = Physics2D.OverlapPointAll(pos);
             foreach (Collider2D col in colliders)
             {
                 CircuitNode neighbor = col.GetComponent<CircuitNode>();
-                
-                if (neighbor != null && neighbor != this && !neighbor.isFixed && neighbor.isWire)
+                if (neighbor != null && neighbor != this && !neighbor.isFixedNet.Value && neighbor.isWire)
                 {
-                    neighbor.FixNode(); 
+                    neighbor.isFixedNet.Value = true; 
                 }
             }
         }
@@ -62,18 +104,31 @@ public class CircuitNode : MonoBehaviour
 
     public void SetVisibility(bool isVisible)
     {
+        if (spriteRenderer == null) return;
+        
+        // Bật tắt hẳn hình ảnh, đảm bảo Client 100% nhận lệnh
+        spriteRenderer.enabled = isVisible;
+        
+        // Vẫn giữ lệnh chỉnh màu a=1 để an toàn nếu prefab lỡ lưu màu mờ
         Color color = spriteRenderer.color;
-        color.a = isVisible ? 1f : 0f;
+        color.a = 1f; 
         spriteRenderer.color = color;
     }
 
     void OnTriggerEnter2D(Collider2D other)
     {
-        if (other.CompareTag("Flashlight")) SetVisibility(true);
+        if (IsServer && other.CompareTag("Flashlight")) isVisibleNet.Value = true;
+    }
+
+    // THÊM Hàm Stay: Đảm bảo nếu chuột vẩy nhanh quá Server lỡ nhịp thì nó gánh lại
+    void OnTriggerStay2D(Collider2D other)
+    {
+        if (IsServer && !isVisibleNet.Value && other.CompareTag("Flashlight"))
+            isVisibleNet.Value = true;
     }
 
     void OnTriggerExit2D(Collider2D other)
     {
-        if (other.CompareTag("Flashlight")) SetVisibility(false);
+        if (IsServer && other.CompareTag("Flashlight")) isVisibleNet.Value = false;
     }
 }

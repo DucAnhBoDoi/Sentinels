@@ -1,49 +1,72 @@
+// ══════════════════════════════════════════════════════
+// FILE: PowerGridManager.cs (Đã đồng bộ mạng)
+// ══════════════════════════════════════════════════════
 using UnityEngine;
 using TMPro; 
-using System.Collections;
+using Unity.Netcode; // 1. THÊM THƯ VIỆN MẠNG
 
-public class PowerGridManager : MonoBehaviour
+// 2. KẾ THỪA NETWORK BEHAVIOUR
+public class PowerGridManager : NetworkBehaviour
 {
     public static PowerGridManager Instance;
 
     [Header("UI Hiển thị")]
     public TextMeshProUGUI progressText; 
 
-    private int totalNodes = 0;
-    private int fixedNodes = 0;
+    // 3. ĐỔI BIẾN THƯỜNG THÀNH BIẾN MẠNG (Chỉ Server được sửa, Client chỉ được đọc)
+    private NetworkVariable<int> totalNodes = new NetworkVariable<int>(0);
+    private NetworkVariable<int> fixedNodes = new NetworkVariable<int>(0);
 
     void Awake() 
     { 
         if (Instance == null) Instance = this; 
     }
 
-    IEnumerator Start()
+    // 4. THAY HÀM START BẰNG ON NETWORK SPAWN
+    public override void OnNetworkSpawn()
     {
-        yield return new WaitForSeconds(1.5f);
+        // Khi Server cộng điểm, Client sẽ tự động cập nhật UI
+        fixedNodes.OnValueChanged += (prev, curr) => UpdateUI();
+        totalNodes.OnValueChanged += (prev, curr) => UpdateUI();
+        
+        UpdateUI();
 
+        // CHỈ SERVER MỚI ĐƯỢC QUYỀN ĐẾM MẠCH ĐIỆN
+        if (IsServer) 
+        {
+            // Delay một chút để chắc chắn GraphGenerator đã vẽ map xong
+            Invoke(nameof(CalculateNodes), 1.5f);
+        }
+    }
+
+    void CalculateNodes()
+    {
         CircuitNode[] allNodes = Object.FindObjectsByType<CircuitNode>(FindObjectsSortMode.None);
+        int count = 0;
         foreach (var node in allNodes)
         {
             if (!node.isWire) 
             {
-                totalNodes++;
+                count++;
             }
         }
         
-        UpdateUI();
-        Debug.Log($"[PowerGrid] Đã đếm được {totalNodes} Hộp nối cần sửa!");
+        totalNodes.Value = count; // Gán vào biến mạng, Client sẽ tự biết là 20
+        Debug.Log($"[PowerGrid] Đã đếm được {totalNodes.Value} Hộp nối cần sửa!");
     }
 
     public void AddFixedNode()
     {
-        fixedNodes++;
-        UpdateUI();
+        if (!IsServer) return; // Bảo mật: Chỉ Server được duyệt điểm
 
-        if (fixedNodes >= totalNodes && totalNodes > 0)
+        fixedNodes.Value++;
+
+        if (fixedNodes.Value >= totalNodes.Value && totalNodes.Value > 0)
         {
             if (Floor1Manager.Instance != null)
             {
-                Floor1Manager.Instance.LevelComplete();
+                // Gọi hàm qua màn bên Floor1Manager
+                Floor1Manager.Instance.LevelCompleteServerRpc();
             }
         }
     }
@@ -52,7 +75,7 @@ public class PowerGridManager : MonoBehaviour
     {
         if (progressText != null)
         {
-            progressText.text = $"Circuits: {fixedNodes}/{totalNodes}";
+            progressText.text = $"Circuits: {fixedNodes.Value}/{totalNodes.Value}";
         }
     }
 }

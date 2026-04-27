@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 using System.Collections;
-using UnityEngine.SceneManagement; // BẮT BUỘC có dòng này để lấy tên Tầng
+using UnityEngine.SceneManagement; 
 
 public class QuestPopupManager : MonoBehaviour
 {
@@ -20,28 +20,32 @@ public class QuestPopupManager : MonoBehaviour
     // BIẾN MỚI: Dùng để check xem đã qua Tầng mới chưa
     private static string lastSceneName = ""; 
 
+    // ---> THÊM HÀM NÀY ĐỂ XÓA TRÍ NHỚ KHI QUAY VỀ MENU <---
+    public static void ResetQuestState()
+    {
+        hasAcceptedOnce = false;
+        lastSceneName = "";
+        isGameStarted = false;
+    }
+
     void Start()
     {
-        // LẤY TÊN MÀN CHƠI HIỆN TẠI (Ví dụ: GamePlayFloor2)
         string currentScene = SceneManager.GetActiveScene().name;
         
-        // KIỂM TRA XEM CÓ VỪA QUA TẦNG KHÔNG
         if (lastSceneName != currentScene)
         {
-            hasAcceptedOnce = false; // Reset lại trạng thái để hiện Quest
-            lastSceneName = currentScene; // Lưu lại tên Tầng này
+            hasAcceptedOnce = false; 
+            lastSceneName = currentScene; 
         }
 
         acceptButton.onClick.AddListener(OnAcceptClicked);
 
-        // KIỂM TRA: Nếu đã từng Accept trước đó (Restart cùng 1 tầng)
         if (hasAcceptedOnce)
         {
             SkipQuestAndStart();
         }
         else
         {
-            // Nếu là lần đầu vào tầng này
             isGameStarted = false; 
             questPopup.SetActive(false);
             if (progressTextUI != null) progressTextUI.SetActive(false);
@@ -59,10 +63,9 @@ public class QuestPopupManager : MonoBehaviour
 
     IEnumerator ShowPopup()
     {
-        // Đợi 3 giây (Lúc này màn hình đang sáng dần lên)
         yield return new WaitForSeconds(3f);
         
-        if (!hasAcceptedOnce) // Chỉ hiện nếu chưa từng accept
+        if (!hasAcceptedOnce) 
         {
             questPopup.SetActive(true); 
         }
@@ -70,9 +73,9 @@ public class QuestPopupManager : MonoBehaviour
 
     void OnAcceptClicked()
     {
-        hasAcceptedOnce = true; // Đánh dấu đã accept
+        hasAcceptedOnce = true; 
         questPopup.SetActive(false); 
-        isGameStarted = true; // Bắt đầu cho phép di chuyển
+        isGameStarted = true; 
         if (progressTextUI != null) progressTextUI.SetActive(true);
     }
 }

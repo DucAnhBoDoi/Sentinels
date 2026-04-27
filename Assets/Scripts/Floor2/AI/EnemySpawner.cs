@@ -1,4 +1,5 @@
 using UnityEngine;
+using System.Collections.Generic;
 
 public class EnemySpawner : MonoBehaviour
 {
@@ -6,22 +7,32 @@ public class EnemySpawner : MonoBehaviour
     public GameObject enemyPrefab; 
     public bool canSpawn = true; 
 
-    [Header("Thiết lập tốc độ sinh (Spawn Rate)")]
-    public float rateEasy = 2.5f;   // Phút 7-3: Ra chậm
-    public float rateHard = 0.5f;   // Phút 3-2: Ra nhanh
-    public float rateInsane = 0.15f; // Phút 2-0: Ra cực nhanh (bão quái)
-    
-    [Header("Danh sách 8 miệng ống")]
+    [Header("Spawn Rate (càng lớn = càng chậm)")]
+    public float rateTutorial = 4.5f; // phút 7–4 (rất chậm)
+    public float rateEasy = 4.0f;     // phút 4–3
+    public float rateHard = 3.5f;     // phút 3 (ít quái)
+    public float rateInsane = 3.0f;   // phút 2 (không spam)
+
+    [Header("Giới hạn số lượng")]
+    public int maxEnemies = 3; // 🔥 luôn giữ ít
+
+    [Header("Spawn Points")]
     public Transform[] spawnPoints; 
 
-    private float nextSpawnTime;
-    private bool hasStartedTimer = false; 
-    private Floor2Manager fm;
-    private float totalStartTime;
+    [Header("Spawn Anti-Overlap")]
+    public float spawnRadius = 1.5f;
+    public float minSpawnDistance = 1.2f;
 
-    // Biến trạng thái để truyền cho quái
+    [Header("Anti Spam")]
+    public float minSpawnInterval = 2.5f; // 🔥 chậm rõ rệt
+
+    private float spawnTimer = 0f;
+    private Floor2Manager fm;
+
     private float currentDamageMultiplier = 1f;
     private float currentSpeedMultiplier = 1f;
+
+    private List<GameObject> currentEnemies = new List<GameObject>();
 
     void Start()
     {
@@ -32,78 +43,126 @@ public class EnemySpawner : MonoBehaviour
     {
         if (fm == null || !fm.timerIsRunning) return;
 
-        if (!hasStartedTimer) {
-            totalStartTime = fm.timeRemaining; // 420 giây
-            hasStartedTimer = true;
-        }
+        currentEnemies.RemoveAll(e => e == null);
+
+        if (currentEnemies.Count >= maxEnemies) return;
 
         float timeRemaining = fm.timeRemaining;
         float currentSpawnRate;
 
-        // --- HỆ THỐNG PHÂN CẤP ĐỘ KHÓ THEO TỪNG PHÚT ---
+        // ===== GIAI ĐOẠN =====
 
-        if (timeRemaining <= 120f) // PHÚT THỨ 2 -> 0: GIAI ĐOẠN SINH TỒN CUỐI
+        if (timeRemaining <= 120f) // 🔴 PHÚT 2
         {
-            currentDamageMultiplier = 2.0f; // Dame to gấp đôi
-            currentSpeedMultiplier = 1.5f;  // Bay rất nhanh
-            currentSpawnRate = rateInsane;  // Spawn cực dồn dập
+            currentDamageMultiplier = 1.8f;
+            currentSpeedMultiplier = 0.9f; // 🔥 CHẬM LẠI
+
+            currentSpawnRate = rateInsane;
         }
-        else if (timeRemaining <= 180f) // PHÚT THỨ 3 -> 2: GIAI ĐOẠN TĂNG TỐC
+        else if (timeRemaining <= 180f) // 🟡 PHÚT 3
         {
-            currentDamageMultiplier = 1.0f; 
-            currentSpeedMultiplier = 1.35f; // Bay nhanh hơn giai đoạn trước
-            currentSpawnRate = rateHard;    // Spawn nhanh
+            currentDamageMultiplier = 1.2f;
+            currentSpeedMultiplier = 1.1f; // 🔥 chỉ hơi nhanh
+
+            currentSpawnRate = rateHard;
         }
-        else if (timeRemaining <= 240f) // PHÚT THỨ 4 -> 3: BẮT ĐẦU TĂNG TỐC BAY
+        else if (timeRemaining <= 240f)
         {
             currentDamageMultiplier = 1.0f;
-            currentSpeedMultiplier = 1.2f;  // Bay nhanh hơn một tí
-            currentSpawnRate = rateEasy;    // Vẫn spawn từ từ
+            currentSpeedMultiplier = 1.05f;
+
+            currentSpawnRate = rateEasy;
         }
-        else // PHÚT 7 -> 4: GIAI ĐOẠN LÀM QUEN
+        else
         {
             currentDamageMultiplier = 1.0f;
-            currentSpeedMultiplier = 1.0f;  // Tốc độ bình thường
-            currentSpawnRate = rateEasy;    // Spawn chậm
+            currentSpeedMultiplier = 1.0f;
+
+            currentSpawnRate = rateTutorial;
         }
 
-        // Thực hiện Spawn
-        if (canSpawn && Time.time >= nextSpawnTime)
+        float finalRate = Mathf.Max(currentSpawnRate, minSpawnInterval);
+
+        spawnTimer += Time.deltaTime;
+
+        if (canSpawn && spawnTimer >= finalRate)
         {
-            SpawnOneEnemy();
-            nextSpawnTime = Time.time + currentSpawnRate;
+            SpawnSingle();
+            spawnTimer = 0f;
         }
     }
 
-    void SpawnOneEnemy()
+    void SpawnSingle()
     {
-        if (!canSpawn || spawnPoints.Length == 0 || enemyPrefab == null) return; 
+        if (!canSpawn || spawnPoints.Length == 0 || enemyPrefab == null) return;
 
         int randomIndex = Random.Range(0, spawnPoints.Length);
         Transform selectedPipe = spawnPoints[randomIndex];
 
-        GameObject newEnemy = Instantiate(enemyPrefab, selectedPipe.position, Quaternion.identity);
+        Vector2 spawnPos = GetValidSpawnPosition(selectedPipe.position);
 
-        BoidEnemy boidScript = newEnemy.GetComponent<BoidEnemy>();
-        if (boidScript != null)
+        GameObject newEnemy = Instantiate(enemyPrefab, spawnPos, Quaternion.identity);
+
+        currentEnemies.Add(newEnemy);
+
+        // 🔥 GIẢM TỐC NGAY TỪ LÚC SPAWN (QUAN TRỌNG NHẤT)
+        Rigidbody2D rb = newEnemy.GetComponent<Rigidbody2D>();
+        if (rb != null)
         {
-            boidScript.attackDamage *= currentDamageMultiplier;
-            boidScript.speed *= currentSpeedMultiplier;
-            
-            // Đổi màu để cảnh báo người chơi ở phút cuối (Phút thứ 2)
-            if (currentDamageMultiplier > 1.5f) {
-                SpriteRenderer sr = newEnemy.GetComponent<SpriteRenderer>();
-                if (sr != null) sr.color = Color.red; 
-            }
-            else if (currentSpeedMultiplier > 1.1f) {
-                // Phút thứ 4 trở đi quái hơi cam để báo hiệu bay nhanh
-                SpriteRenderer sr = newEnemy.GetComponent<SpriteRenderer>();
-                if (sr != null) sr.color = new Color(1f, 0.7f, 0.4f);
-            }
+            Vector2 randomDir = Random.insideUnitCircle.normalized;
+            rb.linearVelocity = randomDir * Random.Range(0.5f, 1.0f); // 🔥 CHẬM HƠN NHIỀU
         }
 
-        if (fm != null && !fm.timerIsRunning) fm.StartTimer();
+        BoidEnemy boid = newEnemy.GetComponent<BoidEnemy>();
+
+        if (boid != null)
+        {
+            boid.attackDamage *= currentDamageMultiplier;
+            boid.speed *= currentSpeedMultiplier;
+
+            SpriteRenderer sr = newEnemy.GetComponent<SpriteRenderer>();
+
+            if (currentDamageMultiplier > 1.5f)
+            {
+                if (sr != null) sr.color = Color.red; // phút 2
+            }
+            else if (currentSpeedMultiplier > 1.05f)
+            {
+                if (sr != null) sr.color = Color.yellow; // phút 3
+            }
+        }
     }
 
-    public void StopSpawning() { canSpawn = false; }
+    Vector2 GetValidSpawnPosition(Vector2 center)
+    {
+        for (int i = 0; i < 10; i++)
+        {
+            Vector2 randomPos = center + Random.insideUnitCircle * spawnRadius;
+
+            bool tooClose = false;
+
+            foreach (GameObject enemy in currentEnemies)
+            {
+                if (enemy == null) continue;
+
+                float dist = Vector2.Distance(randomPos, enemy.transform.position);
+
+                if (dist < minSpawnDistance)
+                {
+                    tooClose = true;
+                    break;
+                }
+            }
+
+            if (!tooClose)
+                return randomPos;
+        }
+
+        return center + Random.insideUnitCircle * spawnRadius;
+    }
+
+    public void StopSpawning()
+    {
+        canSpawn = false;
+    }
 }
