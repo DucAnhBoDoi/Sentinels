@@ -233,7 +233,7 @@ MonoBehaviour:
   - {fileID: 7252815116489233781, guid: 2abc7825c5c7ba245b6d7da0694cac76, type: 3}
   - {fileID: 274306847520254977, guid: 2504845a699bca744a617a6ba8d0b04f, type: 3}
   - {fileID: 6616368918902532391, guid: f5007eb7da5abad42a9f39eece965ae3, type: 3}
-  dropChance: 20
+  dropChance: 25
 --- !u!95 &7574980937321648585
 Animator:
   serializedVersion: 7

@@ -46,7 +46,6 @@ public class Floor1_Control : NetworkBehaviour
     void Update()
     {
         // --- CHỐT CHẶN BẢO VỆ MẠNG ---
-        // Nếu Server/Client đã đóng, lập tức dừng mọi thao tác gửi dữ liệu
         if (!IsSpawned || NetworkManager.Singleton == null || !NetworkManager.Singleton.IsListening) 
         {
             return;
@@ -99,7 +98,6 @@ public class Floor1_Control : NetworkBehaviour
 
             flashlightTransform.rotation = Quaternion.Euler(0, 0, angle - 90f);
             
-            // Lệnh ghi vào biến mạng này từng gây lỗi vàng nếu không có chốt chặn ở trên
             flashlightAngle.Value = angle;
         }
         else
@@ -118,11 +116,29 @@ public class Floor1_Control : NetworkBehaviour
         foreach (Collider2D col in Physics2D.OverlapCircleAll(centerPoint, interactRange))
         {
             var node = col.GetComponent<CircuitNode>();
-            if (node && !node.isWire && node.GetComponent<SpriteRenderer>().color.a > 0)
+            if (node && !node.isWire)
             {
-                node.FixNode();
-                Debug.Log("Player B: Đã sửa xong Hộp Nối!");
-                break;
+                // SỬA LỖI Ở ĐÂY: Dùng InfluenceMap để kiểm tra xem đèn pin có ĐANG chiếu trúng không
+                bool isIlluminated = false;
+                if (InfluenceMap.Instance != null)
+                {
+                    // Lấy cường độ sáng từ đèn pin soi vào vị trí của trạm điện
+                    // Hàm GetDangerValue() sẽ trả về > 0 nếu nằm trong vùng sáng
+                    float lightIntensity = InfluenceMap.Instance.GetDangerValue(node.transform.position);
+                    isIlluminated = lightIntensity > 0f;
+                }
+
+                // Điều kiện mới: Mạch điện đang hiện VÀ đèn pin của Người A đang soi trực tiếp vào nó
+                if (node.GetComponent<SpriteRenderer>().color.a > 0 && isIlluminated)
+                {
+                    node.FixNode();
+                    Debug.Log("Player B: Đã sửa xong Hộp Nối!");
+                    break;
+                }
+                else if (!isIlluminated)
+                {
+                    Debug.LogWarning("Player B: Không thể sửa! Người A chưa soi đèn trực tiếp vào hộp nối này!");
+                }
             }
         }
     }
