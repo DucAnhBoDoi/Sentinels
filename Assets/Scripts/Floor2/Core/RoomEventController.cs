@@ -1,8 +1,9 @@
 using UnityEngine;
 using TMPro; 
 using System.Collections;
+using Unity.Netcode;
 
-public class RoomEventController : MonoBehaviour
+public class RoomEventController : NetworkBehaviour
 {
     [Header("Đối tượng điều khiển")]
     public GameObject gate;            
@@ -10,35 +11,38 @@ public class RoomEventController : MonoBehaviour
     public EnemySpawner spawner;       
 
     [Header("UI cần ẩn/hiện")]
-    [Tooltip("Kéo Core_HealthBar vào đây để giấu nó lúc đầu")]
     public GameObject coreHealthBar; 
 
     [Header("Cài đặt")]
     public int countdownSeconds = 5;
-    private bool hasTriggered = false;
+    
+    // BIẾN MẠNG ĐỂ CẢ 2 KHÔNG KÍCH HOẠT 2 LẦN
+    private NetworkVariable<bool> hasTriggered = new NetworkVariable<bool>(false);
 
     void Start() {
         if (spawner != null) spawner.enabled = false;
-        
-        // Tắt chữ đếm ngược 5s lúc mới vào game
         if (timerText != null) timerText.gameObject.SetActive(false);
-
-        // TẮT LUÔN THANH MÁU CỦA LÕI LÚC MỚI VÀO GAME
         if (coreHealthBar != null) coreHealthBar.SetActive(false);
     }
 
     void OnTriggerEnter2D(Collider2D other) {
-        if (other.CompareTag("Player") && !hasTriggered) {
-            hasTriggered = true;
-            StartCoroutine(StartEventRoutine());
+        // CHỈ SERVER NHẬN DIỆN NGƯỜI CHƠI BƯỚC VÀO
+        if (!IsServer) return;
+
+        if (other.CompareTag("Player") && !hasTriggered.Value) {
+            hasTriggered.Value = true;
+            StartEventClientRpc(); // Báo cho cả 2 máy cùng chạy hiệu ứng
         }
     }
 
-    IEnumerator StartEventRoutine() {
-        // 1. Đóng cửa sập
-        if (gate != null) gate.SetActive(true);
+    [ClientRpc]
+    void StartEventClientRpc()
+    {
+        StartCoroutine(StartEventRoutine());
+    }
 
-        // 2. Chạy đếm ngược 5 giây
+    IEnumerator StartEventRoutine() {
+        if (gate != null) gate.SetActive(true);
         timerText.gameObject.SetActive(true);
         for (int i = countdownSeconds; i > 0; i--) {
             timerText.text = "ENEMIES INCOMING: " + i;
@@ -49,13 +53,11 @@ public class RoomEventController : MonoBehaviour
         yield return new WaitForSeconds(1f);
         timerText.gameObject.SetActive(false);
 
-        // 3. BẬT THANH MÁU CỦA LÕI LÊN
         if (coreHealthBar != null) coreHealthBar.SetActive(true);
+        
+        // CHỈ ĐỂ SERVER BẬT SPAWNER (Để Client không tự đẻ quái)
+        if (IsServer && spawner != null) spawner.enabled = true;
 
-        // 4. Kích hoạt bầy quái
-        if (spawner != null) spawner.enabled = true;
-
-        // 5. Bắt đầu tính giờ của Tầng 2 (Floor2Manager sẽ tự động hiện TimerText lên)
-        if (Floor2Manager.Instance != null) Floor2Manager.Instance.StartTimer();
+        if (Floor2Manager.Instance != null && IsServer) Floor2Manager.Instance.StartTimerServerRpc();
     }
 }

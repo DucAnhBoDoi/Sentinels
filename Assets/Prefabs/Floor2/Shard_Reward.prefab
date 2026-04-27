@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 4475798205792934927}
   - component: {fileID: 8703882260796478750}
   - component: {fileID: 5081730392513817637}
+  - component: {fileID: 8874991003053216087}
   - component: {fileID: 9127213448066639175}
   - component: {fileID: 1058404708419907401}
   m_Layer: 0
@@ -140,6 +141,31 @@ BoxCollider2D:
   m_AutoTiling: 0
   m_Size: {x: 2.25, y: 2.25}
   m_EdgeRadius: 0
+--- !u!114 &8874991003053216087
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1472214848267499036}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.Netcode.Runtime::Unity.Netcode.NetworkObject
+  GlobalObjectIdHash: 1380123761
+  InScenePlacedSourceGlobalObjectIdHash: 0
+  DeferredDespawnTick: 0
+  Ownership: 1
+  AlwaysReplicateAsRoot: 0
+  SynchronizeTransform: 1
+  ActiveSceneSynchronization: 0
+  SceneMigrationSynchronization: 1
+  SpawnWithObservers: 1
+  DontDestroyWithOwner: 0
+  AutoObjectParentSync: 1
+  SyncOwnerTransformWhenParented: 1
+  AllowOwnerToParent: 0
 --- !u!114 &9127213448066639175
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -152,6 +178,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f9ca305ca8391984cbd6546f749bac79, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Game::ShardCollector
+  ShowTopMostFoldoutHeaderGroup: 1
   floatAmplitude: 0.3
   floatFrequency: 2
   pickupRange: 2

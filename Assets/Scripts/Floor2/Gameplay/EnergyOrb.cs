@@ -1,8 +1,9 @@
 using UnityEngine;
 using System.Collections;
-using UnityEngine.InputSystem; 
+using UnityEngine.InputSystem;
+using Unity.Netcode;
 
-public class EnergyOrb : MonoBehaviour
+public class EnergyOrb : NetworkBehaviour
 {
     public enum OrbType { Health, SpeedBoost, StopTime }
     
@@ -23,87 +24,117 @@ public class EnergyOrb : MonoBehaviour
     void Start() { startPos = transform.position; }
 
     void Update() {
-        if (isCollected) return;
-
         float newY = startPos.y + Mathf.Sin(Time.time * frequency) * amplitude;
         transform.position = new Vector3(startPos.x, newY, startPos.z);
 
-        Collider2D[] colliders = Physics2D.OverlapCircleAll(transform.position, pickupRange, playerLayer);
-        foreach (Collider2D col in colliders) {
-            
-            PlayerHP ph = col.GetComponentInParent<PlayerHP>();
-            
-            if (ph != null && !ph.IsDead && Keyboard.current.fKey.wasPressedThisFrame) {
-                Collect(ph.gameObject);
-                break; 
+        if (!IsSpawned || isCollected) return;
+
+        if (Keyboard.current.fKey.wasPressedThisFrame) {
+            Collider2D[] colliders = Physics2D.OverlapCircleAll(transform.position, pickupRange, playerLayer);
+            foreach (Collider2D col in colliders) {
+                NetworkObject playerNetObj = col.GetComponentInParent<NetworkObject>();
+                
+                if (playerNetObj != null && playerNetObj.IsOwner) {
+                    PlayerHP ph = col.GetComponentInParent<PlayerHP>();
+                    if (ph != null && !ph.IsDead) {
+                        ClaimOrbServerRpc(playerNetObj.NetworkObjectId);
+                        break; 
+                    }
+                }
             }
         }
     }
 
-    void Collect(GameObject collector) {
+    [Rpc(SendTo.Server)]
+    void ClaimOrbServerRpc(ulong playerNetworkObjectId) {
+        if (isCollected) return;
         isCollected = true;
-        ApplyEffect(collector);
-        
-        GetComponent<SpriteRenderer>().enabled = false;
-        GetComponent<Collider2D>().enabled = false;
 
-        // Chỉ có StopTime mới cần giữ object sống để chạy Coroutine giải băng quái
-        if (type == OrbType.StopTime) Destroy(gameObject, duration + 0.5f);
-        else Destroy(gameObject); // Máu và Tốc độ ăn xong là xóa luôn cho nhẹ máy
-    }
+        ApplyEffectClientRpc(playerNetworkObjectId);
 
-    void ApplyEffect(GameObject playerObj) {
-        switch (type) {
-            case OrbType.Health:
-                PlayerHP ph = playerObj.GetComponent<PlayerHP>();
-                if (ph != null) ph.Heal(50f); 
-                break;
-
-            case OrbType.SpeedBoost:
-                PlayerMovement pm = playerObj.GetComponent<PlayerMovement>();
-                if (pm != null) 
-                {
-                    // Tìm xem Player đã có cái đồng hồ đếm giờ chưa, chưa có thì gắn vào
-                    SpeedBoostTracker tracker = playerObj.GetComponent<SpeedBoostTracker>();
-                    if (tracker == null) tracker = playerObj.AddComponent<SpeedBoostTracker>();
-                    
-                    // Kích hoạt hoặc Reset thời gian
-                    tracker.ApplyBoost(pm, speedBoostValue, duration);
-                }
-                break;
-
-            case OrbType.StopTime:
-                StartCoroutine(StopTimeCoroutine());
-                break;
+        if (type == OrbType.StopTime) {
+            StartCoroutine(StopTimeCoroutineServer()); 
+            HideOrbClientRpc(); 
+        } else {
+            NetworkObject.Despawn(true); 
         }
     }
 
-    IEnumerator StopTimeCoroutine() {
+    [ClientRpc]
+    void HideOrbClientRpc() {
+        GetComponent<SpriteRenderer>().enabled = false;
+        GetComponent<Collider2D>().enabled = false;
+    }
+
+    [ClientRpc]
+    void ApplyEffectClientRpc(ulong playerNetworkObjectId) {
+        if (!NetworkManager.Singleton.SpawnManager.SpawnedObjects.TryGetValue(playerNetworkObjectId, out NetworkObject playerObj)) return;
+        
+        GameObject collector = playerObj.gameObject;
+
+        if (type == OrbType.Health) {
+            PlayerHP ph = collector.GetComponent<PlayerHP>();
+            if (ph != null && ph.IsOwner) ph.Heal(50f); 
+        }
+        else if (type == OrbType.SpeedBoost) {
+            PlayerMovement pm = collector.GetComponent<PlayerMovement>();
+            if (pm != null && pm.IsOwner) {
+                SpeedBoostTracker tracker = collector.GetComponent<SpeedBoostTracker>();
+                if (tracker == null) tracker = collector.AddComponent<SpeedBoostTracker>();
+                tracker.ApplyBoost(pm, speedBoostValue, duration);
+            }
+        }
+    }
+
+    // =============================================================
+    // HÀM MẠNG: BẢO TẤT CẢ CLIENT ĐÓNG BĂNG/GIẢI ĐÔNG ANIMATION QUÁI
+    // =============================================================
+    [ClientRpc]
+    void SetEnemyAnimationSpeedClientRpc(bool isFrozen) {
         GameObject[] enemies = GameObject.FindGameObjectsWithTag("Enemy");
         foreach (GameObject enemy in enemies) {
             if (enemy == null) continue;
-            MonoBehaviour[] scripts = enemy.GetComponents<MonoBehaviour>();
-            foreach (var s in scripts) { if (s != this) s.enabled = false; }
+            Animator anim = enemy.GetComponent<Animator>();
+            // Nếu đóng băng thì speed = 0, giải đông thì speed = 1
+            if (anim != null) anim.speed = isFrozen ? 0f : 1f; 
+        }
+    }
+
+    IEnumerator StopTimeCoroutineServer() {
+        // BƯỚC 1: Xử lý logic khóa quái trên Server
+        GameObject[] enemies = GameObject.FindGameObjectsWithTag("Enemy");
+        foreach (GameObject enemy in enemies) {
+            if (enemy == null) continue;
+            
+            BoidEnemy boid = enemy.GetComponent<BoidEnemy>();
+            if (boid != null) boid.enabled = false;
+
             Rigidbody2D rb = enemy.GetComponent<Rigidbody2D>();
             if (rb != null) rb.linearVelocity = Vector2.zero;
-            Animator anim = enemy.GetComponent<Animator>();
-            if (anim != null) anim.speed = 0;
         }
+        
+        // BƯỚC 2: Gọi lệnh báo cho tất cả Client (bao gồm cả Host) đóng băng hình ảnh
+        SetEnemyAnimationSpeedClientRpc(true);
+        
         yield return new WaitForSeconds(duration);
+        
+        // BƯỚC 3: Hết thời gian, mở khóa logic trên Server
         GameObject[] activeEnemies = GameObject.FindGameObjectsWithTag("Enemy");
         foreach (GameObject enemy in activeEnemies) {
             if (enemy == null) continue;
-            MonoBehaviour[] scripts = enemy.GetComponents<MonoBehaviour>();
-            foreach (var s in scripts) s.enabled = true;
-            Animator anim = enemy.GetComponent<Animator>();
-            if (anim != null) anim.speed = 1;
+            
+            BoidEnemy boid = enemy.GetComponent<BoidEnemy>();
+            if (boid != null) boid.enabled = true;
         }
+
+        // BƯỚC 4: Báo cho Client mở khóa hình ảnh
+        SetEnemyAnimationSpeedClientRpc(false);
+
+        NetworkObject.Despawn(true); 
     }
 }
 
-// =====================================================================
-// CLASS MỚI: ĐỒNG HỒ THEO DÕI TỐC ĐỘ (Gắn tạm lên Player khi ăn buff)
-// =====================================================================
+// CLASS ĐỒNG HỒ THEO DÕI TỐC ĐỘ
 public class SpeedBoostTracker : MonoBehaviour
 {
     private PlayerMovement pm;
@@ -113,15 +144,11 @@ public class SpeedBoostTracker : MonoBehaviour
     public void ApplyBoost(PlayerMovement playerMovement, float boostValue, float duration)
     {
         pm = playerMovement;
-        
-        // Nếu ĐANG CHƯA CÓ tốc độ cộng thêm thì mới cộng (Chống cộng dồn)
         if (currentBoost == 0f)
         {
             currentBoost = boostValue;
             pm.moveSpeed += currentBoost;
         }
-        
-        // Dù mới ăn cục đầu hay ăn cục thứ 10, cứ reset đồng hồ về 5 giây
         timeLeft = duration;
     }
 
@@ -130,12 +157,10 @@ public class SpeedBoostTracker : MonoBehaviour
         if (timeLeft > 0)
         {
             timeLeft -= Time.deltaTime;
-            
-            // Khi đếm ngược về 0 (Hết tác dụng)
             if (timeLeft <= 0)
             {
-                if (pm != null) pm.moveSpeed -= currentBoost; // Trừ đi đúng lượng đã cộng
-                Destroy(this); // Xóa luôn cái đồng hồ này khỏi Player cho sạch sẽ
+                if (pm != null) pm.moveSpeed -= currentBoost; 
+                Destroy(this); 
             }
         }
     }

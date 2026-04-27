@@ -365,6 +365,7 @@ GameObject:
   m_Component:
   - component: {fileID: 225527510}
   - component: {fileID: 225527509}
+  - component: {fileID: 225527511}
   - component: {fileID: 225527508}
   m_Layer: 0
   m_Name: EventTrigger
@@ -385,6 +386,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7c59357314cb1aa44951ec81edfdd289, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Game::RoomEventController
+  ShowTopMostFoldoutHeaderGroup: 1
   gate: {fileID: 1513422515}
   timerText: {fileID: 372045610}
   spawner: {fileID: 2034537303}
@@ -451,6 +453,31 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1339990389}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &225527511
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 225527507}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.Netcode.Runtime::Unity.Netcode.NetworkObject
+  GlobalObjectIdHash: 3808772719
+  InScenePlacedSourceGlobalObjectIdHash: 0
+  DeferredDespawnTick: 0
+  Ownership: 1
+  AlwaysReplicateAsRoot: 0
+  SynchronizeTransform: 1
+  ActiveSceneSynchronization: 0
+  SceneMigrationSynchronization: 0
+  SpawnWithObservers: 1
+  DontDestroyWithOwner: 0
+  AutoObjectParentSync: 1
+  SyncOwnerTransformWhenParented: 1
+  AllowOwnerToParent: 0
 --- !u!1 &363454385 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 8795338042076922485, guid: 3217c01adf567a84ba9ef2d237ef19ac, type: 3}
@@ -98854,6 +98881,7 @@ GameObject:
   m_Component:
   - component: {fileID: 751530703}
   - component: {fileID: 751530706}
+  - component: {fileID: 751530709}
   - component: {fileID: 751530708}
   - component: {fileID: 751530707}
   m_Layer: 0
@@ -98905,8 +98933,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 49eff85f886a02c4b86514354f698122, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Game::Floor2Manager
-  timeRemaining: 420
-  timerIsRunning: 0
+  ShowTopMostFoldoutHeaderGroup: 1
+  initialTime: 420
+  timeRemaining:
+    m_InternalValue: 300
+  timerIsRunning:
+    m_InternalValue: 0
   timeText: {fileID: 1601721300}
   coreHealthBar: {fileID: 728145812}
   shardPrefab: {fileID: 1472214848267499036, guid: 81aff8254ed80214f9cdf29ce9d98e97, type: 3}
@@ -98930,9 +98962,35 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 26e1fcd94e74cb241979d6bad79a969c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Game::GameOverManager
+  ShowTopMostFoldoutHeaderGroup: 1
   gameOverPanel: {fileID: 1153044397}
   restartButton: {fileID: 1753437994}
   quitButton: {fileID: 2006349803}
+--- !u!114 &751530709
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 751530702}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.Netcode.Runtime::Unity.Netcode.NetworkObject
+  GlobalObjectIdHash: 11340412
+  InScenePlacedSourceGlobalObjectIdHash: 0
+  DeferredDespawnTick: 0
+  Ownership: 1
+  AlwaysReplicateAsRoot: 0
+  SynchronizeTransform: 1
+  ActiveSceneSynchronization: 0
+  SceneMigrationSynchronization: 0
+  SpawnWithObservers: 1
+  DontDestroyWithOwner: 0
+  AutoObjectParentSync: 1
+  SyncOwnerTransformWhenParented: 1
+  AllowOwnerToParent: 0
 --- !u!1 &803604031
 GameObject:
   m_ObjectHideFlags: 0
@@ -100239,6 +100297,18 @@ PrefabInstance:
       propertyPath: maxHealth
       value: 100
       objectReference: {fileID: 0}
+    - target: {fileID: 7250104187539278910, guid: 3217c01adf567a84ba9ef2d237ef19ac, type: 3}
+      propertyPath: GlobalObjectIdHash
+      value: 3574306930
+      objectReference: {fileID: 0}
+    - target: {fileID: 7250104187539278910, guid: 3217c01adf567a84ba9ef2d237ef19ac, type: 3}
+      propertyPath: SceneMigrationSynchronization
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7250104187539278910, guid: 3217c01adf567a84ba9ef2d237ef19ac, type: 3}
+      propertyPath: InScenePlacedSourceGlobalObjectIdHash
+      value: 4246663098
+      objectReference: {fileID: 0}
     - target: {fileID: 7774636970644580884, guid: 3217c01adf567a84ba9ef2d237ef19ac, type: 3}
       propertyPath: m_LocalPosition.x
       value: 2.09
@@ -100315,6 +100385,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a3cf163e9035510419627e775c27483f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Game::PlayerCombat
+  ShowTopMostFoldoutHeaderGroup: 1
   attackPoint: {fileID: 989386089}
   attackRange: 1.5
   enemyLayers:
@@ -152518,6 +152589,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1682737864}
   - component: {fileID: 1682737862}
+  - component: {fileID: 1682737865}
   - component: {fileID: 1682737861}
   m_Layer: 0
   m_Name: TheCore_Logic
@@ -152538,15 +152610,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 299fbecd6aaac5c44b89faac98721929, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Game::LifeCore
-  energy: 200
+  ShowTopMostFoldoutHeaderGroup: 1
   maxEnergy: 200
   chargeSpeed: 20
+  energy:
+    m_InternalValue: 100
+  playersOnPlatforms:
+    m_InternalValue: 0
   requiredPlayersToCharge: 2
   energyBar: {fileID: 728145814}
   hpText: {fileID: 0}
-  gameOverPanel: {fileID: 1153044397}
   isUnderAttack: 0
-  playersOnPlatforms: 0
 --- !u!58 &1682737862
 CircleCollider2D:
   m_ObjectHideFlags: 0
@@ -152598,6 +152672,31 @@ Transform:
   m_Children: []
   m_Father: {fileID: 935992273}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1682737865
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1682737860}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.Netcode.Runtime::Unity.Netcode.NetworkObject
+  GlobalObjectIdHash: 279799374
+  InScenePlacedSourceGlobalObjectIdHash: 0
+  DeferredDespawnTick: 0
+  Ownership: 1
+  AlwaysReplicateAsRoot: 0
+  SynchronizeTransform: 1
+  ActiveSceneSynchronization: 0
+  SceneMigrationSynchronization: 0
+  SpawnWithObservers: 1
+  DontDestroyWithOwner: 0
+  AutoObjectParentSync: 1
+  SyncOwnerTransformWhenParented: 1
+  AllowOwnerToParent: 0
 --- !u!1 &1728101240
 GameObject:
   m_ObjectHideFlags: 0
@@ -152950,6 +153049,18 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 4479471820655236872, guid: d6cff015914d52d42b2689beb0821397, type: 3}
+      propertyPath: GlobalObjectIdHash
+      value: 1483056159
+      objectReference: {fileID: 0}
+    - target: {fileID: 4479471820655236872, guid: d6cff015914d52d42b2689beb0821397, type: 3}
+      propertyPath: SceneMigrationSynchronization
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4479471820655236872, guid: d6cff015914d52d42b2689beb0821397, type: 3}
+      propertyPath: InScenePlacedSourceGlobalObjectIdHash
+      value: 788928197
+      objectReference: {fileID: 0}
     - target: {fileID: 7960480163964002293, guid: d6cff015914d52d42b2689beb0821397, type: 3}
       propertyPath: maxHealth
       value: 100
@@ -152991,6 +153102,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a3cf163e9035510419627e775c27483f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Game::PlayerCombat
+  ShowTopMostFoldoutHeaderGroup: 1
   attackPoint: {fileID: 1349935280}
   attackRange: 1.5
   enemyLayers:
@@ -153019,6 +153131,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2034537304}
+  - component: {fileID: 2034537306}
   - component: {fileID: 2034537303}
   - component: {fileID: 2034537305}
   m_Layer: 10
@@ -153040,9 +153153,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c42d7eddd52c1094c9636801cb78d934, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Game::EnemySpawner
+  ShowTopMostFoldoutHeaderGroup: 1
   enemyPrefab: {fileID: 2579152013032259313, guid: b1cbfcdc4a367ed4987d0273728cb038, type: 3}
   canSpawn: 1
-  rateEasy: 2.5
+  rateTutorial: 2
+  rateEasy: 1.5
   rateHard: 0.5
   rateInsane: 0.15
   maxEnemies: 20
@@ -153057,7 +153172,7 @@ MonoBehaviour:
   - {fileID: 166782627}
   spawnRadius: 1.5
   minSpawnDistance: 1.2
-  minSpawnInterval: 0.8
+  minSpawnInterval: 0.1
 --- !u!4 &2034537304
 Transform:
   m_ObjectHideFlags: 0
@@ -153117,6 +153232,31 @@ CircleCollider2D:
   m_CompositeOrder: 0
   m_Offset: {x: 0, y: 0}
   m_Radius: 0.5
+--- !u!114 &2034537306
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2034537302}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.Netcode.Runtime::Unity.Netcode.NetworkObject
+  GlobalObjectIdHash: 2997841575
+  InScenePlacedSourceGlobalObjectIdHash: 0
+  DeferredDespawnTick: 0
+  Ownership: 1
+  AlwaysReplicateAsRoot: 0
+  SynchronizeTransform: 1
+  ActiveSceneSynchronization: 0
+  SceneMigrationSynchronization: 0
+  SpawnWithObservers: 1
+  DontDestroyWithOwner: 0
+  AutoObjectParentSync: 1
+  SyncOwnerTransformWhenParented: 1
+  AllowOwnerToParent: 0
 --- !u!1 &2070162922
 GameObject:
   m_ObjectHideFlags: 0

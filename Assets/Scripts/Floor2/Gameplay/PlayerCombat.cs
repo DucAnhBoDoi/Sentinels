@@ -1,10 +1,11 @@
 using UnityEngine;
 using System.Collections;
+using Unity.Netcode; 
 
-public class PlayerCombat : MonoBehaviour
+public class PlayerCombat : NetworkBehaviour
 {
     [Header("Cấu hình vùng đánh")]
-    public Transform attackPoint;    
+    public Transform attackPoint;
     public float attackRange = 1.5f;
     public LayerMask enemyLayers;
 
@@ -18,54 +19,77 @@ public class PlayerCombat : MonoBehaviour
     public float attackDelay = 0.15f;
 
     private Animator animator;
+    private Unity.Netcode.Components.NetworkAnimator netAnim; // THÊM BIẾN NÀY
     private bool isHitStopping = false;
 
-    void Start() { animator = GetComponent<Animator>(); }
+    void Start() 
+    { 
+        animator = GetComponent<Animator>(); 
+        netAnim = GetComponent<Unity.Netcode.Components.NetworkAnimator>();
+    }
 
-    void Update() {
+    void Update()
+    {
+        if (!IsOwner) return;
+
         if (!QuestPopupManager.isGameStarted) return;
         if (Input.GetKeyDown(attackKey)) StartCoroutine(AttackWithDelay());
     }
 
-    IEnumerator AttackWithDelay() {
-        if (animator != null) animator.SetTrigger("isAttacking");
+    IEnumerator AttackWithDelay()
+    {
+        // 1. DÙNG NETWORK ANIMATOR ĐỂ BUNG HOẠT ẢNH TRÊN TOÀN MẠNG
+        if (netAnim != null) netAnim.SetTrigger("isAttacking");
+        else if (animator != null) animator.SetTrigger("isAttacking");
+
         yield return new WaitForSeconds(attackDelay);
         PerformDamage();
     }
 
-    void PerformDamage() {
+    void PerformDamage()
+    {
         if (attackPoint == null) return;
 
         Collider2D[] hitEnemies = Physics2D.OverlapCircleAll(attackPoint.position, attackRange, enemyLayers);
 
-        foreach (Collider2D enemy in hitEnemies) {
-            // TÌM INTERFACE CHUNG
+        foreach (Collider2D enemy in hitEnemies)
+        {
             IDamagable damageable = enemy.GetComponentInParent<IDamagable>();
 
-            if (damageable != null) {
-                // 1. Gây sát thương (Quái sẽ tự quyết định có chết hay rớt đồ không)
+            if (damageable != null)
+            {
                 damageable.TakeDamage();
 
-                // 2. Hiệu ứng khựng hình (Fix lỗi đứng game)
-                StartCoroutine(HitStop(0.05f));
+                // 2. GỌI LỆNH MẠNG ĐỂ CẢ HOST VÀ CLIENT CÙNG CHẠY HITSTOP
+                ApplyHitStopClientRpc();
 
-                // 3. Hồi máu (Sử dụng script PlayerHP của bạn)
                 PlayerHP ph = GetComponent<PlayerHP>();
                 if (ph != null) ph.TakeDamage(-(int)healthRegenPerKill);
             }
         }
     }
 
-    IEnumerator HitStop(float duration) {
+    // HÀM MẠNG: BẮT TẤT CẢ CÁC MÁY CÙNG KHỰNG HÌNH LẠI
+    [ClientRpc]
+    void ApplyHitStopClientRpc()
+    {
+        StartCoroutine(HitStop(0.05f));
+    }
+
+    IEnumerator HitStop(float duration)
+    {
         if (isHitStopping) yield break;
         isHitStopping = true;
-        Time.timeScale = 0.05f;
-        yield return new WaitForSecondsRealtime(duration);
-        Time.timeScale = 1f; // Trả về 1 để không bị chậm game vĩnh viễn
+
+        if (animator != null) animator.speed = 0.05f;
+        yield return new WaitForSeconds(duration);
+        if (animator != null) animator.speed = 1f;
+
         isHitStopping = false;
     }
 
-    void OnDrawGizmos() {
+    void OnDrawGizmos()
+    {
         if (attackPoint == null) return;
         Gizmos.color = Color.red;
         Gizmos.DrawWireSphere(attackPoint.position, attackRange);

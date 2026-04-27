@@ -1,9 +1,9 @@
 using UnityEngine;
+using Unity.Netcode; // THÊM THƯ VIỆN MẠNG
 
 public class ItemDropper : MonoBehaviour
 {
     [Header("Danh sách các loại Năng lượng")]
-    // Kéo cả 2 Prefab (fulloblood và runfast) vào danh sách này
     public GameObject[] energyOrbPrefabs; 
 
     [Range(0, 100)]
@@ -21,10 +21,17 @@ public class ItemDropper : MonoBehaviour
         
         if (roll <= dropChance)
         {
-            // Chọn ngẫu nhiên 1 trong các Prefab có trong danh sách
             int randomIndex = Random.Range(0, energyOrbPrefabs.Length);
             
-            Instantiate(energyOrbPrefabs[randomIndex], transform.position, Quaternion.identity);
+            // 1. Lưu vật phẩm vừa đẻ ra vào một biến
+            GameObject droppedItem = Instantiate(energyOrbPrefabs[randomIndex], transform.position, Quaternion.identity);
+            
+            // 2. GỌI LỆNH SPAWN MẠNG ĐỂ CLIENT CŨNG THẤY
+            NetworkObject netObj = droppedItem.GetComponent<NetworkObject>();
+            if (netObj != null)
+            {
+                netObj.Spawn(true);
+            }
             
             Debug.Log("<color=cyan>Quái đã rơi ra vật phẩm!</color>");
         }

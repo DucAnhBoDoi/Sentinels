@@ -1,16 +1,17 @@
 using UnityEngine;
 using System.Collections.Generic;
+using Unity.Netcode; // BẮT BUỘC CÓ
 
 [RequireComponent(typeof(SpriteRenderer), typeof(Rigidbody2D), typeof(Animator))]
-public class BoidEnemy : MonoBehaviour, IDamagable 
+public class BoidEnemy : NetworkBehaviour, IDamagable 
 {
     [Header("Boid Settings")]
     public float speed = 3.0f;
     public float neighborRadius = 3.5f;
     public float attackDamage = 5f;
 
-    [Range(0, 10)] public float separationWeight = 8.0f; // 🔥 Tăng mạnh để quái dạt ra
-    [Range(0, 5)] public float cohesionWeight = 0.5f;    // 🔥 Giảm cực thấp để tránh tụ đàn
+    [Range(0, 10)] public float separationWeight = 8.0f; 
+    [Range(0, 5)] public float cohesionWeight = 0.5f;    
     [Range(0, 5)] public float alignmentWeight = 1.0f;
     public float targetWeight = 2.0f;
 
@@ -19,11 +20,13 @@ public class BoidEnemy : MonoBehaviour, IDamagable
     public float extraSeparationForce = 6.0f;   
 
     [Header("Cấu hình sinh tồn")]
-    public int health = 3;
+    public int maxHealth = 3;
+    // BIẾN MẠNG QUẢN LÝ MÁU
+    public NetworkVariable<int> currentHealth = new NetworkVariable<int>(3, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
     private bool isDead = false;
 
     [Header("Cấu hình tấn công")]
-    public float attackDistance = 1.2f; // 🔥 Tăng nhẹ để quái không phải đứng quá sát
+    public float attackDistance = 1.2f; 
     public Vector2 attackOffset;
     public Vector2 damageRangeScale = new Vector2(1.5f, 1.5f); 
     public float attackCooldown = 1.5f;
@@ -34,28 +37,70 @@ public class BoidEnemy : MonoBehaviour, IDamagable
     private Animator anim;
     private SpriteRenderer sr;
     private Rigidbody2D rb;
+    private Unity.Netcode.Components.NetworkAnimator netAnim; // THÊM BIẾN MẠNG ANIMATOR
+
     private Vector2 currentVelocity;
     private static List<BoidEnemy> allBoids = new List<BoidEnemy>();
+
+    // BIẾN MẠNG ĐỂ LẬT MẶT QUÁI CHO CLIENT THẤY
+    private NetworkVariable<bool> isFlipped = new NetworkVariable<bool>(false, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
 
     void Start()
     {
         anim = GetComponent<Animator>();
         sr = GetComponent<SpriteRenderer>();
         rb = GetComponent<Rigidbody2D>();
+        netAnim = GetComponent<Unity.Netcode.Components.NetworkAnimator>();
 
         GameObject core = GameObject.FindGameObjectWithTag("TheCore");
         if (core != null) target = core.transform;
 
-        // Random hướng ban đầu cực mạnh để phá đội hình
         currentVelocity = Random.insideUnitCircle.normalized * speed;
+    }
+
+    public override void OnNetworkSpawn()
+    {
+        if (IsServer) currentHealth.Value = maxHealth;
+
+        currentHealth.OnValueChanged += OnHealthChanged;
+        isFlipped.OnValueChanged += OnFlipChanged;
+    }
+
+    public override void OnNetworkDespawn()
+    {
+        currentHealth.OnValueChanged -= OnHealthChanged;
+        isFlipped.OnValueChanged -= OnFlipChanged;
+    }
+
+    private void OnHealthChanged(int prev, int current)
+    {
+        if (current <= 0 && !isDead)
+        {
+            Die();
+        }
+        else if (current < prev)
+        {
+            if (netAnim) netAnim.SetTrigger("isHurt");
+            else if (anim) anim.SetTrigger("isHurt");
+        }
+    }
+
+    private void OnFlipChanged(bool prev, bool current)
+    {
+        if (sr) sr.flipX = current;
     }
 
     public void TakeDamage()
     {
         if (isDead) return;
-        health--;
-        if (health <= 0) Die();
-        else if (anim) anim.SetTrigger("isHurt");
+        TakeDamageServerRpc(); // Yêu cầu Server trừ máu
+    }
+
+    [Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Everyone)]
+    private void TakeDamageServerRpc()
+    {
+        if (isDead) return;
+        currentHealth.Value--;
     }
 
     void Die()
@@ -63,20 +108,38 @@ public class BoidEnemy : MonoBehaviour, IDamagable
         if (isDead) return;
         isDead = true;
         rb.linearVelocity = Vector2.zero;
-        if (anim) anim.SetTrigger("isDead");
-
-        ItemDropper dropper = GetComponent<ItemDropper>();
-        if (dropper != null) dropper.DropRandomItem();
+        
+        if (netAnim) netAnim.SetTrigger("isDead");
+        else if (anim) anim.SetTrigger("isDead");
 
         GetComponent<Collider2D>().enabled = false;
-        Destroy(gameObject, 1.2f);
+
+        // CHỈ SERVER MỚI ĐƯỢC RỚT ĐỒ VÀ XÓA MẠNG
+        if (IsServer)
+        {
+            ItemDropper dropper = GetComponent<ItemDropper>();
+            if (dropper != null) dropper.DropRandomItem();
+            
+            // Chờ 1.2s rồi xóa
+            Invoke(nameof(DespawnEnemy), 1.2f);
+        }
+    }
+
+    void DespawnEnemy()
+    {
+        if (NetworkObject != null && NetworkObject.IsSpawned)
+        {
+            NetworkObject.Despawn(true);
+        }
     }
 
     void Update()
     {
         if (isDead || target == null) return;
 
-        // Tính khoảng cách đến lõi
+        // CHỈ SERVER MỚI TÍNH TOÁN AI DI CHUYỂN
+        if (!IsServer) return;
+
         float distToTarget = Vector2.Distance(transform.position, target.position);
         Collider2D targetCol = target.GetComponent<Collider2D>();
         Vector2 targetCenter = target.position;
@@ -90,16 +153,17 @@ public class BoidEnemy : MonoBehaviour, IDamagable
 
         if (distToTarget <= attackDistance)
         {
-            // 🔥 KHI ĐANG ĐÁNH: Vẫn phải giữ khoảng cách với con bên cạnh
             Vector2 escapeDir = CalculatePureSeparation();
             currentVelocity = Vector2.Lerp(currentVelocity, escapeDir * speed * 0.5f, Time.deltaTime * 5f);
 
-            if (anim) anim.SetBool("isRunning", false);
-            sr.flipX = (targetCenter.x > transform.position.x);
+            if (netAnim) netAnim.Animator.SetBool("isRunning", false);
+            
+            // Server tự động cập nhật hướng nhìn cho các máy khác
+            isFlipped.Value = (targetCenter.x > transform.position.x);
 
             if (Time.time >= lastAttackTime + attackCooldown)
             {
-                if (anim) anim.SetTrigger("isAttacking");
+                if (netAnim) netAnim.SetTrigger("isAttacking");
                 lastAttackTime = Time.time;
             }
         }
@@ -109,7 +173,6 @@ public class BoidEnemy : MonoBehaviour, IDamagable
         }
     }
 
-    // Hàm chỉ tính toán lực tách để dùng khi đang đứng đánh
     Vector2 CalculatePureSeparation()
     {
         Vector2 sep = Vector2.zero;
@@ -127,7 +190,7 @@ public class BoidEnemy : MonoBehaviour, IDamagable
 
     void HandleFlocking(Vector2 targetCenter)
     {
-        if (anim) anim.SetBool("isRunning", true);
+        if (netAnim) netAnim.Animator.SetBool("isRunning", true);
 
         Vector2 separation = Vector2.zero;
         Vector2 cohesion = Vector2.zero;
@@ -142,8 +205,6 @@ public class BoidEnemy : MonoBehaviour, IDamagable
             if (dist < neighborRadius)
             {
                 Vector2 diff = ((Vector2)transform.position - (Vector2)boid.transform.position).normalized;
-                
-                // 🔥 Lực tách tỷ lệ nghịch với khoảng cách (càng gần đẩy càng mạnh)
                 float force = (dist < separationDistance) ? extraSeparationForce : 1.0f;
                 separation += diff * (force / Mathf.Max(dist, 0.1f));
 
@@ -154,8 +215,8 @@ public class BoidEnemy : MonoBehaviour, IDamagable
         }
 
         Vector2 targetDir = (targetCenter - (Vector2)transform.position).normalized;
-        
         Vector2 flockingDir = Vector2.zero;
+        
         if (neighborCount > 0)
         {
             cohesion = ((cohesion / neighborCount) - (Vector2)transform.position).normalized;
@@ -164,29 +225,26 @@ public class BoidEnemy : MonoBehaviour, IDamagable
         }
 
         Vector2 combinedDir = flockingDir + targetDir * targetWeight;
-        combinedDir += Random.insideUnitCircle * 0.2f; // Tăng độ nhiễu
+        combinedDir += Random.insideUnitCircle * 0.2f; 
 
         currentVelocity = Vector2.Lerp(currentVelocity, combinedDir.normalized * speed, Time.deltaTime * 4f);
-        if (currentVelocity.magnitude > 0.1f) sr.flipX = currentVelocity.x > 0;
+        
+        // Server cập nhật hướng nhìn lật mặt quái
+        if (currentVelocity.magnitude > 0.1f) isFlipped.Value = currentVelocity.x > 0;
     }
 
     void FixedUpdate()
     {
-        if (!isDead) rb.linearVelocity = currentVelocity;
+        if (!isDead && IsServer) rb.linearVelocity = currentVelocity;
     }
 
-    // 🔥 SỬA LỖI ĐÁNH KHÔNG MẤT MÁU TẠI ĐÂY
     public void ExecuteBoidHit()
     {
-        if (target == null || isDead) return;
+        // Chỉ Server mới được tính sát thương đập vào Lõi
+        if (target == null || isDead || !IsServer) return;
 
-        // Xác định hướng: Nếu đang nhìn phải (flipX true) thì đánh sang phải (+), ngược lại sang trái (-)
         float lookDir = sr.flipX ? 1f : -1f;
-
-        // Tính toán vị trí tâm đòn đánh (Attack Hitbox)
-        // Lưu ý: Không dùng Mathf.Abs ở đây để đảm bảo offset đi đúng hướng nhìn
         Vector2 attackCenter = (Vector2)transform.position + new Vector2(attackOffset.x * lookDir, attackOffset.y);
-
         Collider2D[] hitObjects = Physics2D.OverlapBoxAll(attackCenter, damageRangeScale, 0f);
 
         foreach (Collider2D col in hitObjects)
@@ -194,15 +252,11 @@ public class BoidEnemy : MonoBehaviour, IDamagable
             if (col.CompareTag("TheCore"))
             {
                 LifeCore coreScript = col.GetComponent<LifeCore>();
-                if (coreScript != null)
-                {
-                    coreScript.TakeDirectDamage(attackDamage);
-                }
+                if (coreScript != null) coreScript.TakeDirectDamage(attackDamage);
             }
         }
     }
 
-    // Vẽ vùng đánh để bạn dễ căn chỉnh trong Scene
     void OnDrawGizmosSelected()
     {
         float lookDir = (sr != null && sr.flipX) ? 1f : -1f;
@@ -213,4 +267,11 @@ public class BoidEnemy : MonoBehaviour, IDamagable
 
     void OnEnable() { if(!allBoids.Contains(this)) allBoids.Add(this); }
     void OnDisable() { allBoids.Remove(this); }
+
+    [ClientRpc]
+    public void SetColorClientRpc(Color newColor)
+    {
+        if (sr == null) sr = GetComponent<SpriteRenderer>();
+        if (sr != null) sr.color = newColor;
+    }
 }

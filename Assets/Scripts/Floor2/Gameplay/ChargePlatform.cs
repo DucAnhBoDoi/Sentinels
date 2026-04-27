@@ -1,4 +1,5 @@
 using UnityEngine;
+using Unity.Netcode;
 
 public class ChargePlatform : MonoBehaviour
 {
@@ -14,12 +15,12 @@ public class ChargePlatform : MonoBehaviour
     }
 
     void Update() {
-        if (coreScript == null) return;
+        // CHỈ SERVER MỚI QUÉT XEM CÓ AI DẪM LÊN BỆ KHÔNG
+        if (coreScript == null || NetworkManager.Singleton == null || !NetworkManager.Singleton.IsServer) return;
 
         Collider2D playerCollider = Physics2D.OverlapCircle(transform.position, detectionRange, playerLayer);
         PlayerHP currentPh = null;
 
-        // TÌM SCRIPT TRÊN CẢ OBJECT CHA (Bỏ qua vụ Tag)
         if (playerCollider != null) {
             currentPh = playerCollider.GetComponentInParent<PlayerHP>();
         }
@@ -28,22 +29,17 @@ public class ChargePlatform : MonoBehaviour
             if (!isPlayerNearby) {
                 isPlayerNearby = true;
                 coreScript.SetPlayerOnPlatform(true);
-                
                 lastPlayerOnPlatform = currentPh;
                 lastPlayerOnPlatform.isOnPlatform = true;
-                
-                Debug.Log("<color=yellow>Player đã dẫm lên bệ: </color>" + gameObject.name);
             }
         } else {
             if (isPlayerNearby) {
                 isPlayerNearby = false;
                 coreScript.SetPlayerOnPlatform(false);
-                
                 if (lastPlayerOnPlatform != null) {
                     lastPlayerOnPlatform.isOnPlatform = false;
                     lastPlayerOnPlatform = null;
                 }
-                Debug.Log("Player đã rời bệ: " + gameObject.name);
             }
         }
     }

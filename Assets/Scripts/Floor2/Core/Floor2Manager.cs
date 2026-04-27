@@ -4,19 +4,29 @@ using UnityEngine.SceneManagement;
 using UnityEngine.InputSystem;
 using TMPro;
 using System.Collections;
+using Unity.Netcode;
 
-public class Floor2Manager : MonoBehaviour
+public class Floor2Manager : NetworkBehaviour
 {
     public static Floor2Manager Instance;
 
     [Header("Luật chơi Tầng 2 (Thời gian)")]
-    public float timeRemaining = 300f;
-    public bool timerIsRunning = false;
-    private bool isGameOver = false;
+    // Tạo một biến bình thường để chỉnh trong Inspector
+    public float initialTime = 300f;
 
-    [Header("Giao diện UI")] // GOM CHUNG UI VÀO ĐÂY
+    // Giấu biến mạng đi để tránh lỗi Editor
+    [HideInInspector]
+    public NetworkVariable<float> timeRemaining = new NetworkVariable<float>(0f);
+
+    [HideInInspector]
+    public NetworkVariable<bool> timerIsRunning = new NetworkVariable<bool>(false);
+
+    private NetworkVariable<bool> isGameOver = new NetworkVariable<bool>(false);
+    private NetworkVariable<bool> isLevelComplete = new NetworkVariable<bool>(false);
+
+    [Header("Giao diện UI")]
     public TextMeshProUGUI timeText;
-    public GameObject coreHealthBar; // BỔ SUNG BIẾN NÀY ĐỂ GIẤU THANH MÁU
+    public GameObject coreHealthBar;
 
     [Header("Phần thưởng & Lõi")]
     public GameObject shardPrefab;
@@ -33,81 +43,78 @@ public class Floor2Manager : MonoBehaviour
     public Image fadeImage;
     public float fadeDuration = 1.5f;
 
-    private bool isLevelComplete = false;
     private bool isTransitioning = false;
     private bool hasDroppedShard = false;
 
     void Awake() { if (Instance == null) Instance = this; }
 
-    void Start()
+    public override void OnNetworkSpawn()
     {
         if (!playerA) playerA = GameObject.Find("Player_A_Navigator")?.transform;
         if (!playerB) playerB = GameObject.Find("Player_B_Mechanic")?.transform;
 
+        if (IsServer)
+        {
+            timeRemaining.Value = initialTime;
+            timerIsRunning.Value = false;
+            isGameOver.Value = false;
+            isLevelComplete.Value = false;
+        }
+
         Time.timeScale = 1f;
-        isGameOver = false;
-        DisplayTime(timeRemaining);
 
         if (timeText != null) timeText.gameObject.SetActive(false);
 
-        // Sáng dần khi vừa load Tầng 2
         if (fadeImage != null)
         {
             fadeImage.gameObject.SetActive(true);
             StartCoroutine(FadeFromBlack());
         }
+
+        // Client luôn lắng nghe thời gian từ Host để hiển thị
+        timeRemaining.OnValueChanged += (prev, current) => DisplayTime(current);
     }
 
-    public void StartTimer()
+    [Rpc(SendTo.Server)]
+    public void StartTimerServerRpc()
     {
-        if (!timerIsRunning && !isGameOver)
+        if (!timerIsRunning.Value && !isGameOver.Value)
         {
-            timerIsRunning = true;
-            if (timeText != null) timeText.gameObject.SetActive(true);
+            timerIsRunning.Value = true;
+            ShowTimerUIClientRpc();
         }
+    }
+
+    [ClientRpc]
+    void ShowTimerUIClientRpc()
+    {
+        if (timeText != null) timeText.gameObject.SetActive(true);
     }
 
     void Update()
     {
-        // Kiểm tra xem Lõi còn sống không
-        LifeCore core = Object.FindAnyObjectByType<LifeCore>();
-        if (core != null && core.energy <= 0 && !isGameOver)
+        // 1. CHẠY THỜI GIAN TRÊN SERVER
+        if (IsServer && timerIsRunning.Value && !isGameOver.Value)
         {
-            isGameOver = true;
-            timerIsRunning = false;
-            
-            // Ẩn luôn UI nếu thua cho gọn màn hình (Tuỳ chọn)
-            if (timeText != null) timeText.gameObject.SetActive(false);
-            if (coreHealthBar != null) coreHealthBar.SetActive(false);
-            
-            return; 
-        }
-
-        // 1. CHẠY THỜI GIAN
-        if (timerIsRunning && !isGameOver)
-        {
-            if (timeRemaining > 0)
+            if (timeRemaining.Value > 0)
             {
-                timeRemaining -= Time.deltaTime;
-                DisplayTime(timeRemaining);
+                timeRemaining.Value -= Time.deltaTime;
             }
             else
             {
-                timeRemaining = 0;
-                DisplayTime(0);
-                timerIsRunning = false;
-                isGameOver = true;
-                WinGame(); // Hết giờ -> Lõi còn sống -> Thắng
+                timeRemaining.Value = 0;
+                timerIsRunning.Value = false;
+                isGameOver.Value = true;
+                WinGameClientRpc(); // Hết giờ -> Lõi còn sống -> Thắng
             }
         }
 
-        // 2. LOGIC TỚI CỬA QUA TẦNG 3
-        if (!isLevelComplete || isTransitioning) return;
+        // 2. SERVER CHECK ĐIỀU KIỆN QUA MÀN
+        if (!IsServer || !isLevelComplete.Value || isTransitioning) return;
 
         var keyboard = Keyboard.current;
         if (keyboard == null) return;
 
-        // Bấm phím 3 để qua Tầng 3
         if (keyboard.digit3Key.wasPressedThisFrame)
         {
             if (elevatorDoor == null) return;
@@ -118,11 +125,7 @@ public class Floor2Manager : MonoBehaviour
             if (distA <= interactDistance && distB <= interactDistance)
             {
                 Debug.Log("Cả 2 đã ở cửa! Đang tải Tầng 3...");
-                StartCoroutine(TransitionToNextFloor());
-            }
-            else
-            {
-                Debug.Log("CẢ 2 NGƯỜI CHƠI phải đứng sát vào Cửa Thang Máy!");
+                StartNextFloorSequenceClientRpc();
             }
         }
     }
@@ -135,17 +138,42 @@ public class Floor2Manager : MonoBehaviour
         timeText.text = string.Format("{0:00}:{1:00}", minutes, seconds);
     }
 
-    void WinGame()
+    [Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Everyone)]
+    public void TriggerGameOverServerRpc()
     {
-        // === GIẤU UI KHI CHIẾN THẮNG ===
+        if (isGameOver.Value) return;
+        isGameOver.Value = true;
+        timerIsRunning.Value = false;
+
+        // Gọi ClientRpc để tất cả các máy cùng hiện bảng thua cuộc
+        ShowGameOverClientRpc();
+    }
+
+    [ClientRpc]
+    void ShowGameOverClientRpc()
+    {
+        // 1. Giấu các UI không cần thiết đi
+        HideUIClientRpc();
+
+        // 2. Hiện cái bảng Game Over lên (Dùng chung GameOverManager mà bạn đã tạo)
+        if (GameOverManager.Instance != null)
+        {
+            GameOverManager.Instance.ShowGameOver();
+        }
+    }
+
+    [ClientRpc]
+    void HideUIClientRpc()
+    {
         if (timeText != null) timeText.gameObject.SetActive(false);
         if (coreHealthBar != null) coreHealthBar.SetActive(false);
+    }
 
-        // Dừng sinh quái
-        EnemySpawner spawner = Object.FindAnyObjectByType<EnemySpawner>();
-        if (spawner != null) spawner.StopSpawning();
+    [ClientRpc]
+    void WinGameClientRpc()
+    {
+        HideUIClientRpc();
 
-        // Ép quái chết từ từ có Animation
         GameObject[] enemies = GameObject.FindGameObjectsWithTag("Enemy");
         foreach (GameObject enemy in enemies)
         {
@@ -159,33 +187,32 @@ public class Floor2Manager : MonoBehaviour
             if (rb != null) rb.linearVelocity = Vector2.zero;
 
             MonoBehaviour[] scripts = enemy.GetComponents<MonoBehaviour>();
-            foreach (var s in scripts) {
+            foreach (var s in scripts)
+            {
                 if (s != this) s.enabled = false;
             }
-
             Destroy(enemy, 1.5f);
         }
 
-        // Rơi Shard
-        if (shardPrefab != null && coreTransform != null && !hasDroppedShard)
+        // CHỈ SERVER ĐƯỢC ĐẺ VẬT PHẨM (SHARD) MẠNG
+        if (IsServer && shardPrefab != null && coreTransform != null && !hasDroppedShard)
         {
             hasDroppedShard = true;
             Vector3 spawnPosition = coreTransform.position + shardOffset;
             GameObject spawnedShard = Instantiate(shardPrefab, spawnPosition, Quaternion.identity);
-
-            SpriteRenderer sr = spawnedShard.GetComponent<SpriteRenderer>();
-            if (sr != null) { sr.sortingLayerName = "Player"; sr.sortingOrder = 10; }
+            spawnedShard.GetComponent<NetworkObject>().Spawn(); // Khai sinh mạng cho cục Shard
         }
     }
 
-    // Gọi hàm này khi nhặt được Shard
     public void LevelComplete()
     {
-        isLevelComplete = true;
-        Debug.Log("<color=green>ĐÃ LẤY ĐƯỢC LÕI! HÃY ĐẾN CỬA VÀ BẤM PHÍM [3] ĐỂ QUA TẦNG 3!</color>");
+        if (IsServer) isLevelComplete.Value = true;
     }
 
-    // --- CÁC HÀM HIỆU ỨNG CHUYỂN CẢNH ---
+    // --- CÁC HÀM HIỆU ỨNG VÀ CHUYỂN MÀN ---
+    [ClientRpc]
+    private void StartNextFloorSequenceClientRpc() { StartCoroutine(TransitionToNextFloor()); }
+
     IEnumerator TransitionToNextFloor()
     {
         isTransitioning = true;
@@ -195,55 +222,61 @@ public class Floor2Manager : MonoBehaviour
             float elapsed = 0f; Color c = fadeImage.color;
             while (elapsed < fadeDuration) { elapsed += Time.deltaTime; c.a = Mathf.Clamp01(elapsed / fadeDuration); fadeImage.color = c; yield return null; }
         }
-        SceneManager.LoadScene("GamePlayFloor3"); // Load Tầng 3
+        if (IsServer) NetworkManager.Singleton.SceneManager.LoadScene("GamePlayFloor3", LoadSceneMode.Single);
     }
 
     IEnumerator FadeFromBlack()
     {
         if (fadeImage == null) yield break;
-
         fadeImage.gameObject.SetActive(true);
-        Color c = fadeImage.color;
-        c.a = 1f; 
-        fadeImage.color = c;
-
+        Color c = fadeImage.color; c.a = 1f; fadeImage.color = c;
         yield return new WaitForSeconds(0.5f);
-
         float elapsed = 0f;
         while (elapsed < fadeDuration)
         {
-            elapsed += Time.deltaTime;
-            c.a = Mathf.Clamp01(1f - (elapsed / fadeDuration));
-            fadeImage.color = c;
-            yield return null;
+            elapsed += Time.deltaTime; c.a = Mathf.Clamp01(1f - (elapsed / fadeDuration)); fadeImage.color = c; yield return null;
         }
-
         fadeImage.gameObject.SetActive(false);
     }
 
-    public void RestartLevelWithFade() { StartCoroutine(TransitionToRestartSequence()); }
-    public void QuitToMenuWithFade(string menuSceneName) { StartCoroutine(TransitionToMenuSequence(menuSceneName)); }
+    // HỆ THỐNG RESTART & QUIT Y HỆT TẦNG 1
+    public void RestartLevelWithFade() { RestartLevelServerRpc(); }
+    [Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Everyone)] private void RestartLevelServerRpc() { RestartLevelClientRpc(); }
+    [ClientRpc] private void RestartLevelClientRpc() { StartCoroutine(TransitionToRestartSequence()); }
+
+    public void QuitToMenuWithFade(string menuSceneName) { QuitToMenuServerRpc(menuSceneName); }
+    [Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Everyone)] private void QuitToMenuServerRpc(string menuSceneName) { QuitToMenuClientRpc(menuSceneName); }
+    [ClientRpc] private void QuitToMenuClientRpc(string menuSceneName) { StartCoroutine(TransitionToMenuSequence(menuSceneName)); }
 
     IEnumerator TransitionToRestartSequence()
     {
+        isTransitioning = true;
+        Time.timeScale = 0f; // SỬA Ở ĐÂY: Khóa chặt thời gian ngay lập tức để quái vật không nhúc nhích được
+        
         if (fadeImage != null)
         {
             fadeImage.gameObject.SetActive(true); float elapsed = 0f; Color c = fadeImage.color;
             while (elapsed < fadeDuration) { elapsed += Time.unscaledDeltaTime; c.a = Mathf.Clamp01(elapsed / fadeDuration); fadeImage.color = c; yield return null; }
         }
-        Time.timeScale = 1f;
-        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+        
+        Time.timeScale = 1f; // Trả lại thời gian trước khi Load scene mới
+        if (IsServer) NetworkManager.Singleton.SceneManager.LoadScene(SceneManager.GetActiveScene().name, LoadSceneMode.Single);
     }
 
     IEnumerator TransitionToMenuSequence(string sceneName)
     {
+        isTransitioning = true;
+        Time.timeScale = 0f; // SỬA Ở ĐÂY: Khóa chặt thời gian
+
         if (fadeImage != null)
         {
             fadeImage.gameObject.SetActive(true); float elapsed = 0f; Color c = fadeImage.color;
             while (elapsed < fadeDuration) { elapsed += Time.unscaledDeltaTime; c.a = Mathf.Clamp01(elapsed / fadeDuration); fadeImage.color = c; yield return null; }
         }
-        Time.timeScale = 1f;
-        QuestPopupManager.hasAcceptedOnce = false; 
+        
+        Time.timeScale = 1f; 
+        QuestPopupManager.ResetQuestState();
+        if (NetworkManager.Singleton != null) NetworkManager.Singleton.Shutdown();
         SceneManager.LoadScene(sceneName);
     }
 }
