@@ -235,7 +235,7 @@ MonoBehaviour:
   maxHp: 3
   flashDuration: 0.5
   flashFadeOutDuration: 0.18
-  knockbackForce: 10
+  knockbackForce: 15
   knockbackDuration: 0.15
   useShake: 1
   shakeMagnitude: 0.03

@@ -17,4 +17,4 @@ MonoBehaviour:
   DamageCooldown: 0.6
   MaxHp: 3
   SpawnCountPerWave: 4
-  SpawnInterval: 0.15
+  SpawnInterval: 0.25
