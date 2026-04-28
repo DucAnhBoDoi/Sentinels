@@ -1,8 +1,9 @@
 using System;
 using DG.Tweening;
+using Unity.Netcode;
 using UnityEngine;
 
-public class BossRoomEnterTrigger : MonoBehaviour
+public class BossRoomEnterTrigger : NetworkBehaviour
 {
     [SerializeField] private GameObject _gate;
 
@@ -32,7 +33,15 @@ public class BossRoomEnterTrigger : MonoBehaviour
         // _boss.gameObject.SetActive(true);
         // Destroy(_bossAvatar);
         _bossPhase1.enabled = true;
-        Destroy(gameObject);
+        if (NetworkManager && NetworkManager.IsServer)
+        {
+            NetworkObject.Despawn();
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
+
         foreach (GameObject player in GameObject.FindGameObjectsWithTag("Player"))
         {
             player.transform.position = transform.position;
@@ -45,8 +54,16 @@ public class BossRoomEnterTrigger : MonoBehaviour
             .AppendInterval(_bossPhase1DeathDuration)
             .OnComplete(() =>
             {
-                Destroy(_bossPhase1.gameObject);
-                _bossPhase2.gameObject.SetActive(true);
+                if (!NetworkManager)
+                {
+                    Destroy(_bossPhase1.gameObject);
+                    _bossPhase2.gameObject.SetActive(true);
+                }
+                else if (NetworkManager && NetworkManager.IsServer)
+                {
+                    _bossPhase1.NetworkObject.Despawn();
+                    _bossPhase2.gameObject.SetActive(true);
+                }
             });
     }
 }

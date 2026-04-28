@@ -1,11 +1,13 @@
 using CleverCrow.Fluid.BTs.Trees;
 using UnityEngine;
 using CleverCrow.Fluid.BTs.Tasks;
+using Unity.Netcode;
+using Unity.Netcode.Components;
 using UnityEngine.Events;
 
 [RequireComponent(typeof(HealthManager), typeof(Animator), typeof(Collider2D))]
-[RequireComponent(typeof(Rigidbody2D), typeof(SpriteRenderer))]
-public class BossPhase1 : MonoBehaviour, IDamagable
+[RequireComponent(typeof(Rigidbody2D), typeof(SpriteRenderer), typeof(NetworkAnimator))]
+public class BossPhase1 : NetworkBehaviour, IDamagable
 {
     private static readonly int Death = Animator.StringToHash("T_Death");
     private static readonly int Attack = Animator.StringToHash("T_Attack");
@@ -15,7 +17,7 @@ public class BossPhase1 : MonoBehaviour, IDamagable
     public UnityAction OnDeath;
 
     [SerializeField, HideInInspector] private HealthManager _hm;
-    [SerializeField, HideInInspector] private Animator _anim;
+    [SerializeField, HideInInspector] private NetworkAnimator _anim;
     [SerializeField, HideInInspector] private Collider2D _collider;
     [SerializeField, HideInInspector] private Rigidbody2D _rb;
     [SerializeField, HideInInspector] private SpriteRenderer _sr;
@@ -115,6 +117,11 @@ public class BossPhase1 : MonoBehaviour, IDamagable
 
     private void Update()
     {
+        if (NetworkManager && !IsServer)
+        {
+            return;
+        }
+
         if (_isDead)
         {
             return;
@@ -155,7 +162,7 @@ public class BossPhase1 : MonoBehaviour, IDamagable
             _hm.ReduceHealth(1);
             if (!_isHurt)
             {
-                _anim.SetTrigger(Hurt);
+                _anim.Animator.SetTrigger(Hurt);
                 _isHurt = true;
                 _hurtTimer = _hurtDuration;
             }
@@ -168,7 +175,7 @@ public class BossPhase1 : MonoBehaviour, IDamagable
             return;
         }
 
-        _anim.SetTrigger(Death);
+        _anim.Animator.SetTrigger(Death);
         _collider.enabled = false;
         _atkHitBox.gameObject.SetActive(false);
         _checkHitable.gameObject.SetActive(false);
@@ -188,7 +195,7 @@ public class BossPhase1 : MonoBehaviour, IDamagable
 
     private TaskStatus AttackBehavior()
     {
-        _anim.SetTrigger(Attack);
+        _anim.Animator.SetTrigger(Attack);
         return TaskStatus.Success;
     }
 
@@ -208,7 +215,7 @@ public class BossPhase1 : MonoBehaviour, IDamagable
             moveThreshold = offsetY;
         }
 
-        _anim.SetFloat(FMoveThreshold, moveThreshold);
+        _anim.Animator.SetFloat(FMoveThreshold, moveThreshold);
 
         float atkHitBoxX = _atkHitBox.transform.localPosition.x;
         float atkHitBoxY = _atkHitBox.transform.localPosition.y;
@@ -245,9 +252,20 @@ public class BossPhase1 : MonoBehaviour, IDamagable
             return TaskStatus.Failure;
         }
 
-        BossProjectile projectile = Instantiate(_projectile);
-        projectile.transform.position = transform.position;
-        projectile.Target = _targetedPlayer.transform;
+        if (!NetworkManager)
+        {
+            BossProjectile projectile = Instantiate(_projectile);
+            projectile.transform.position = transform.position;
+            projectile.Target = _targetedPlayer.transform;
+        }
+        else if (NetworkManager.IsServer)
+        {
+            BossProjectile projectile = Instantiate(_projectile);
+            projectile.NetworkObject.Spawn(true);
+            projectile.transform.position = transform.position;
+            projectile.Target = _targetedPlayer.transform;
+        }
+
         return TaskStatus.Success;
     }
 
@@ -261,7 +279,7 @@ public class BossPhase1 : MonoBehaviour, IDamagable
 
         if (_anim == null)
         {
-            _anim = GetComponent<Animator>();
+            _anim = GetComponent<NetworkAnimator>();
         }
 
         if (_collider == null)

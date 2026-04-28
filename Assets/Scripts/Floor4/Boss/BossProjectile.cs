@@ -1,8 +1,9 @@
 using System;
+using Unity.Netcode;
 using UnityEngine;
 
 [RequireComponent(typeof(Collider2D))]
-public class BossProjectile : MonoBehaviour
+public class BossProjectile : NetworkBehaviour
 {
     [SerializeField, HideInInspector] private Collider2D _collider;
 
@@ -16,16 +17,36 @@ public class BossProjectile : MonoBehaviour
     {
         if (Target == null)
         {
-            Destroy(gameObject);
+            if (NetworkManager && NetworkManager.IsServer)
+            {
+                NetworkObject.Despawn();
+            }
+            else if (!NetworkManager)
+            {
+                Destroy(gameObject);
+            }
         }
     }
 
     private void Update()
     {
+        if (NetworkManager && !NetworkManager.IsServer)
+        {
+            return;
+        }
+
         LifeTime -= Time.deltaTime;
         if (LifeTime <= 0)
         {
-            Destroy(gameObject);
+            if (NetworkManager && NetworkManager.IsServer)
+            {
+                NetworkObject.Despawn();
+            }
+            else if (!NetworkManager)
+            {
+                Destroy(gameObject);
+            }
+
             return;
         }
 
@@ -58,7 +79,14 @@ public class BossProjectile : MonoBehaviour
             playerHp.TakeDamage(1);
         }
 
-        Destroy(gameObject);
+        if (!NetworkManager || NetworkManager.IsServer)
+        {
+            Destroy(gameObject);
+        }
+        else
+        {
+            NetworkObject.Despawn();
+        }
     }
 
 #if UNITY_EDITOR

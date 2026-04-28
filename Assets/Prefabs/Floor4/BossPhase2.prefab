@@ -223,8 +223,10 @@ GameObject:
   - component: {fileID: 6073091960180583677}
   - component: {fileID: 792534581557644064}
   - component: {fileID: 6122282701195071872}
+  - component: {fileID: -4939931318504137953}
   - component: {fileID: 1419086237231763110}
   - component: {fileID: 7865713663063778817}
+  - component: {fileID: 4310455781549400484}
   m_Layer: 10
   m_Name: BossPhase2
   m_TagString: Untagged
@@ -373,6 +375,31 @@ MonoBehaviour:
   m_EditorClassIdentifier: Game::HealthManager
   <Health>k__BackingField: 20
   _healthBar: {fileID: 4392169461258257557}
+--- !u!114 &-4939931318504137953
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4717875625688379640}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.Netcode.Runtime::Unity.Netcode.NetworkObject
+  GlobalObjectIdHash: 1037756027
+  InScenePlacedSourceGlobalObjectIdHash: 0
+  DeferredDespawnTick: 0
+  Ownership: 1
+  AlwaysReplicateAsRoot: 0
+  SynchronizeTransform: 1
+  ActiveSceneSynchronization: 0
+  SceneMigrationSynchronization: 1
+  SpawnWithObservers: 1
+  DontDestroyWithOwner: 0
+  AutoObjectParentSync: 1
+  SyncOwnerTransformWhenParented: 1
+  AllowOwnerToParent: 0
 --- !u!114 &1419086237231763110
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -385,8 +412,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f485dc775121ed74b8be4f385b8d475b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Game::BossPhase1
+  ShowTopMostFoldoutHeaderGroup: 1
   _hm: {fileID: 6122282701195071872}
-  _anim: {fileID: 792534581557644064}
+  _anim: {fileID: 4310455781549400484}
   _collider: {fileID: 7865713663063778817}
   _rb: {fileID: 6073091960180583677}
   _sr: {fileID: 8721890965692487052}
@@ -399,6 +427,7 @@ MonoBehaviour:
   _atkDuration: 1.1
   _hurtDuration: 0.6
   _firewall: {fileID: 5744016577324018188}
+  _teleportPool: {fileID: 0}
 --- !u!70 &7865713663063778817
 CapsuleCollider2D:
   m_ObjectHideFlags: 0
@@ -436,6 +465,63 @@ CapsuleCollider2D:
   m_Offset: {x: -0.5, y: -1.7500001}
   m_Size: {x: 6.5, y: 5}
   m_Direction: 1
+--- !u!114 &4310455781549400484
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4717875625688379640}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e8d0727d5ae3244e3b569694d3912374, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.Netcode.Runtime::Unity.Netcode.Components.NetworkAnimator
+  ShowTopMostFoldoutHeaderGroup: 1
+  NetworkAnimatorExpanded: 0
+  AuthorityMode: 0
+  m_Animator: {fileID: 792534581557644064}
+  TransitionStateInfoList:
+  - IsCrossFadeExit: 0
+    Layer: 0
+    OriginatingState: 1080829965
+    DestinationState: 1740614436
+    TransitionDuration: 0
+    TriggerNameHash: -630864032
+    TransitionIndex: 1
+  - IsCrossFadeExit: 0
+    Layer: 0
+    OriginatingState: 1326225478
+    DestinationState: 1080829965
+    TransitionDuration: 0
+    TriggerNameHash: -1870843227
+    TransitionIndex: 0
+  - IsCrossFadeExit: 0
+    Layer: 0
+    OriginatingState: 1326225478
+    DestinationState: 1740614436
+    TransitionDuration: 0
+    TriggerNameHash: -630864032
+    TransitionIndex: 1
+  AnimatorParameterEntries:
+    ParameterEntries:
+    - name: T_Death
+      NameHash: 1468704207
+      Synchronize: 1
+      ParameterType: 9
+    - name: T_Attack
+      NameHash: -1870843227
+      Synchronize: 1
+      ParameterType: 9
+    - name: T_Hurt
+      NameHash: -630864032
+      Synchronize: 1
+      ParameterType: 9
+    - name: F_MoveThreshold
+      NameHash: 1089551024
+      Synchronize: 1
+      ParameterType: 1
+  AnimatorParametersExpanded: 0
 --- !u!1 &5744016577324018188
 GameObject:
   m_ObjectHideFlags: 0
