@@ -1,22 +1,3 @@
-// ============================================================
-// FILE: Assets/Scripts/Floor3/Gameplay/ProximityDetector.cs
-// Namespace: Scripts.Floor3.Gameplay
-// ── DAY 4 ──────────────────────────────────────────────────
-// Checks distance of Player A and Player B to the robot.
-//
-// ESCORT GATE (new feature):
-//   Robot only moves when AT LEAST ONE player is within
-//   _escortDistance. If both players leave the escort zone,
-//   robot stops (SetEscortGate false). Resumes when a player
-//   returns close enough.
-//
-// ALSO:
-//   - Fires UI warning when either player is too far
-//   - Feeds DifficultyManager with proximity data
-//   - ProximityEventBus events for HUD
-//   - Updates Robot Emotion (Confused/Stable) based on distance
-// ============================================================
-
 using UnityEngine;
 using Scripts.Floor3.Core;
 
@@ -61,6 +42,18 @@ namespace Scripts.Floor3.Gameplay
 
         private void Update()
         {
+            // 1. TỰ ĐỘNG TÌM PLAYER KHI SPAWN QUA MẠNG
+            if (_playerA == null) 
+            {
+                GameObject pA = GameObject.Find("Player_A_Navigator");
+                if (pA != null) _playerA = pA.transform;
+            }
+            if (_playerB == null) 
+            {
+                GameObject pB = GameObject.Find("Player_B_Mechanic");
+                if (pB != null) _playerB = pB.transform;
+            }
+
             if (_robotTransform == null) return;
 
             float distA = _playerA != null
@@ -82,28 +75,33 @@ namespace Scripts.Floor3.Gameplay
             // LUẬT MỚI: Bắt buộc CẢ 2 người phải ở trong vòng xanh lá cây (&&)
             bool bothPlayersClose = playerAClose && playerBClose;
 
-            // NẾU CẢ 2 TỚI GẦN THÌ MỚI GỌI UIMANAGER BẬT BẢNG TOPIC
-            if (bothPlayersClose)
+            // 2. CHỈ SERVER MỚI ĐƯỢC QUYỀN ĐO KHOẢNG CÁCH VÀ ÉP TOÀN MẠNG MỞ BẢNG
+            // Kiểm tra hasStartedMission để tránh bảng bị gọi mở liên tục sau khi game đã bắt đầu
+            if (bothPlayersClose && !Scripts.Floor3.UI.TopicSelectionUI.hasStartedMission)
             {
-                if (Floor3UIManager.Instance != null)
+                if (Unity.Netcode.NetworkManager.Singleton != null && Unity.Netcode.NetworkManager.Singleton.IsServer)
                 {
-                    Floor3UIManager.Instance.ShowTopicSelection();
+                    if (Scripts.Floor3.Network.TopicNetworkSync.Instance != null)
+                    {
+                        // Gọi lệnh ép cả Host và Client mở bảng cùng 1 lúc để đóng băng thời gian chuẩn xác
+                        Scripts.Floor3.Network.TopicNetworkSync.Instance.ShowTopicPanelClientRpc();
+                    }
                 }
             }
 
-            // ROBOT CHỈ ĐI TIẾP NẾU CẢ 2 NGƯỜI CÙNG Ở TRONG VÒNG
-            if (bothPlayersClose && !_escortGateOpen)
+            // --- ĐÃ SỬA --- ROBOT CHỈ ĐI TIẾP NẾU CẢ 2 NGƯỜI CÙNG Ở TRONG VÒNG VÀ ĐÃ BẤM CHỌN CHỦ ĐỀ XONG!
+            if (bothPlayersClose && Scripts.Floor3.UI.TopicSelectionUI.hasStartedMission && !_escortGateOpen)
             {
                 _escortGateOpen = true;
                 _robotController?.SetEscortGate(true);
-                Debug.Log("[ProximityDetector] Cả 2 Player đã vào vùng — robot tiếp tục chạy.");
+                Debug.Log("[ProximityDetector] Cả 2 Player đã vào vùng và đã chọn Topic — robot tiếp tục chạy.");
             }
-            // NẾU 1 TRONG 2 NGƯỜI RỜI VÒNG, ROBOT DỪNG LẠI CHỜ
-            else if (!bothPlayersClose && _escortGateOpen)
+            // --- ĐÃ SỬA --- NẾU 1 TRONG 2 NGƯỜI RỜI VÒNG, HOẶC CHƯA CHỌN CHỦ ĐỀ -> ROBOT DỪNG LẠI CHỜ
+            else if ((!bothPlayersClose || !Scripts.Floor3.UI.TopicSelectionUI.hasStartedMission) && _escortGateOpen)
             {
                 _escortGateOpen = false;
                 _robotController?.SetEscortGate(false);
-                Debug.Log("[ProximityDetector] Có Player đi lạc — robot dừng lại chờ.");
+                Debug.Log("[ProximityDetector] Có Player đi lạc hoặc chưa Start Mission — robot dừng lại chờ.");
             }
 
             // --- THÊM MỚI ---: CẬP NHẬT CẢM XÚC ROBOT ----------------------

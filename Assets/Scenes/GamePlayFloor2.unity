@@ -98934,7 +98934,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Game::Floor2Manager
   ShowTopMostFoldoutHeaderGroup: 1
-  initialTime: 420
+  initialTime: 15
   timeRemaining:
     m_InternalValue: 300
   timerIsRunning:

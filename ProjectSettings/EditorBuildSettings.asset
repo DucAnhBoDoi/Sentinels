@@ -14,7 +14,7 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/GamePlayFloor2.unity
     guid: d1ed07bef8e1e3242a3bfa9c957ed86e
-  - enabled: 0
+  - enabled: 1
     path: Assets/Scenes/GamePlayFloor3.unity
     guid: 12a6d1d2699be864986f94f5d800e91d
   - enabled: 0

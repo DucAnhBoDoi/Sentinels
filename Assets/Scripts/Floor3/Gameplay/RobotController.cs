@@ -1,35 +1,14 @@
-// ============================================================
-// FILE: Assets/Scripts/Floor3/Gameplay/RobotController.cs
-// Namespace: Scripts.Floor3.Gameplay
-// ── UPDATED ────────────────────────────────────────────────
-// NEW FEATURES:
-//   1. QUIZ FREEZE: Time.timeScale = 0 when quiz opens,
-//      Time.timeScale = 1 when quiz closes. Everything freezes —
-//      viruses, players, robot, timers. Quiz UI still works
-//      because it uses unscaled time (set on QuizManager timer).
-//
-//   2. VIRUS PROXIMITY PANIC: Robot scans nearby colliders
-//      each second. If any VirusAI is within _panicRadius,
-//      robot enters Panicked state and stops moving.
-//      Resumes only when the area is clear.
-//
-// ARCHITECTURE NOTE on Time.timeScale:
-//   Owned here because RobotController is the escort anchor.
-//   QuizEventBus fires the events — RobotController reacts.
-//   No other script needs to touch timeScale.
-// ============================================================
-
 using System.Collections;
 using UnityEngine;
+using Unity.Netcode; // THÊM THƯ VIỆN MẠNG
 using Scripts.Floor3.Core;
 using Scripts.Floor3.AI;
 
 namespace Scripts.Floor3.Gameplay
 {
-    public class RobotController : MonoBehaviour
+    // ĐỔI SANG NetworkBehaviour
+    public class RobotController : NetworkBehaviour
     {
-        // ── Inspector ────────────────────────────────────────────────────
-
         [Header("Waypoints")]
         [SerializeField] private Transform[] _waypoints;
         [SerializeField] private bool[] _isCheckpoint;
@@ -49,51 +28,34 @@ namespace Scripts.Floor3.Gameplay
         [SerializeField] private float _maxHp = 100f;
 
         [Header("Virus Proximity / Panic")]
-        [Tooltip("If any virus enters this radius, robot enters Panicked state and stops.")]
         [SerializeField] private float _panicRadius = 2.5f;
-
-        [Tooltip("How often (seconds) to scan for nearby viruses. Lower = more responsive, more cost.")]
         [SerializeField] private float _proximityScanInterval = 0.3f;
-
-        [Tooltip("Layer mask for virus objects. Set to the layer your virus prefab uses.")]
         [SerializeField] private LayerMask _virusLayer;
 
         [Header("Debug")]
         [SerializeField] private bool _drawGizmos = true;
 
-        // ── Private State ─────────────────────────────────────────────────
-
         private RobotStateMachine _stateMachine;
+        
+        // BIẾN ĐỒNG BỘ MÁU: Tự động cập nhật giao diện khi máu thay đổi
+        public NetworkVariable<float> currentHp = new NetworkVariable<float>(0f);
 
         private int _currentWaypointIndex = 0;
-        private float _currentHp;
         private float _currentSpeed;
         private bool _isEscortComplete = false;
         private int _checkpointsFired = 0;
-
-        // Escort gate — set by ProximityDetector
         private bool _escortGateOpen = true;
 
-        // Panic tracking (virus proximity)
         private bool _isPanicked = false;
         private Coroutine _proximityCoroutine = null;
 
-        // Transient state flags — ExitPanic must respect these
-        // so it never overrides an active stun or acceleration
         private bool _isStunned = false;
         private bool _isAccelerating = false;
-
-        // State before panic (so we can restore correctly)
         private RobotState _stateBeforePanic = RobotState.Moving;
-
-        // ── Unity Lifecycle ──────────────────────────────────────────────
 
         private void Awake()
         {
             _stateMachine = GetComponent<RobotStateMachine>();
-            if (_stateMachine == null)
-                Debug.LogError("[RobotController] Missing RobotStateMachine!");
-
             var rb = GetComponent<Rigidbody2D>();
             if (rb != null)
             {
@@ -102,15 +64,33 @@ namespace Scripts.Floor3.Gameplay
                 rb.constraints = RigidbodyConstraints2D.FreezeRotation;
             }
 
-            _currentHp = _maxHp;
             _currentSpeed = _baseSpeed;
             ValidateWaypointArrays();
         }
 
+        public override void OnNetworkSpawn()
+        {
+            // Server nạp máu đầy
+            if (IsServer) currentHp.Value = _maxHp;
+
+            // Client và Server cùng lắng nghe khi máu bị trừ để cập nhật UI
+            currentHp.OnValueChanged += (prev, current) => 
+            {
+                float normalizedHp = current / _maxHp;
+                RobotEventBus.RaiseRobotDamaged(normalizedHp);
+                UpdateEmotionFromHp(normalizedHp);
+
+                // Nếu máu = 0, phát sự kiện chết
+                if (current <= 0f && prev > 0f)
+                {
+                    _stateMachine.ChangeState(RobotState.Stunned);
+                    RobotEventBus.RaiseRobotDied();
+                }
+            };
+        }
+
         private void OnEnable()
         {
-            // ── FEATURE 1: Quiz Freeze ────────────────────────────────────
-            // Subscribe to quiz events to freeze/unfreeze time
             QuizEventBus.OnQuizStarted += OnQuizStarted;
             QuizEventBus.OnQuizResolved += OnQuizResolved;
             QuizEventBus.OnTimerExpired += OnQuizTimerExpired;
@@ -121,46 +101,33 @@ namespace Scripts.Floor3.Gameplay
             QuizEventBus.OnQuizStarted -= OnQuizStarted;
             QuizEventBus.OnQuizResolved -= OnQuizResolved;
             QuizEventBus.OnTimerExpired -= OnQuizTimerExpired;
-
-            // Safety: always restore timescale if this object is disabled
             Time.timeScale = 1f;
         }
 
         private void Start()
         {
-            if (_waypoints == null || _waypoints.Length == 0)
-            {
-                Debug.LogError("[RobotController] No waypoints assigned!");
-                return;
-            }
             _stateMachine.ChangeState(RobotState.Moving);
 
-            // Start proximity scan loop
-            _proximityCoroutine = StartCoroutine(ProximityScanLoop());
+            // CHỈ SERVER MỚI ĐƯỢC CHẠY QUÉT VIRUS
+            if (IsServer)
+            {
+                _proximityCoroutine = StartCoroutine(ProximityScanLoop());
+            }
         }
-
-        // ── Update ───────────────────────────────────────────────────────
 
         private void Update()
         {
-            if (_isEscortComplete) return;
+            // CHỈ SERVER MỚI ĐƯỢC TÍNH TOÁN DI CHUYỂN
+            if (!IsServer || _isEscortComplete) return;
             HandleMovement();
         }
 
-        // ── Movement ─────────────────────────────────────────────────────
-
         private void HandleMovement()
         {
-            // Guard 1: panic (virus nearby)
-            if (_isPanicked) return;
-
-            // Guard 2: escort gate — no player is close enough to escort
-            // Robot waits politely until a player comes back
-            if (!_escortGateOpen) return;
+            if (_isPanicked || !_escortGateOpen) return;
 
             RobotState state = _stateMachine.CurrentState;
-            if (state != RobotState.Moving && state != RobotState.Accelerated)
-                return;
+            if (state != RobotState.Moving && state != RobotState.Accelerated) return;
 
             if (_currentWaypointIndex >= _waypoints.Length) return;
 
@@ -182,9 +149,7 @@ namespace Scripts.Floor3.Gameplay
 
             if (isFinal)
             {
-                _isEscortComplete = true;
-                _stateMachine.ChangeState(RobotState.Waiting);
-                RobotEventBus.RaiseEscortComplete();
+                EscortCompleteClientRpc();
                 return;
             }
 
@@ -193,54 +158,34 @@ namespace Scripts.Floor3.Gameplay
             if (isCheckpoint)
             {
                 _checkpointsFired++;
-                Debug.Log($"[RobotController] Checkpoint #{_checkpointsFired} at waypoint {index}");
-                _stateMachine.ChangeState(RobotState.Waiting);
-                RobotEventBus.RaiseCheckpointReached(index);
-            }
-            else
-            {
-                Debug.Log($"[RobotController] Nav waypoint {index} → {_currentWaypointIndex}");
+                CheckpointReachedClientRpc(index);
             }
         }
 
-        // ── FEATURE 1: Quiz Time Freeze ───────────────────────────────────
-        // WHY timeScale and not individual pause flags?
-        //   timeScale = 0 pauses ALL Update/FixedUpdate/Coroutines globally.
-        //   Viruses, players, animations, physics — all freeze instantly.
-        //   Quiz UI uses Time.unscaledDeltaTime so its timer still works.
-        //   This is the standard Unity approach for pause menus / quiz screens.
-
-        private void OnQuizStarted(QuizQuestion _)
+        // Báo cho mọi Client biết đã Checkpoint
+        [ClientRpc]
+        private void CheckpointReachedClientRpc(int index)
         {
-            Debug.Log("[RobotController] Quiz opened → Freezing game (timeScale = 0).");
-            Time.timeScale = 0f;
+            _stateMachine.ChangeState(RobotState.Waiting);
+            RobotEventBus.RaiseCheckpointReached(index);
         }
 
-        private void OnQuizResolved(bool _correct, int _index)
+        // Báo cho mọi Client biết đã Xong
+        [ClientRpc]
+        private void EscortCompleteClientRpc()
         {
-            Debug.Log("[RobotController] Quiz closed → Resuming game (timeScale = 1).");
-            Time.timeScale = 1f;
+            _isEscortComplete = true;
+            _stateMachine.ChangeState(RobotState.Waiting);
+            RobotEventBus.RaiseEscortComplete();
         }
 
-        private void OnQuizTimerExpired()
-        {
-            // Timer expired also closes the quiz
-            Time.timeScale = 1f;
-        }
-
-        // ── FEATURE 2: Virus Proximity / Panic ───────────────────────────
-        // Scans a circle around the robot every _proximityScanInterval seconds.
-        // If any VirusAI is found inside _panicRadius:
-        //   → Robot enters Panicked state, stops moving
-        //   → Emotion = Panicked
-        // When scan finds zero viruses in range:
-        //   → Robot resumes from Panicked
+        private void OnQuizStarted(QuizQuestion _) { Time.timeScale = 0f; }
+        private void OnQuizResolved(bool _correct, int _index) { Time.timeScale = 1f; }
+        private void OnQuizTimerExpired() { Time.timeScale = 1f; }
 
         private IEnumerator ProximityScanLoop()
         {
-            // Use WaitForSecondsRealtime so scan runs even during timeScale = 0
             var wait = new WaitForSecondsRealtime(_proximityScanInterval);
-
             while (!_isEscortComplete)
             {
                 yield return wait;
@@ -250,100 +195,74 @@ namespace Scripts.Floor3.Gameplay
 
         private void CheckVirusProximity()
         {
-            Collider2D[] hits = Physics2D.OverlapCircleAll(
-                transform.position, _panicRadius, _virusLayer);
-
+            Collider2D[] hits = Physics2D.OverlapCircleAll(transform.position, _panicRadius, _virusLayer);
             bool enemyNearby = false;
 
             foreach (var hit in hits)
             {
-                if (hit.GetComponent<VirusAI>() != null ||
-                    hit.GetComponent<UtilityRobotAI_Floor3>() != null)
+                if (hit.GetComponent<VirusAI>() != null || hit.GetComponent<UtilityRobotAI_Floor3>() != null)
                 {
-                    enemyNearby = true;
-                    break;
+                    enemyNearby = true; break;
                 }
             }
 
-            if (enemyNearby && !_isPanicked)
-            {
-                EnterPanic();
-            }
-            else if (!enemyNearby && _isPanicked)
-            {
-                ExitPanic();
-            }
+            if (enemyNearby && !_isPanicked) EnterPanic();
+            else if (!enemyNearby && _isPanicked) ExitPanic();
         }
 
         private void EnterPanic()
         {
-            // Guard: already panicked — ProximityScanLoop can call this
-            // multiple times if virus stays in range across scan ticks.
             if (_isPanicked) return;
-
-            // Save state BEFORE panic for restoration later.
-            // Only save stable states — if currently in a transient state
-            // (Stunned/Accelerated), fall back to Moving on restore.
             var current = _stateMachine.CurrentState;
-            _stateBeforePanic = (current == RobotState.Waiting)
-                ? RobotState.Waiting
-                : RobotState.Moving;
-
-            // Set flag FIRST — HandleMovement checks this before state machine.
-            _isPanicked = true;
-
-            _stateMachine.ChangeEmotion(RobotEmotion.Panicked);
-            _stateMachine.ChangeState(RobotState.Panicked);
-
-            Debug.Log($"[RobotController] Virus nearby — PANICKED (was {current}). Robot stopped.");
+            _stateBeforePanic = (current == RobotState.Waiting) ? RobotState.Waiting : RobotState.Moving;
+            
+            // Gọi ClientRpc để đổi hiệu ứng hoảng loạn trên tất cả màn hình
+            SyncPanicStateClientRpc(true);
         }
 
         private void ExitPanic()
         {
-            _isPanicked = false;
-            _stateMachine.ChangeEmotion(RobotEmotion.Stable);
-
-            // CRITICAL: Don't blindly resume Moving/Waiting.
-            // Check if Stun or Acceleration coroutine is STILL running.
-            // If stun is active → robot should stay Stunned, not resume.
-            // If acceleration is active → robot should stay Accelerated.
-            // The coroutine itself will handle the transition when it ends.
-            if (_isStunned)
-            {
-                _stateMachine.ChangeState(RobotState.Stunned);
-                Debug.Log("[RobotController] Area clear — returning to Stunned (stun still active).");
-                return;
-            }
-
-            if (_isAccelerating)
-            {
-                _stateMachine.ChangeState(RobotState.Moving);
-                _stateMachine.ChangeState(RobotState.Accelerated);
-                Debug.Log("[RobotController] Area clear — returning to Accelerated (boost still active).");
-                return;
-            }
-
-            // No active transient state — restore stable state
-            RobotState resumeState = (_stateBeforePanic == RobotState.Waiting)
-                ? RobotState.Waiting
-                : RobotState.Moving;
-
-            _stateMachine.ChangeState(resumeState);
-            _currentSpeed = _baseSpeed;
-
-            Debug.Log($"[RobotController] Area clear — exiting panic. Resuming: {resumeState}");
+            // Gọi ClientRpc để đổi hiệu ứng bình thường trên tất cả màn hình
+            SyncPanicStateClientRpc(false);
         }
 
-        // ── Public API ────────────────────────────────────────────────────
+        [ClientRpc]
+        private void SyncPanicStateClientRpc(bool isPanicking)
+        {
+            _isPanicked = isPanicking;
+            if (isPanicking)
+            {
+                _stateMachine.ChangeEmotion(RobotEmotion.Panicked);
+                _stateMachine.ChangeState(RobotState.Panicked);
+            }
+            else
+            {
+                _stateMachine.ChangeEmotion(RobotEmotion.Stable);
+                if (_isStunned)
+                {
+                    _stateMachine.ChangeState(RobotState.Stunned);
+                    return;
+                }
+                if (_isAccelerating)
+                {
+                    _stateMachine.ChangeState(RobotState.Accelerated);
+                    return;
+                }
+                RobotState resumeState = (_stateBeforePanic == RobotState.Waiting) ? RobotState.Waiting : RobotState.Moving;
+                _stateMachine.ChangeState(resumeState);
+            }
+        }
 
         public void ResumeMovement()
         {
+            if (!IsServer) return;
             _currentSpeed = _baseSpeed;
-            _stateMachine.ChangeState(RobotState.Moving);
+            SyncStateClientRpc(RobotState.Moving);
         }
 
         public void ApplySpeedBoost()
         {
+            if (!IsServer) return;
             StartCoroutine(AccelerationCoroutine());
         }
 
@@ -351,106 +270,81 @@ namespace Scripts.Floor3.Gameplay
         {
             _isAccelerating = true;
             _currentSpeed = _acceleratedSpeed;
-            _stateMachine.ChangeState(RobotState.Moving);
-            _stateMachine.ChangeState(RobotState.Accelerated);
+            SyncStateClientRpc(RobotState.Accelerated);
 
             yield return new WaitForSeconds(_accelerationDuration);
 
             _isAccelerating = false;
             _currentSpeed = _baseSpeed;
 
-            if (_isPanicked)
-                _stateMachine.ChangeState(RobotState.Panicked);
-            else if (_stateMachine.CurrentState == RobotState.Accelerated)
-                _stateMachine.ChangeState(RobotState.Moving);
+            if (_isPanicked) SyncStateClientRpc(RobotState.Panicked);
+            else if (_stateMachine.CurrentState == RobotState.Accelerated) SyncStateClientRpc(RobotState.Moving);
         }
 
         public void ApplyStun()
         {
+            if (!IsServer) return;
             StartCoroutine(StunCoroutine());
         }
 
         private IEnumerator StunCoroutine()
         {
             _isStunned = true;
-            _stateMachine.ChangeState(RobotState.Stunned);
+            SyncStateClientRpc(RobotState.Stunned);
 
             yield return new WaitForSeconds(_stunDuration);
 
             _isStunned = false;
             _currentSpeed = _baseSpeed;
 
-            // After stun ends: if STILL panicked (virus still nearby),
-            // go to Panicked. Otherwise resume Moving.
-            if (_isPanicked)
-                _stateMachine.ChangeState(RobotState.Panicked);
-            else
-                _stateMachine.ChangeState(RobotState.Moving);
+            if (_isPanicked) SyncStateClientRpc(RobotState.Panicked);
+            else SyncStateClientRpc(RobotState.Moving);
+        }
+
+        [ClientRpc]
+        private void SyncStateClientRpc(RobotState newState)
+        {
+            _stateMachine.ChangeState(newState);
         }
 
         public void TakeDamage(float amount)
         {
-            _currentHp = Mathf.Clamp(_currentHp - amount, 0f, _maxHp);
-            float normalizedHp = _currentHp / _maxHp;
-            RobotEventBus.RaiseRobotDamaged(normalizedHp);
-            UpdateEmotionFromHp(normalizedHp);
-
-            if (_currentHp <= 0f)
-            {
-                _stateMachine.ChangeState(RobotState.Stunned);
-                RobotEventBus.RaiseRobotDied();
-            }
+            // Chỉ Server mới được tính toán sát thương
+            if (!IsServer) return;
+            
+            // Trừ máu, NetworkVariable sẽ tự phát tín hiệu cho Client cập nhật giao diện
+            currentHp.Value = Mathf.Clamp(currentHp.Value - amount, 0f, _maxHp);
         }
-
-        // ── Emotion ──────────────────────────────────────────────────────
 
         private void UpdateEmotionFromHp(float normalizedHp)
         {
-            // Don't override Panicked emotion — proximity check owns that
             if (_isPanicked) return;
-
             if (normalizedHp > 0.6f) _stateMachine.ChangeEmotion(RobotEmotion.Stable);
             else if (normalizedHp > 0.3f) _stateMachine.ChangeEmotion(RobotEmotion.Confused);
             else _stateMachine.ChangeEmotion(RobotEmotion.Panicked);
         }
 
-        // ── Getters ──────────────────────────────────────────────────────
-
-        public float GetNormalizedHp() => _currentHp / _maxHp;
+        public float GetNormalizedHp() => currentHp.Value / _maxHp;
         public int GetCurrentWaypointIndex() => _currentWaypointIndex;
         public bool IsPanicked() => _isPanicked;
 
-        /// <summary>
-        /// Called by ProximityDetector.
-        /// true  = at least 1 player is close → robot may move.
-        /// false = both players are too far   → robot waits.
-        /// </summary>
         public void SetEscortGate(bool open)
         {
+            if (!IsServer) return;
             if (_escortGateOpen == open) return;
             _escortGateOpen = open;
-            Debug.Log($"[RobotController] Escort gate: {(open ? "OPEN — moving" : "CLOSED — waiting for player")}");
         }
-
-        // ── Validation ───────────────────────────────────────────────────
 
         private void ValidateWaypointArrays()
         {
             if (_waypoints == null) return;
             if (_isCheckpoint == null || _isCheckpoint.Length != _waypoints.Length)
-            {
-                Debug.LogWarning("[RobotController] _isCheckpoint resized.");
                 _isCheckpoint = new bool[_waypoints.Length];
-            }
         }
-
-        // ── Gizmos ───────────────────────────────────────────────────────
 
         private void OnDrawGizmos()
         {
             if (!_drawGizmos) return;
-
-            // Panic radius — red when panicked, dark red when normal
             Gizmos.color = _isPanicked ? Color.red : new Color(0.8f, 0.2f, 0.2f, 0.3f);
             Gizmos.DrawWireSphere(transform.position, _panicRadius);
 
@@ -469,8 +363,7 @@ namespace Scripts.Floor3.Gameplay
                 }
             }
 
-            if (Application.isPlaying && _currentWaypointIndex < _waypoints.Length
-                && _waypoints[_currentWaypointIndex] != null)
+            if (Application.isPlaying && _currentWaypointIndex < _waypoints.Length && _waypoints[_currentWaypointIndex] != null)
             {
                 Gizmos.color = Color.yellow;
                 Gizmos.DrawWireSphere(_waypoints[_currentWaypointIndex].position, 0.45f);

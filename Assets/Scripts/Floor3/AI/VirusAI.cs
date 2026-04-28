@@ -1,38 +1,33 @@
 using System.Collections;
 using UnityEngine;
+using Unity.Netcode; // THÊM THƯ VIỆN MẠNG
 using Scripts.ScriptableObjects;
 using Scripts.Floor3.Gameplay;
 
 namespace Scripts.Floor3.AI
 {
-    // THÊM IDamagable VÀO ĐÂY ĐỂ PLAYER CỦA ANH CHÉM ĐƯỢC
-    public class VirusAI : MonoBehaviour, IDamagable
+    // ĐỔI SANG NetworkBehaviour
+    public class VirusAI : NetworkBehaviour, IDamagable
     {
-        // ── Internal State ────────────────────────────────────────────────
         private enum VirusState { Chasing, Attacking, Dead }
 
-        // ── Injected Data ─────────────────────────────────────────────────
         private VirusData _data;
         private RobotController _robotTarget;
 
-        // ── Inspector (set on prefab) ─────────────────────────────────────
         [Header("Wall Avoidance")]
         [SerializeField] private LayerMask _wallLayer;
         [SerializeField] private int _rayCount = 8;
         [SerializeField] private float _rayLength = 1.2f;
         [SerializeField] private float _avoidanceWeight = 2.5f;
 
-        [Header("Debug")]
-        [SerializeField] private bool _drawSteeringRays = false;
+        // ĐÃ XÓA BIẾN_drawSteeringRays Ở ĐÂY ĐỂ TRÁNH LỖI CS0414
 
-        // ── Private State ─────────────────────────────────────────────────
         private VirusState _state = VirusState.Chasing;
         private float _currentHp;
         private float _damageTimer = 0f;
         private bool _initialized = false;
         private HitReactionController _hitReaction;
 
-        // ── Public Init ───────────────────────────────────────────────────
         public void Initialize(VirusData data, RobotController robotTarget)
         {
             _data = data;
@@ -42,91 +37,71 @@ namespace Scripts.Floor3.AI
             _hitReaction = GetComponent<HitReactionController>();
         }
 
-        // ── Unity Lifecycle ──────────────────────────────────────────────
         private void Update()
         {
+            // CHỈ SERVER MỚI ĐƯỢC CHẠY TRÍ TUỆ NHÂN TẠO
+            if (!IsServer) return;
+
             if (!Scripts.Floor3.UI.TopicSelectionUI.hasStartedMission) return;
             if (!_initialized || _state == VirusState.Dead) return;
 
-            // Nhường cho knockback nếu đang bị đẩy
             if (_hitReaction != null && _hitReaction.IsBeingKnockedBack) return;
 
             if (_state == VirusState.Chasing) ChaseRobot();
             if (_state == VirusState.Attacking) TickDamage();
         }
 
-        // ── Movement with Wall Avoidance ──────────────────────────────────
         private void ChaseRobot()
         {
             if (_robotTarget == null) return;
-
             Vector2 toRobot = ((Vector2)_robotTarget.transform.position - (Vector2)transform.position).normalized;
             Vector2 moveDir = ComputeSteeringDirection(toRobot);
-
             transform.position += (Vector3)(moveDir * _data.MoveSpeed * Time.deltaTime);
         }
 
         private Vector2 ComputeSteeringDirection(Vector2 desiredDirection)
         {
-            Vector2 bestDir = desiredDirection;
-            float bestWeight = -1f;
-
+            Vector2 bestDir = desiredDirection; float bestWeight = -1f;
             float angleStep = 360f / _rayCount;
 
             for (int i = 0; i < _rayCount; i++)
             {
                 float angle = i * angleStep;
                 Vector2 rayDir = RotateVector(desiredDirection, angle);
-
                 float weight = Vector2.Dot(rayDir, desiredDirection);
-
                 RaycastHit2D hit = Physics2D.Raycast(transform.position, rayDir, _rayLength, _wallLayer);
+                
                 if (hit.collider != null)
                 {
                     float proximity = 1f - (hit.distance / _rayLength);
                     weight -= _avoidanceWeight * proximity;
                 }
-
-                if (_drawSteeringRays)
-                {
-                    Color c = (hit.collider != null) ? Color.red : Color.green;
-                    Debug.DrawRay(transform.position, rayDir * _rayLength, c);
-                }
-
-                if (weight > bestWeight)
-                {
-                    bestWeight = weight;
-                    bestDir = rayDir;
-                }
+                
+                if (weight > bestWeight) { bestWeight = weight; bestDir = rayDir; }
             }
-
             return bestDir.normalized;
         }
 
         private static Vector2 RotateVector(Vector2 v, float angleDeg)
         {
             float rad = angleDeg * Mathf.Deg2Rad;
-            float cos = Mathf.Cos(rad);
-            float sin = Mathf.Sin(rad);
+            float cos = Mathf.Cos(rad); float sin = Mathf.Sin(rad);
             return new Vector2(cos * v.x - sin * v.y, sin * v.x + cos * v.y);
         }
 
-        // ── Damage Tick ───────────────────────────────────────────────────
         private void TickDamage()
         {
             _damageTimer -= Time.deltaTime;
             if (_damageTimer <= 0f)
             {
-                _robotTarget?.TakeDamage(_data.DamageOnContact); // Chỉ cắn Robot
+                _robotTarget?.TakeDamage(_data.DamageOnContact); 
                 _damageTimer = _data.DamageCooldown;
             }
         }
 
-        // ── Collision ─────────────────────────────────────────────────────
         private void OnTriggerEnter2D(Collider2D other)
         {
-            if (_state == VirusState.Dead) return;
-            // Chỉ bắt sự kiện chạm vào Robot
+            if (!IsServer || _state == VirusState.Dead) return;
             if (other.GetComponent<RobotController>() != null)
             {
                 _state = VirusState.Attacking;
@@ -136,36 +111,38 @@ namespace Scripts.Floor3.AI
 
         private void OnTriggerExit2D(Collider2D other)
         {
-            if (other.GetComponent<RobotController>() != null)
-                if (_state == VirusState.Attacking)
-                    _state = VirusState.Chasing;
+            if (!IsServer) return;
+            if (other.GetComponent<RobotController>() != null && _state == VirusState.Attacking)
+                _state = VirusState.Chasing;
         }
 
-        // ── HÀM NHẬN ĐÒN TỪ HỆ THỐNG PLAYER CỦA ANH (MỚI THÊM) ─────────────
-        public void TakeDamage()
-        {
-            TakeDamage(1f);
-        }
+        public void TakeDamage() { TakeDamage(1f); }
 
         public void TakeDamage(float amount)
         {
-            if (_state == VirusState.Dead) return;
+            // CHỈ SERVER NHẬN LỆNH TRỪ MÁU
+            if (!IsServer || _state == VirusState.Dead) return;
 
-            // Flash + knockback (không đụng HP)
             if (_hitReaction != null)
             {
                 Vector2 knockbackDir = Vector2.up;
                 if (_robotTarget != null)
                     knockbackDir = ((Vector2)transform.position - (Vector2)_robotTarget.transform.position).normalized;
+                
                 _hitReaction.ReactOnly(knockbackDir);
+                TriggerHitVisualClientRpc(knockbackDir); // Chớp trắng trên máy Client
             }
 
-            // HP vẫn do VirusAI tự quản lý như cũ
             _currentHp -= amount;
             if (_currentHp <= 0f) Die();
         }
 
-        // ── Death ─────────────────────────────────────────────────────────
+        [ClientRpc]
+        private void TriggerHitVisualClientRpc(Vector2 dir)
+        {
+            if (!IsServer && _hitReaction != null) _hitReaction.ReactOnly(dir);
+        }
+
         private void Die()
         {
             if (_state == VirusState.Dead) return;
@@ -176,7 +153,7 @@ namespace Scripts.Floor3.AI
         private IEnumerator DeathCoroutine()
         {
             yield return new WaitForSeconds(0.15f);
-            Destroy(gameObject);
+            if (NetworkObject.IsSpawned) NetworkObject.Despawn(true);
         }
     }
 }

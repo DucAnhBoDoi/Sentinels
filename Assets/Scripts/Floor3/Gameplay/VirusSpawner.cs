@@ -1,41 +1,26 @@
 // ============================================================
 // FILE: Assets/Scripts/Floor3/Gameplay/VirusSpawner.cs
 // Namespace: Scripts.Floor3.Gameplay
-// ── REWRITTEN ──────────────────────────────────────────────
+// ── MULTIPLAYER READY ──────────────────────────────────────
 // KEY CHANGES:
-//   1. CONTINUOUS SPAWN: A background loop spawns viruses
-//      periodically from game start. This is the baseline
-//      pressure that always exists.
-//
-//   2. WRONG ANSWER SPAWN: When quiz answer is wrong,
-//      SpawnWave() is called. It picks spawn points NEAREST
-//      to the checkpoint position (not random map-wide).
-//      This makes wrong-answer punishment feel local and fair.
-//
-//   3. MAX VIRUS CAP: Continuous spawn respects a max alive
-//      cap so the scene doesn't get overwhelmed.
-//
-// SPAWN POINT STRATEGY:
-//   You place spawn points around your entire map.
-//   - Continuous spawn: truly random across all points
-//   - Wrong answer spawn: filtered to N nearest points
-//     to the checkpoint where the wrong answer happened
-//
-// MULTIPLAYER NOTE:
-//   Only Server runs spawn loops.
-//   Wrap StartCoroutine calls with if (!IsServer) return;
+//   1. Inherits from NetworkBehaviour instead of MonoBehaviour.
+//   2. Uses IsServer checks to ensure ONLY the Host spawns viruses.
+//   3. Uses NetworkObject.Spawn() to synchronize viruses to clients.
+//   4. Uses NetworkObject.Despawn() to clean them up properly over the network.
 // ============================================================
 
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using Unity.Netcode; // THÊM THƯ VIỆN MẠNG
 using Scripts.Floor3.AI;
 using Scripts.ScriptableObjects;
 
 namespace Scripts.Floor3.Gameplay
 {
-    public class VirusSpawner : MonoBehaviour
+    // ĐỔI TỪ MonoBehaviour SANG NetworkBehaviour
+    public class VirusSpawner : NetworkBehaviour
     {
         // ── Inspector ────────────────────────────────────────────────────
 
@@ -98,17 +83,20 @@ namespace Scripts.Floor3.Gameplay
 
         private void Start()
         {
-            StartContinuousSpawn();
+            // CHỈ MÁY CHỦ (HOST) MỚI ĐƯỢC CHẠY VÒNG LẶP ĐẺ QUÁI
+            if (IsServer)
+            {
+                StartContinuousSpawn();
+            }
         }
 
         // ── Continuous Spawn ─────────────────────────────────────────────
 
-        /// <summary>
-        /// Starts the background virus spawn loop.
-        /// Runs for the entire level — provides constant pressure.
-        /// </summary>
         public void StartContinuousSpawn()
         {
+            // CHẶN CLIENT KHÔNG CHO CHẠY
+            if (!IsServer) return; 
+
             if (_spawningActive) return;
             _spawningActive = true;
             _continuousLoop = StartCoroutine(ContinuousSpawnLoop());
@@ -117,6 +105,9 @@ namespace Scripts.Floor3.Gameplay
 
         public void StopContinuousSpawn()
         {
+            // CHẶN CLIENT KHÔNG CHO CHẠY
+            if (!IsServer) return;
+
             _spawningActive = false;
             if (_continuousLoop != null)
             {
@@ -157,13 +148,10 @@ namespace Scripts.Floor3.Gameplay
 
         // ── Wrong Answer Spawn ────────────────────────────────────────────
 
-        /// <summary>
-        /// Spawn a punishment wave near the checkpoint where the wrong answer happened.
-        /// checkpointPosition = the world position of that checkpoint waypoint.
-        /// </summary>
         public void SpawnWave(Vector3 checkpointPosition)
         {
-            if (_currentVirusData == null) return;
+            // CHẶN CLIENT
+            if (!IsServer || _currentVirusData == null) return;
 
             _totalWavesSpawned++;
             int count = _currentVirusData.SpawnCountPerWave;
@@ -172,12 +160,10 @@ namespace Scripts.Floor3.Gameplay
             StartCoroutine(SpawnWaveNearCheckpoint(checkpointPosition, count));
         }
 
-        /// <summary>
-        /// Overload without position — falls back to random spawn points.
-        /// Used as fallback if checkpoint position is unavailable.
-        /// </summary>
         public void SpawnWave()
         {
+            if (!IsServer) return;
+
             if (_robotController != null)
                 SpawnWave(_robotController.transform.position);
             else
@@ -212,11 +198,24 @@ namespace Scripts.Floor3.Gameplay
             GameObject virusGO = Instantiate(_virusPrefab, position, Quaternion.identity, _virusContainer);
             virusGO.name = $"Virus_{_activeViruses.Count + 1}";
 
+            // LỆNH MẠNG: ĐẨY QUÁI VỪA TẠO LÊN CHO TẤT CẢ CÁC CLIENT CÙNG THẤY
+            NetworkObject netObj = virusGO.GetComponent<NetworkObject>();
+            if (netObj != null) 
+            {
+                netObj.Spawn(true);
+            }
+            else 
+            {
+                Debug.LogError("[VirusSpawner] Thiếu NetworkObject trên Prefab Virus!");
+            }
+
             VirusAI virusAI = virusGO.GetComponent<VirusAI>();
             if (virusAI == null)
             {
                 Debug.LogError("[VirusSpawner] Virus prefab is missing VirusAI component!");
-                Destroy(virusGO);
+                // Hủy đúng chuẩn mạng
+                if (netObj != null && netObj.IsSpawned) netObj.Despawn(true);
+                else Destroy(virusGO);
                 return;
             }
 
@@ -251,10 +250,6 @@ namespace Scripts.Floor3.Gameplay
             return _spawnPoints[Random.Range(0, _spawnPoints.Length)].position;
         }
 
-        /// <summary>
-        /// Returns the N spawn points closest to a given world position.
-        /// Used to localize wrong-answer spawns near the failed checkpoint.
-        /// </summary>
         private List<Transform> GetNearestSpawnPoints(Vector3 origin, int count)
         {
             if (_spawnPoints == null || _spawnPoints.Length == 0)
@@ -267,10 +262,6 @@ namespace Scripts.Floor3.Gameplay
                 .ToList();
         }
 
-        /// <summary>
-        /// Returns spawn points within a distance range from the escort robot.
-        /// Ensures viruses do not spawn too close to the robot.
-        /// </summary>
         private List<Transform> GetSpawnPointsNearRobot()
         {
             if (_robotController == null || _spawnPoints == null)
@@ -305,14 +296,31 @@ namespace Scripts.Floor3.Gameplay
 
         public void ClearAllViruses()
         {
+            // CHỈ SERVER ĐƯỢC XÓA QUÁI TRÊN MẠNG
+            if (!IsServer) return; 
+
             StopContinuousSpawn();
             foreach (var v in _activeViruses)
-                if (v != null) Destroy(v.gameObject);
+            {
+                if (v != null)
+                {
+                    // XÓA CHUẨN MẠNG: Dùng Despawn thay vì Destroy
+                    NetworkObject netObj = v.GetComponent<NetworkObject>();
+                    if (netObj != null && netObj.IsSpawned)
+                    {
+                        netObj.Despawn(true);
+                    }
+                    else
+                    {
+                        Destroy(v.gameObject);
+                    }
+                }
+            }
             _activeViruses.Clear();
             Log("All viruses cleared.");
         }
 
-        // ── Getters (for DifficultyManager Day 4) ────────────────────────
+        // ── Getters ───────────────────────────────────────────────────────
 
         public int GetActiveVirusCount() => _activeViruses.Count;
         public int GetTotalWavesSpawned() => _totalWavesSpawned;

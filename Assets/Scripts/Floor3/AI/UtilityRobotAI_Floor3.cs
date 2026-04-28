@@ -1,9 +1,11 @@
 using UnityEngine;
 using System.Collections.Generic;
+using Unity.Netcode; // THÊM THƯ VIỆN MẠNG
 
 [RequireComponent(typeof(SpriteRenderer))]
 [RequireComponent(typeof(Rigidbody2D))]
-public class UtilityRobotAI_Floor3 : MonoBehaviour, IDamagable
+// ĐỔI SANG NetworkBehaviour
+public class UtilityRobotAI_Floor3 : NetworkBehaviour, IDamagable
 {
     [Header("Targets")]
     public Transform playerA;
@@ -47,7 +49,7 @@ public class UtilityRobotAI_Floor3 : MonoBehaviour, IDamagable
     {
         sr = GetComponent<SpriteRenderer>();
         rb = GetComponent<Rigidbody2D>();
-        rb.freezeRotation = true; // Chống lăn lộn
+        rb.freezeRotation = true; 
 
         allRobots.Add(this);
 
@@ -60,17 +62,19 @@ public class UtilityRobotAI_Floor3 : MonoBehaviour, IDamagable
         _hitReaction = GetComponent<HitReactionController>();
     }
 
-    void OnDestroy()
+    // ĐÃ SỬA LỖI CẢNH BÁO CS0114 Ở ĐÂY
+    public override void OnDestroy()
     {
+        base.OnDestroy(); // Gọi hàm dọn dẹp mạng của NetworkBehaviour
         allRobots.Remove(this);
     }
 
     void FixedUpdate()
     {
-        // Giữ quái đứng im khi chưa bấm Start Mission (Bảo vệ lúc đang đọc Quest)
-        if (!Scripts.Floor3.UI.TopicSelectionUI.hasStartedMission) return;
+        // CHỈ SERVER MỚI ĐƯỢC CHẠY AI TÌM ĐƯỜNG VÀ CẮN
+        if (!IsServer) return;
 
-        // THÊM DÒNG NÀY: nhường quyền điều khiển cho knockback
+        if (!Scripts.Floor3.UI.TopicSelectionUI.hasStartedMission) return;
         if (_hitReaction != null && _hitReaction.IsBeingKnockedBack) return;
 
         if (currentCooldown > 0)
@@ -81,7 +85,7 @@ public class UtilityRobotAI_Floor3 : MonoBehaviour, IDamagable
         if (target != null)
         {
             ExecuteMovement(target);
-            TickAttack(); // Gọi lệnh quét Radar để cắn
+            TickAttack(); 
         }
         else
         {
@@ -89,12 +93,10 @@ public class UtilityRobotAI_Floor3 : MonoBehaviour, IDamagable
         }
     }
 
-    // ── LOGIC CẮN BẰNG RADAR (CHUẨN 100%, KHÔNG TRƯỢT) ──
     void TickAttack()
     {
         if (currentCooldown > 0) return;
 
-        // Tạo vòng tròn quét. Bán kính to hơn stoppingDistance 0.3m để chắc chắn bao trùm được Player
         float attackRadius = stoppingDistance + 0.3f;
         Collider2D[] hits = Physics2D.OverlapCircleAll(transform.position, attackRadius);
 
@@ -105,7 +107,7 @@ public class UtilityRobotAI_Floor3 : MonoBehaviour, IDamagable
             {
                 hp.TakeDamage(attackDamage);
                 currentCooldown = attackCooldown;
-                return; // Cắn được 1 người là dừng chờ hồi chiêu, không cắn lan
+                return; 
             }
         }
     }
@@ -146,7 +148,7 @@ public class UtilityRobotAI_Floor3 : MonoBehaviour, IDamagable
 
             if (distToTarget <= stoppingDistance)
             {
-                bestDir = Vector2.zero; // Tới gần thì đứng lại chuẩn bị cắn
+                bestDir = Vector2.zero; 
             }
             else
             {
@@ -173,24 +175,33 @@ public class UtilityRobotAI_Floor3 : MonoBehaviour, IDamagable
         }
 
         if (bestDir != Vector2.zero)
-        {
             rb.linearVelocity = bestDir.normalized * currentSpeed;
-        }
         else
-        {
             rb.linearVelocity = Vector2.zero;
-        }
 
-        // XỬ LÝ LẬT MẶT
+        // XỬ LÝ LẬT MẶT (GỌI CLIENT RPC ĐỂ MỌI NGƯỜI CÙNG THẤY)
+        bool shouldFlip = sr.flipX;
         if (target != null)
         {
-            if (target.position.x < transform.position.x - 0.1f) sr.flipX = true;
-            else if (target.position.x > transform.position.x + 0.1f) sr.flipX = false;
+            if (target.position.x < transform.position.x - 0.1f) shouldFlip = true;
+            else if (target.position.x > transform.position.x + 0.1f) shouldFlip = false;
         }
         else if (Mathf.Abs(bestDir.x) > 0.1f)
         {
-            sr.flipX = bestDir.x < 0;
+            shouldFlip = bestDir.x < 0;
         }
+
+        if (sr.flipX != shouldFlip)
+        {
+            sr.flipX = shouldFlip;
+            SyncFlipClientRpc(shouldFlip);
+        }
+    }
+
+    [ClientRpc]
+    private void SyncFlipClientRpc(bool flip)
+    {
+        if (!IsServer && sr != null) sr.flipX = flip;
     }
 
     void PickNewPatrolPoint()
@@ -199,33 +210,43 @@ public class UtilityRobotAI_Floor3 : MonoBehaviour, IDamagable
         stuckTimer = 0f;
     }
 
-    // TakeDamage() — giữ nguyên như hướng dẫn lần trước, chỉ chắc chắn manageHp = true trên Inspector
-    public void TakeDamage()
+    public void TakeDamage() { TakeDamage(1f); }
+
+    public void TakeDamage(float amount)
     {
-        if (_hitReaction == null) { Destroy(gameObject); return; }
+        // CHỈ SERVER MỚI ĐƯỢC XỬ LÝ SÁT THƯƠNG QUÁI
+        if (!IsServer) return;
+        if (_hitReaction == null) { DespawnVirus(); return; }
 
         Transform attacker = FindNearestPlayer();
         Vector2 knockbackDir = Vector2.up;
         if (attacker != null)
             knockbackDir = ((Vector2)transform.position - (Vector2)attacker.position).normalized;
 
-        bool died = _hitReaction.ReactToHit(knockbackDir, 1f);
-        if (died) Destroy(gameObject);
+        // Gọi ClientRpc để chạy hiệu ứng chớp trắng trên mọi màn hình
+        TriggerHitVisualClientRpc(knockbackDir);
+
+        bool died = _hitReaction.ReactToHit(knockbackDir, amount);
+        if (died) DespawnVirus();
+    }
+
+    [ClientRpc]
+    private void TriggerHitVisualClientRpc(Vector2 dir)
+    {
+        // Client chỉ chạy hiệu ứng Flash (không trừ HP)
+        if (!IsServer && _hitReaction != null) _hitReaction.ReactOnly(dir);
+    }
+
+    private void DespawnVirus()
+    {
+        if (NetworkObject.IsSpawned) NetworkObject.Despawn(true);
+        else Destroy(gameObject);
     }
 
     private void OnDrawGizmosSelected()
     {
-        Gizmos.color = Color.red;
-        Gizmos.DrawWireSphere(transform.position, detectionRadius);
-
-        Gizmos.color = Color.green;
-        Gizmos.DrawWireSphere(
-            Application.isPlaying ? startPos : (Vector2)transform.position,
-            patrolRadius
-        );
-
-        // Vẽ cái "Radar cắn" màu Vàng cho anh dễ nhìn trong Scene
-        Gizmos.color = Color.yellow;
-        Gizmos.DrawWireSphere(transform.position, stoppingDistance + 0.3f);
+        Gizmos.color = Color.red; Gizmos.DrawWireSphere(transform.position, detectionRadius);
+        Gizmos.color = Color.green; Gizmos.DrawWireSphere(Application.isPlaying ? startPos : (Vector2)transform.position, patrolRadius);
+        Gizmos.color = Color.yellow; Gizmos.DrawWireSphere(transform.position, stoppingDistance + 0.3f);
     }
 }

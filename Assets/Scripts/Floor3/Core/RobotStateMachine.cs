@@ -3,21 +3,16 @@
 // Namespace: Scripts.Floor3.Core
 // ------------------------------------------------------------
 // Manages robot state transitions.
-// WHY SEPARATE FROM RobotController:
-//   - RobotController handles physics/movement
-//   - RobotStateMachine handles logic/transitions
-//   - Each can evolve independently
-//   - Easier to unit-test state logic in isolation
-// MULTIPLAYER NOTE: In multiplayer, only the HOST/SERVER should
-//                   call ChangeState(). Clients observe via
-//                   NetworkVariable<RobotState>.
+// MULTIPLAYER FIXED: Server determines state, Syncs to Clients via ClientRpc.
 // ============================================================
 
 using UnityEngine;
+using Unity.Netcode; // THÊM THƯ VIỆN MẠNG
 
 namespace Scripts.Floor3.Core
 {
-    public class RobotStateMachine : MonoBehaviour
+    // ĐỔI TỪ MonoBehaviour SANG NetworkBehaviour
+    public class RobotStateMachine : NetworkBehaviour
     {
         [Header("Debug")]
         [SerializeField] private bool _logTransitions = true;
@@ -30,11 +25,11 @@ namespace Scripts.Floor3.Core
 
         // ── State Transitions ────────────────────────────────────────────
 
-        /// <summary>
-        /// Request a state change. Validates transition legality.
-        /// </summary>
         public void ChangeState(RobotState newState)
         {
+            // BẢO VỆ: Chỉ Server mới có quyền thay đổi trạng thái gốc
+            if (!IsServer) return;
+
             if (_currentState == newState) return;
 
             if (!IsTransitionValid(_currentState, newState))
@@ -46,59 +41,74 @@ namespace Scripts.Floor3.Core
             if (_logTransitions)
                 Debug.Log($"[RobotStateMachine] {_currentState} → {newState}");
 
+            // Áp dụng trên Server
+            _currentState = newState;
+            RobotEventBus.RaiseStateChanged(_currentState);
+
+            // Bắn tín hiệu sang cho Client để cập nhật UI/Animation
+            SyncStateClientRpc(newState);
+        }
+
+        [ClientRpc]
+        private void SyncStateClientRpc(RobotState newState)
+        {
+            // Nếu là Server thì bỏ qua vì nó đã chạy lệnh ở trên rồi
+            if (IsServer) return; 
+
             _currentState = newState;
             RobotEventBus.RaiseStateChanged(_currentState);
         }
 
-        /// <summary>
-        /// Change robot emotion. No strict validation — emotions can shift freely.
-        /// </summary>
+        // ── Emotion Transitions ──────────────────────────────────────────
+
         public void ChangeEmotion(RobotEmotion newEmotion)
         {
+            // BẢO VỆ: Chỉ Server mới có quyền quyết định cảm xúc
+            if (!IsServer) return;
+
             if (_currentEmotion == newEmotion) return;
+            
+            // Áp dụng trên Server
+            _currentEmotion = newEmotion;
+            RobotEventBus.RaiseEmotionChanged(_currentEmotion);
+
+            // Đồng bộ cảm xúc sang Client
+            SyncEmotionClientRpc(newEmotion);
+        }
+
+        [ClientRpc]
+        private void SyncEmotionClientRpc(RobotEmotion newEmotion)
+        {
+            if (IsServer) return;
+
             _currentEmotion = newEmotion;
             RobotEventBus.RaiseEmotionChanged(_currentEmotion);
         }
 
         // ── Transition Validation ────────────────────────────────────────
 
-        /// <summary>
-        /// Defines legal state transitions.
-        /// Add new transitions here as systems grow — never modify RobotController
-        /// just to allow a transition.
-        /// </summary>
         private bool IsTransitionValid(RobotState from, RobotState to)
         {
-            // ── RULE: Panicked can be entered from ANY state ───────────────
-            // Virus proximity check runs independently of quiz/stun logic.
-            // Robot must always be able to panic regardless of current state.
             if (to == RobotState.Panicked) return true;
-
-            // ── RULE: Panicked can exit to any movement state ─────────────
             if (from == RobotState.Panicked) return true;
 
             return (from, to) switch
             {
-                // From Moving
                 (RobotState.Moving, RobotState.Waiting) => true,
                 (RobotState.Moving, RobotState.Stunned) => true,
                 (RobotState.Moving, RobotState.Accelerated) => true,
 
-                // From Waiting (at checkpoint)
                 (RobotState.Waiting, RobotState.Moving) => true,
                 (RobotState.Waiting, RobotState.Stunned) => true,
                 (RobotState.Waiting, RobotState.Accelerated) => true,
                 (RobotState.Waiting, RobotState.AskingQuestion) => true,
 
-                // From AskingQuestion
                 (RobotState.AskingQuestion, RobotState.Moving) => true,
                 (RobotState.AskingQuestion, RobotState.Stunned) => true,
                 (RobotState.AskingQuestion, RobotState.Accelerated) => true,
 
-                // From Stunned (timer expires → resume)
                 (RobotState.Stunned, RobotState.Moving) => true,
 
-                // From Accelerated (boost ends)
                 (RobotState.Accelerated, RobotState.Moving) => true,
                 (RobotState.Accelerated, RobotState.Waiting) => true,
 
