@@ -258,6 +258,9 @@ PrefabInstance:
       addedObject: {fileID: 1101637386143774411}
     m_AddedComponents:
     - targetCorrespondingSourceObject: {fileID: 3793757085749545316, guid: f7c9740856e52f148a3600a63e40adba, type: 3}
+      insertIndex: 3
+      addedObject: {fileID: -6474487523055448762}
+    - targetCorrespondingSourceObject: {fileID: 3793757085749545316, guid: f7c9740856e52f148a3600a63e40adba, type: 3}
       insertIndex: -1
       addedObject: {fileID: -5762473180609067764}
   m_SourcePrefab: {fileID: 100100000, guid: f7c9740856e52f148a3600a63e40adba, type: 3}
@@ -266,6 +269,18 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 3793757085749545316, guid: f7c9740856e52f148a3600a63e40adba, type: 3}
   m_PrefabInstance: {fileID: 1449802953809350695}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &-6474487523055448762
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2357808002341755203}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3df8b5d9088a67946bfc87f537d0650e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Game::MultiplayerCharacterSetup
 --- !u!114 &-5762473180609067764
 MonoBehaviour:
   m_ObjectHideFlags: 0

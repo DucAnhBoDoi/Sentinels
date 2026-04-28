@@ -69,6 +69,9 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents:
     - targetCorrespondingSourceObject: {fileID: 3793757085749545316, guid: f7c9740856e52f148a3600a63e40adba, type: 3}
+      insertIndex: 3
+      addedObject: {fileID: -385386906072492963}
+    - targetCorrespondingSourceObject: {fileID: 3793757085749545316, guid: f7c9740856e52f148a3600a63e40adba, type: 3}
       insertIndex: -1
       addedObject: {fileID: -4411585184005105339}
   m_SourcePrefab: {fileID: 100100000, guid: f7c9740856e52f148a3600a63e40adba, type: 3}
@@ -82,6 +85,20 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 3793757085749545316, guid: f7c9740856e52f148a3600a63e40adba, type: 3}
   m_PrefabInstance: {fileID: 5668185444311927569}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &-385386906072492963
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8795338042076922485}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3df8b5d9088a67946bfc87f537d0650e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Game::MultiplayerCharacterSetup
+  ShowTopMostFoldoutHeaderGroup: 1
+  isPlayerA: 0
 --- !u!114 &-4411585184005105339
 MonoBehaviour:
   m_ObjectHideFlags: 0
