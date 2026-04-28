@@ -9,6 +9,7 @@ using UnityEngine.UI;
 public class LobbyRoom : MonoBehaviour
 {
     public event UnityAction OnRoomJoin;
+    public event UnityAction<LobbyRoom> OnOnlineRoomJoin;
 
     [SerializeField]
     private TMP_Text _txtServerName;
@@ -25,6 +26,13 @@ public class LobbyRoom : MonoBehaviour
     [HideInInspector]
     public ushort ServerPort;
 
+    // --- THÊM BIẾN CHO ONLINE ---
+    [HideInInspector]
+    public bool IsOnlineRoom = false;
+
+    [HideInInspector]
+    public string OnlineLobbyId;
+
     private void Start()
     {
         _txtServerName.SetText(ServerName);
@@ -33,8 +41,15 @@ public class LobbyRoom : MonoBehaviour
 
     private void OnBtnJoinClick()
     {
-        UnityTransport transport = (UnityTransport)NetworkManager.Singleton.NetworkConfig.NetworkTransport;
-        transport.SetConnectionData(ServerAddress.ToString(), ServerPort);
-        OnRoomJoin?.Invoke();
+        if (IsOnlineRoom)
+        {
+            OnOnlineRoomJoin?.Invoke(this); 
+        }
+        else
+        {
+            UnityTransport transport = (UnityTransport)NetworkManager.Singleton.NetworkConfig.NetworkTransport;
+            transport.SetConnectionData(ServerAddress.ToString(), ServerPort);
+            OnRoomJoin?.Invoke();
+        }
     }
 }
