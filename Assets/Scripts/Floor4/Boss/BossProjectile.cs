@@ -35,10 +35,9 @@ public class BossProjectile : MonoBehaviour
         float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
         transform.rotation = Quaternion.Euler(new(0, 0, angle));
 
-        if (Vector2.Distance(transform.position, Target.position) <= 0.1f)
+        if (Vector2.Distance(transform.position, Target.position) <= 1)
         {
-            Collider2D col = Physics2D.OverlapCircle(transform.position, 5, LayerMask.GetMask("Player"));
-            HandlePlayerHit(col);
+            transform.position = Target.position + Vector3.down * 2;
         }
     }
 
@@ -54,13 +53,10 @@ public class BossProjectile : MonoBehaviour
             return;
         }
 
-        // Vector3 direction = other.transform.position - transform.position;
-        // if (other.gameObject.TryGetComponent(out KnockBackManager knock))
-        // {
-        //     knock.KnockBack(direction, 20);
-        // }
-
-        Debug.Log($"Projectile hit player {player.name}");
+        if (player.gameObject.TryGetComponent(out PlayerHP playerHp))
+        {
+            playerHp.TakeDamage(1);
+        }
 
         Destroy(gameObject);
     }

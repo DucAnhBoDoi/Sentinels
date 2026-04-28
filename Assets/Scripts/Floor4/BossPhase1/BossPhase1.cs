@@ -28,6 +28,8 @@ public class BossPhase1 : MonoBehaviour, IDamagable
     [SerializeField] private CheckHitable _checkHitable;
     [SerializeField] private float _atkDuration;
     [SerializeField] private float _hurtDuration;
+    [SerializeField] private GameObject _firewall;
+    [SerializeField] private Transform _teleportPool;
     [SerializeField] private BehaviorTree _tree;
 
     private GameObject[] _players;
@@ -48,7 +50,13 @@ public class BossPhase1 : MonoBehaviour, IDamagable
             .End()
             .SelectorRandom()
             .Sequence()
+            .Selector()
+            .Sequence()
+            .RandomChance(1, 5)
+            .Do(nameof(TeleportToClosest), TeleportToClosest)
+            .End()
             .Do(nameof(MoveTowardPlayerBehavior), MoveTowardPlayerBehavior)
+            .End()
             .Selector()
             .Sequence()
             .Condition(() => _checkHitable.Attackable)
@@ -70,15 +78,39 @@ public class BossPhase1 : MonoBehaviour, IDamagable
             .Build();
     }
 
+    private TaskStatus TeleportToClosest()
+    {
+        if (_teleportPool == null)
+        {
+            return TaskStatus.Failure;
+        }
+
+        Transform closest = _teleportPool.GetChild(0);
+
+        foreach (Transform point in _teleportPool)
+        {
+            if (Vector2.Distance(point.position, _targetedPlayer.transform.position) <
+                Vector2.Distance(closest.position, _targetedPlayer.transform.position))
+            {
+                closest = point;
+            }
+        }
+
+        transform.position = closest.position;
+
+        return TaskStatus.Success;
+    }
+
     private void Start()
     {
+        if (_firewall != null)
+        {
+            _firewall.SetActive(true);
+        }
+
+        _players = GameObject.FindGameObjectsWithTag("Player");
         _atkHitBox.gameObject.SetActive(false);
         _checkHitable.gameObject.SetActive(true);
-        _players = GameObject.FindGameObjectsWithTag("Player");
-        if (_players.Length > 0 && _targetedPlayer == null)
-        {
-            _targetedPlayer = _players[0];
-        }
     }
 
     private void Update()
@@ -90,15 +122,13 @@ public class BossPhase1 : MonoBehaviour, IDamagable
 
         _rb.linearVelocity = Vector2.zero;
 
-        if (_targetedPlayer)
+        foreach (var player in _players)
         {
-            foreach (var player in _players)
+            if (_targetedPlayer == null ||
+                Vector2.Distance(player.transform.position, transform.position) <
+                Vector2.Distance(_targetedPlayer.transform.position, transform.position))
             {
-                if (Vector2.Distance(player.transform.position, transform.position) <
-                    Vector2.Distance(_targetedPlayer.transform.position, transform.position))
-                {
-                    _targetedPlayer = player;
-                }
+                _targetedPlayer = player;
             }
         }
 
@@ -143,12 +173,12 @@ public class BossPhase1 : MonoBehaviour, IDamagable
         _atkHitBox.gameObject.SetActive(false);
         _checkHitable.gameObject.SetActive(false);
         _isDead = true;
-        OnDeath?.Invoke();
-
-        foreach (var ps in GetComponentsInChildren<ParticleSystem>())
+        if (_firewall != null)
         {
-            ps.Stop();
+            _firewall.gameObject.SetActive(false);
         }
+
+        OnDeath?.Invoke();
     }
 
     private void HandleAttack()

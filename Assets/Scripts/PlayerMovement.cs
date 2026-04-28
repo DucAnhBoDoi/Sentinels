@@ -2,23 +2,21 @@
 // FILE: PlayerMovement.cs (Di chuyển, Lộn, Lật mặt & Đánh)
 // Dùng cho mọi máy, mọi Tầng.
 // ══════════════════════════════════════════════════════
+
 using UnityEngine;
 using UnityEngine.InputSystem;
 using Unity.Netcode;
 
 public class PlayerMovement : NetworkBehaviour
 {
-    [Header("Cấu hình di chuyển")]
-    public float moveSpeed = 5f;
+    [Header("Cấu hình di chuyển")] public float moveSpeed = 5f;
     public bool useQuestSystem = true;
 
-    [Header("Thành phần hỗ trợ")]
-    public Rigidbody2D rb;
+    [Header("Thành phần hỗ trợ")] public Rigidbody2D rb;
     public Animator anim;
     private Unity.Netcode.Components.NetworkAnimator netAnim;
 
-    [Header("Cấu hình Chiến đấu")]
-    public bool canAttack = true;
+    [Header("Cấu hình Chiến đấu")] public bool canAttack = true;
     public float attackRange = 1.5f;
     public Vector2 actionOffset;
     public LayerMask enemyLayer;
@@ -41,7 +39,7 @@ public class PlayerMovement : NetworkBehaviour
 
     void Update()
     {
-        if (!IsOwner) return;
+        if (NetworkManager && NetworkManager.IsClient && !IsOwner) return;
         // Kiểm tra xem có đang bị kẹt bởi bảng Quest không (chỉ dùng nếu useQuestSystem = true)
         if (useQuestSystem && !QuestPopupManager.isGameStarted) return;
 
@@ -65,12 +63,12 @@ public class PlayerMovement : NetworkBehaviour
         // Dùng netAnim cho đồng bộ mạng, nếu không có thì dùng anim thường
         if (movement.sqrMagnitude > 0)
         {
-            if (netAnim) netAnim.Animator.SetBool("isRunning", true);
+            if (NetworkManager && NetworkManager.IsClient && netAnim) netAnim.Animator.SetBool("isRunning", true);
             else if (anim) anim.SetBool("isRunning", true);
         }
         else
         {
-            if (netAnim) netAnim.Animator.SetBool("isRunning", false);
+            if (NetworkManager && NetworkManager.IsClient && netAnim) netAnim.Animator.SetBool("isRunning", false);
             else if (anim) anim.SetBool("isRunning", false);
         }
 
@@ -89,13 +87,13 @@ public class PlayerMovement : NetworkBehaviour
 
     void FixedUpdate()
     {
-        if (!IsOwner) return;
+        if (NetworkManager && NetworkManager.IsClient && !IsOwner) return;
 
         if (!isRolling)
         {
             if (movement != Vector2.zero)
             {
-                rb.MovePosition(rb.position + movement.normalized * moveSpeed * Time.fixedDeltaTime);
+                rb.MovePosition(rb.position + movement.normalized * (moveSpeed * Time.fixedDeltaTime));
             }
             else
             {
@@ -117,7 +115,7 @@ public class PlayerMovement : NetworkBehaviour
     {
         isRolling = true;
 
-        if (netAnim) netAnim.SetTrigger("isRolling");
+        if (NetworkManager && NetworkManager.IsClient && netAnim) netAnim.SetTrigger("isRolling");
         else if (anim) anim.SetTrigger("isRolling"); // Phòng hờ nếu test offline
 
         rb.linearVelocity = movement.normalized * (moveSpeed * 1.5f);
@@ -133,7 +131,7 @@ public class PlayerMovement : NetworkBehaviour
     // ĐÃ XÓA HÀM TRÙNG LẶP, CHỈ GIỮ LẠI HÀM NÀY
     void PerformAttack()
     {
-        if (netAnim) netAnim.SetTrigger("isAttacking");
+        if (NetworkManager && NetworkManager.IsClient && netAnim) netAnim.SetTrigger("isAttacking");
         else if (anim) anim.SetTrigger("isAttacking");
     }
 

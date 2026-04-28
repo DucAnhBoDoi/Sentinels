@@ -3,21 +3,19 @@ using Unity.Netcode;
 
 public class PlayerHP : NetworkBehaviour
 {
-    [Header("Chỉ số sinh tồn")]
-    public float maxHealth = 100f;
-    
+    [Header("Chỉ số sinh tồn")] public float maxHealth = 100f;
+
     public NetworkVariable<float> currentHealth = new NetworkVariable<float>(
-        0f, 
-        NetworkVariableReadPermission.Everyone, 
-        NetworkVariableWritePermission.Server 
+        0f,
+        NetworkVariableReadPermission.Everyone,
+        NetworkVariableWritePermission.Server
     );
 
-    public HealthBar healthBar; 
+    public HealthBar healthBar;
 
-    [Header("Cơ chế Tầng 2")]
-    public bool isOnPlatform = false; 
+    [Header("Cơ chế Tầng 2")] public bool isOnPlatform = false;
 
-    private bool isDead = false; 
+    private bool isDead = false;
     public bool IsDead => isDead;
 
     private Animator anim;
@@ -72,7 +70,14 @@ public class PlayerHP : NetworkBehaviour
     public void TakeDamage(float damageAmount)
     {
         if (isDead) return;
-        TakeDamageServerRpc(damageAmount);
+        if (NetworkManager && NetworkManager.IsClient)
+        {
+            TakeDamageServerRpc(damageAmount);
+            return;
+        }
+
+        float newHealth = currentHealth.Value - damageAmount;
+        currentHealth.Value = Mathf.Clamp(newHealth, 0, maxHealth);
     }
 
     // 6. GỬI SERVER (ĐÃ CẬP NHẬT THEO CHUẨN UNITY MỚI NHẤT)
@@ -87,7 +92,7 @@ public class PlayerHP : NetworkBehaviour
 
     public void Heal(float amount)
     {
-        TakeDamage(-amount); 
+        TakeDamage(-amount);
     }
 
     void Die()
@@ -104,7 +109,10 @@ public class PlayerHP : NetworkBehaviour
 
         // 3. Dừng vật lý và va chạm
         rb.linearVelocity = Vector2.zero;
-        GetComponent<Collider2D>().enabled = false;
+        foreach (Collider2D col in GetComponentsInChildren<Collider2D>())
+        {
+            col.enabled = false;
+        }
 
         // 4. CHỜ 1.5 GIÂY RỒI MỚI HIỆN BẢNG
         if (GameOverManager.Instance != null)

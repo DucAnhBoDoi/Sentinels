@@ -33,6 +33,10 @@ public class BossRoomEnterTrigger : MonoBehaviour
         // Destroy(_bossAvatar);
         _bossPhase1.enabled = true;
         Destroy(gameObject);
+        foreach (GameObject player in GameObject.FindGameObjectsWithTag("Player"))
+        {
+            player.transform.position = transform.position;
+        }
     }
 
     private void OnBossPhase1Death()

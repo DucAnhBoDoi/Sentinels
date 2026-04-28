@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 [RequireComponent(typeof(Collider2D))]
@@ -7,29 +9,41 @@ public class CheckHitable : MonoBehaviour
 
     public bool Attackable { get; private set; }
 
-    private int _count;
+    private List<GameObject> _targets;
+
+    private void Awake()
+    {
+        _targets = new List<GameObject>();
+    }
 
     private void Update()
     {
-        Attackable = _count > 0;
+        Attackable = false;
+        foreach (GameObject target in _targets)
+        {
+            if (target.CompareTag("Player"))
+            {
+                Attackable = true;
+            }
+        }
     }
 
     private void OnTriggerEnter2D(Collider2D other)
     {
         if (!other.CompareTag("Player")) return;
 
-        Debug.Log($"In range to attack {other.name}");
+        _targets.Add(other.gameObject);
 
-        _count++;
+        Debug.Log($"In range to attack {other.name}");
     }
 
     private void OnTriggerExit2D(Collider2D other)
     {
         if (!other.CompareTag("Player")) return;
 
-        Debug.Log($"Out of range to attack {other.name}");
+        _targets.Remove(other.gameObject);
 
-        _count--;
+        Debug.Log($"Out of range to attack {other.name}");
     }
 
 #if UNITY_EDITOR

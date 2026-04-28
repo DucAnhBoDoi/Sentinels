@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 [RequireComponent(typeof(Collider2D))]
@@ -27,7 +29,10 @@ public class DamageHitBox : MonoBehaviour
     {
         if (!other.CompareTag("Player")) return;
 
-        Debug.Log($"Boss hit player {other.name}");
+        if (other.gameObject.TryGetComponent(out PlayerHP playerHp))
+        {
+            playerHp.TakeDamage(1);
+        }
     }
 
 #if UNITY_EDITOR
@@ -37,7 +42,7 @@ public class DamageHitBox : MonoBehaviour
         {
             _collider = GetComponent<Collider2D>();
         }
-        
+
         _collider.isTrigger = true;
     }
 #endif
