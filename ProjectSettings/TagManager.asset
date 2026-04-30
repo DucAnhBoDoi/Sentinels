@@ -59,14 +59,14 @@ TagManager:
   - name: Decor
     uniqueID: 1642134099
     locked: 0
+  - name: RobotEscort
+    uniqueID: 3146002283
+    locked: 0
   - name: Player
     uniqueID: 3440499979
     locked: 0
   - name: WalkBehind
     uniqueID: 2715252765
-    locked: 0
-  - name: RobotEscort
-    uniqueID: 3146002283
     locked: 0
   - name: Virus
     uniqueID: 3401878275
