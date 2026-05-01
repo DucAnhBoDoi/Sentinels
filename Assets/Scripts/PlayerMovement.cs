@@ -6,6 +6,7 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 using Unity.Netcode;
+using UnityEngine.EventSystems;
 
 public class PlayerMovement : NetworkBehaviour
 {
@@ -90,6 +91,8 @@ public class PlayerMovement : NetworkBehaviour
         // 3. TẤN CÔNG (Chuột trái)
         if (mouse.leftButton.wasPressedThisFrame && canAttack)
         {
+            if (EventSystem.current.IsPointerOverGameObject()) return;
+
             PerformAttack();
         }
     }
@@ -165,7 +168,7 @@ public class PlayerMovement : NetworkBehaviour
             if (skeleton != null)
             {
                 skeleton.TakeDamage();
-                hasHitSomething = true; 
+                hasHitSomething = true;
             }
         }
 
