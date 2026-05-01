@@ -100286,8 +100286,16 @@ PrefabInstance:
     m_TransformParent: {fileID: 1674892646}
     m_Modifications:
     - target: {fileID: 2564126092389927938, guid: 3217c01adf567a84ba9ef2d237ef19ac, type: 3}
+      propertyPath: hitSound
+      value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 2564126092389927938, guid: 3217c01adf567a84ba9ef2d237ef19ac, type: 3}
       propertyPath: canAttack
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2564126092389927938, guid: 3217c01adf567a84ba9ef2d237ef19ac, type: 3}
+      propertyPath: swingSound
+      value: 
       objectReference: {fileID: 0}
     - target: {fileID: 2564126092389927938, guid: 3217c01adf567a84ba9ef2d237ef19ac, type: 3}
       propertyPath: enemyLayer.m_Bits
@@ -100373,6 +100381,11 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 7774636970644580884, guid: 3217c01adf567a84ba9ef2d237ef19ac, type: 3}
   m_PrefabInstance: {fileID: 1117893037}
   m_PrefabAsset: {fileID: 0}
+--- !u!82 &1117893039 stripped
+AudioSource:
+  m_CorrespondingSourceObject: {fileID: 2590284646767798309, guid: 3217c01adf567a84ba9ef2d237ef19ac, type: 3}
+  m_PrefabInstance: {fileID: 1117893037}
+  m_PrefabAsset: {fileID: 0}
 --- !u!114 &1117893045
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -100394,6 +100407,9 @@ MonoBehaviour:
   attackKey: 323
   healthRegenPerKill: 6
   attackDelay: 0.15
+  audioSource: {fileID: 1117893039}
+  swingSound: {fileID: 8300000, guid: 503479e8df14b5c489e5d22f7f86b12a, type: 3}
+  hitSound: {fileID: 8300000, guid: 9cf66270fa994684aaddf72b095fd7f7, type: 3}
 --- !u!1 &1127043376
 GameObject:
   m_ObjectHideFlags: 0
@@ -100509,7 +100525,7 @@ TilemapRenderer:
   m_LightmapParameters: {fileID: 0}
   m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: -1579714531
-  m_SortingLayer: 6
+  m_SortingLayer: 7
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_ChunkSize: {x: 32, y: 32, z: 32}
@@ -152918,8 +152934,16 @@ PrefabInstance:
       value: 100
       objectReference: {fileID: 0}
     - target: {fileID: 8728635386217666356, guid: d6cff015914d52d42b2689beb0821397, type: 3}
+      propertyPath: hitSound
+      value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 8728635386217666356, guid: d6cff015914d52d42b2689beb0821397, type: 3}
       propertyPath: canAttack
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8728635386217666356, guid: d6cff015914d52d42b2689beb0821397, type: 3}
+      propertyPath: swingSound
+      value: 
       objectReference: {fileID: 0}
     - target: {fileID: 8728635386217666356, guid: d6cff015914d52d42b2689beb0821397, type: 3}
       propertyPath: enemyLayer.m_Bits
@@ -152940,6 +152964,11 @@ PrefabInstance:
 --- !u!4 &1935996506 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 3554118121029464354, guid: d6cff015914d52d42b2689beb0821397, type: 3}
+  m_PrefabInstance: {fileID: 1935996505}
+  m_PrefabAsset: {fileID: 0}
+--- !u!82 &1935996507 stripped
+AudioSource:
+  m_CorrespondingSourceObject: {fileID: 8738468245882860307, guid: d6cff015914d52d42b2689beb0821397, type: 3}
   m_PrefabInstance: {fileID: 1935996505}
   m_PrefabAsset: {fileID: 0}
 --- !u!114 &1935996513
@@ -152963,6 +152992,9 @@ MonoBehaviour:
   attackKey: 323
   healthRegenPerKill: 6
   attackDelay: 0.15
+  audioSource: {fileID: 1935996507}
+  swingSound: {fileID: 8300000, guid: 503479e8df14b5c489e5d22f7f86b12a, type: 3}
+  hitSound: {fileID: 8300000, guid: 9cf66270fa994684aaddf72b095fd7f7, type: 3}
 --- !u!114 &2006349803 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 4579287641564145839, guid: a5cc1c8b543582042a872634b80a8451, type: 3}

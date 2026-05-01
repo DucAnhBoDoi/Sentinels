@@ -18,14 +18,23 @@ public class PlayerCombat : NetworkBehaviour
     [Header("Cấu hình Delay")]
     public float attackDelay = 0.15f;
 
+    // --- THÊM CẤU HÌNH ÂM THANH Ở ĐÂY ---
+    [Header("Cấu hình Âm thanh")]
+    public AudioSource audioSource;
+    public AudioClip swingSound;
+    public AudioClip hitSound;
+
     private Animator animator;
-    private Unity.Netcode.Components.NetworkAnimator netAnim; // THÊM BIẾN NÀY
+    private Unity.Netcode.Components.NetworkAnimator netAnim; 
     private bool isHitStopping = false;
 
     void Start() 
     { 
         animator = GetComponent<Animator>(); 
         netAnim = GetComponent<Unity.Netcode.Components.NetworkAnimator>();
+
+        // Tự động tìm AudioSource trên người nhân vật
+        if (audioSource == null) audioSource = GetComponent<AudioSource>();
     }
 
     void Update()
@@ -42,6 +51,12 @@ public class PlayerCombat : NetworkBehaviour
         if (netAnim != null) netAnim.SetTrigger("isAttacking");
         else if (animator != null) animator.SetTrigger("isAttacking");
 
+        // --- GỌI ÂM THANH CHÉM KIẾM TẠI ĐÂY (Ngay khi vung tay) ---
+        if (audioSource != null && swingSound != null)
+        {
+            audioSource.PlayOneShot(swingSound);
+        }
+
         yield return new WaitForSeconds(attackDelay);
         PerformDamage();
     }
@@ -51,6 +66,8 @@ public class PlayerCombat : NetworkBehaviour
         if (attackPoint == null) return;
 
         Collider2D[] hitEnemies = Physics2D.OverlapCircleAll(attackPoint.position, attackRange, enemyLayers);
+        
+        bool hasHitSomething = false; // Biến cờ hiệu kiểm tra chém trúng
 
         foreach (Collider2D enemy in hitEnemies)
         {
@@ -59,6 +76,7 @@ public class PlayerCombat : NetworkBehaviour
             if (damageable != null)
             {
                 damageable.TakeDamage();
+                hasHitSomething = true; // Bật cờ hiệu
 
                 // 2. GỌI LỆNH MẠNG ĐỂ CẢ HOST VÀ CLIENT CÙNG CHẠY HITSTOP
                 ApplyHitStopClientRpc();
@@ -66,6 +84,12 @@ public class PlayerCombat : NetworkBehaviour
                 PlayerHP ph = GetComponent<PlayerHP>();
                 if (ph != null) ph.TakeDamage(-(int)healthRegenPerKill);
             }
+        }
+
+        // --- GỌI ÂM THANH TRÚNG ĐÍCH TẠI ĐÂY ---
+        if (hasHitSomething && audioSource != null && hitSound != null)
+        {
+            audioSource.PlayOneShot(hitSound);
         }
     }
 

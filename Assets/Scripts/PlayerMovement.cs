@@ -21,6 +21,12 @@ public class PlayerMovement : NetworkBehaviour
     public Vector2 actionOffset;
     public LayerMask enemyLayer;
 
+    // --- THÊM CẤU HÌNH ÂM THANH Ở ĐÂY ---
+    [Header("Cấu hình Âm thanh")]
+    public AudioSource audioSource;
+    public AudioClip swingSound;
+    public AudioClip hitSound; // THÊM BIẾN NÀY ĐỂ KÉO THẢ TIẾNG CHÉM TRÚNG QUÁI
+
     private Vector2 movement;
     private bool isRolling = false;
     private float baseScaleX;
@@ -29,6 +35,9 @@ public class PlayerMovement : NetworkBehaviour
     {
         if (!rb) rb = GetComponent<Rigidbody2D>();
         if (!anim) anim = GetComponent<Animator>();
+
+        // Tự động tìm AudioSource trên người nhân vật nếu bạn quên kéo thả
+        if (!audioSource) audioSource = GetComponent<AudioSource>();
 
         netAnim = GetComponent<Unity.Netcode.Components.NetworkAnimator>();
 
@@ -128,11 +137,16 @@ public class PlayerMovement : NetworkBehaviour
         rb.linearVelocity = Vector2.zero;
     }
 
-    // ĐÃ XÓA HÀM TRÙNG LẶP, CHỈ GIỮ LẠI HÀM NÀY
     void PerformAttack()
     {
         if (NetworkManager && NetworkManager.IsClient && netAnim) netAnim.SetTrigger("isAttacking");
         else if (anim) anim.SetTrigger("isAttacking");
+
+        // --- GỌI ÂM THANH CHÉM KIẾM TẠI ĐÂY ---
+        if (audioSource != null && swingSound != null)
+        {
+            audioSource.PlayOneShot(swingSound);
+        }
     }
 
     public void ExecutePlayerHit()
@@ -143,10 +157,21 @@ public class PlayerMovement : NetworkBehaviour
 
         Collider2D[] hitEnemies = Physics2D.OverlapCircleAll(centerPoint, attackRange, enemyLayer);
 
+        bool hasHitSomething = false;
+
         foreach (Collider2D col in hitEnemies)
         {
             var skeleton = col.GetComponentInParent<IDamagable>();
-            if (skeleton != null) skeleton.TakeDamage();
+            if (skeleton != null)
+            {
+                skeleton.TakeDamage();
+                hasHitSomething = true; 
+            }
+        }
+
+        if (hasHitSomething && audioSource != null && hitSound != null)
+        {
+            audioSource.PlayOneShot(hitSound);
         }
     }
 

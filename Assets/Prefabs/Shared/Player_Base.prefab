@@ -205,6 +205,7 @@ GameObject:
   - component: {fileID: 5804968018917270260}
   - component: {fileID: 3041332698797393711}
   - component: {fileID: 7871425432186701587}
+  - component: {fileID: -1343204598244007116}
   - component: {fileID: 8820285107169415122}
   - component: {fileID: -1654742883904272430}
   - component: {fileID: 817826734284136216}
@@ -281,7 +282,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: -854467317
-  m_SortingLayer: 5
+  m_SortingLayer: 6
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_Sprite: {fileID: 3204480812468917802, guid: 198037fdefa74b341b2d825b19aa9d1a, type: 3}
@@ -342,6 +343,106 @@ MonoBehaviour:
   enemyLayer:
     serializedVersion: 2
     m_Bits: 1024
+  audioSource: {fileID: -1343204598244007116}
+  swingSound: {fileID: 8300000, guid: 503479e8df14b5c489e5d22f7f86b12a, type: 3}
+  hitSound: {fileID: 8300000, guid: 9cf66270fa994684aaddf72b095fd7f7, type: 3}
+--- !u!82 &-1343204598244007116
+AudioSource:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3793757085749545316}
+  m_Enabled: 1
+  serializedVersion: 4
+  OutputAudioMixerGroup: {fileID: -1150077098544014580, guid: 64c8707258e7b4c4dbf2b3c6127c3ebf, type: 2}
+  m_audioClip: {fileID: 0}
+  m_Resource: {fileID: 0}
+  m_PlayOnAwake: 0
+  m_Volume: 1
+  m_Pitch: 1
+  Loop: 0
+  Mute: 0
+  Spatialize: 0
+  SpatializePostEffects: 0
+  Priority: 128
+  DopplerLevel: 1
+  MinDistance: 1
+  MaxDistance: 500
+  Pan2D: 0
+  rolloffMode: 0
+  BypassEffects: 0
+  BypassListenerEffects: 0
+  BypassReverbZones: 0
+  rolloffCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 1
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  panLevelCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  spreadCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  reverbZoneMixCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
 --- !u!114 &8820285107169415122
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -354,8 +455,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 38351fb59c463f84180a8daeaafa512c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Game::PlayerHP
+  ShowTopMostFoldoutHeaderGroup: 1
   maxHealth: 10
-  currentHealth: 0
+  currentHealth:
+    m_InternalValue: 0
   healthBar: {fileID: 1924381376755899375}
   isOnPlatform: 0
 --- !u!114 &-1654742883904272430

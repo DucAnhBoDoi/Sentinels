@@ -1113,6 +1113,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Game::MenuPopupOptionsController
   _utils: {fileID: 817125202}
+  _audioMixer: {fileID: 24100000, guid: 64c8707258e7b4c4dbf2b3c6127c3ebf, type: 2}
   _btnSave: {fileID: 1707531699}
   _btnBack: {fileID: 1473799289}
   _masterVolumeSlider: {fileID: 925845474}
