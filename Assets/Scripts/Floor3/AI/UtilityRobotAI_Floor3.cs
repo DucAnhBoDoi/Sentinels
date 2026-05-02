@@ -55,7 +55,7 @@ public class UtilityRobotAI_Floor3 : NetworkBehaviour, IDamagable
     {
         sr = GetComponent<SpriteRenderer>();
         rb = GetComponent<Rigidbody2D>();
-        rb.freezeRotation = true; 
+        rb.freezeRotation = true;
 
         allRobots.Add(this);
 
@@ -70,7 +70,7 @@ public class UtilityRobotAI_Floor3 : NetworkBehaviour, IDamagable
 
     public override void OnDestroy()
     {
-        base.OnDestroy(); 
+        base.OnDestroy();
         allRobots.Remove(this);
     }
 
@@ -89,7 +89,7 @@ public class UtilityRobotAI_Floor3 : NetworkBehaviour, IDamagable
         if (target != null)
         {
             ExecuteMovement(target);
-            TickAttack(); 
+            TickAttack();
         }
         else
         {
@@ -111,7 +111,7 @@ public class UtilityRobotAI_Floor3 : NetworkBehaviour, IDamagable
             {
                 hp.TakeDamage(attackDamage);
                 currentCooldown = attackCooldown;
-                return; 
+                return;
             }
         }
     }
@@ -152,7 +152,7 @@ public class UtilityRobotAI_Floor3 : NetworkBehaviour, IDamagable
 
             if (distToTarget <= stoppingDistance)
             {
-                bestDir = Vector2.zero; 
+                bestDir = Vector2.zero;
             }
             else
             {
@@ -239,15 +239,20 @@ public class UtilityRobotAI_Floor3 : NetworkBehaviour, IDamagable
     [ClientRpc]
     private void TriggerHitVisualClientRpc(Vector2 dir)
     {
-        if (!IsServer)
+        if (IsServer)
         {
-            // Bật hiệu ứng trên Client
-            if (hitParticles != null) hitParticles.Play();
+            // Server xử lý chính
+            hitParticles?.Play();
             StartCoroutine(FlashRedRoutine());
-            if (_hitReaction != null) _hitReaction.ReactOnly(dir);
-    
-        // Gọi hàm TriggerHurt trên Virus2AnimatorController để chạy animation Hurt
-        GetComponent<Virus2AnimatorController>()?.TriggerHurt();
+
+            _hitReaction?.ReactOnly(dir);
+            GetComponent<Virus2AnimatorController>()?.TriggerHurt();
+        }
+        else
+        {
+            // Client chỉ hiển thị hiệu ứng (không logic)
+            _hitReaction?.ReactOnly(dir);
+            GetComponent<Virus2AnimatorController>()?.TriggerHurt();
         }
     }
 
@@ -265,10 +270,10 @@ public class UtilityRobotAI_Floor3 : NetworkBehaviour, IDamagable
     {
         // THÊM DÒNG NÀY TRƯỚC KHI DESPAWN:
         GetComponent<Virus2AnimatorController>()?.TriggerDeath();
-    
+
         // Delay nhỏ để Death animation kịp play
         StartCoroutine(DelayedDespawn());
-        
+
         if (NetworkObject.IsSpawned) NetworkObject.Despawn(true);
         else Destroy(gameObject);
     }
