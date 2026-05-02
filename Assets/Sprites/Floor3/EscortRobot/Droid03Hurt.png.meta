@@ -1,10 +1,19 @@
 fileFormatVersion: 2
-guid: 92122293e3ee8914e978eced5f458f89
+guid: 63843f4cc5b705c4fa9c717a281e89d0
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 6130974709032972458
-    second: big_demon_run_anim_f1_0
+      213: 7446348813930290768
+    second: Droid03Hurt_0
+  - first:
+      213: -1457356407180909224
+    second: Droid03Hurt_1
+  - first:
+      213: -6553048083615294190
+    second: Droid03Hurt_2
+  - first:
+      213: -793371099729761870
+    second: Droid03Hurt_3
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -37,7 +46,7 @@ TextureImporter:
   maxTextureSize: 2048
   textureSettings:
     serializedVersion: 2
-    filterMode: 1
+    filterMode: 0
     aniso: 1
     mipBias: 0
     wrapU: 1
@@ -51,7 +60,7 @@ TextureImporter:
   spriteMeshType: 1
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
-  spritePixelsToUnits: 100
+  spritePixelsToUnits: 16
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
@@ -100,23 +109,89 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: big_demon_run_anim_f1_0
+      name: Droid03Hurt_0
       rect:
         serializedVersion: 2
-        x: 3
-        y: 3
-        width: 24
-        height: 31
+        x: 10
+        y: 0
+        width: 28
+        height: 20
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: aa070dab309951550800000000000000
-      internalID: 6130974709032972458
+      spriteID: 05e57f73bceb65760800000000000000
+      internalID: 7446348813930290768
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Droid03Hurt_1
+      rect:
+        serializedVersion: 2
+        x: 55
+        y: 0
+        width: 34
+        height: 18
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 855a7dea11e66cbe0800000000000000
+      internalID: -1457356407180909224
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Droid03Hurt_2
+      rect:
+        serializedVersion: 2
+        x: 103
+        y: 0
+        width: 34
+        height: 18
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 21d5e0ccc75ee05a0800000000000000
+      internalID: -6553048083615294190
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Droid03Hurt_3
+      rect:
+        serializedVersion: 2
+        x: 151
+        y: 0
+        width: 34
+        height: 18
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2b9eb8130316df4f0800000000000000
+      internalID: -793371099729761870
       vertices: []
       indices: 
       edges: []
@@ -125,7 +200,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 
+    spriteID: d330e79587af2d441815a097b456df10
     internalID: 0
     vertices: []
     indices: 
@@ -133,9 +208,14 @@ TextureImporter:
     weights: []
     secondaryTextures: []
     spriteCustomMetadata:
-      entries: []
+      entries:
+      - key: SpriteEditor.SliceSettings
+        value: '{"sliceOnImport":false,"gridCellCount":{"x":1.0,"y":1.0},"gridSpriteSize":{"x":64.0,"y":64.0},"gridSpriteOffset":{"x":0.0,"y":0.0},"gridSpritePadding":{"x":0.0,"y":0.0},"pivot":{"x":0.5,"y":0.5},"pivotPixels":{"x":0.0,"y":0.0},"autoSlicingMethod":0,"spriteAlignment":0,"pivotUnitMode":0,"slicingType":0,"keepEmptyRects":false,"isAlternate":false}'
     nameFileIdTable:
-      big_demon_run_anim_f1_0: 6130974709032972458
+      Droid03Hurt_0: 7446348813930290768
+      Droid03Hurt_1: -1457356407180909224
+      Droid03Hurt_2: -6553048083615294190
+      Droid03Hurt_3: -793371099729761870
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
