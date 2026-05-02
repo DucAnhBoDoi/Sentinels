@@ -20,13 +20,21 @@ namespace Scripts.Floor3.AI
         [SerializeField] private float _rayLength = 1.2f;
         [SerializeField] private float _avoidanceWeight = 2.5f;
 
-        // ĐÃ XÓA BIẾN_drawSteeringRays Ở ĐÂY ĐỂ TRÁNH LỖI CS0414
+        // ── THÊM CẤU HÌNH HIỆU ỨNG ──
+        [Header("Hiệu ứng")]
+        public ParticleSystem hitParticles;
+        private SpriteRenderer sr;
 
         private VirusState _state = VirusState.Chasing;
         private float _currentHp;
         private float _damageTimer = 0f;
         private bool _initialized = false;
         private HitReactionController _hitReaction;
+
+        private void Awake()
+        {
+            sr = GetComponent<SpriteRenderer>(); // Tìm SpriteRenderer để chớp màu
+        }
 
         public void Initialize(VirusData data, RobotController robotTarget)
         {
@@ -39,7 +47,6 @@ namespace Scripts.Floor3.AI
 
         private void Update()
         {
-            // CHỈ SERVER MỚI ĐƯỢC CHẠY TRÍ TUỆ NHÂN TẠO
             if (!IsServer) return;
 
             if (!Scripts.Floor3.UI.TopicSelectionUI.hasStartedMission) return;
@@ -120,7 +127,6 @@ namespace Scripts.Floor3.AI
 
         public void TakeDamage(float amount)
         {
-            // CHỈ SERVER NHẬN LỆNH TRỪ MÁU
             if (!IsServer || _state == VirusState.Dead) return;
 
             if (_hitReaction != null)
@@ -129,8 +135,12 @@ namespace Scripts.Floor3.AI
                 if (_robotTarget != null)
                     knockbackDir = ((Vector2)transform.position - (Vector2)_robotTarget.transform.position).normalized;
                 
+                // Hiệu ứng trên Server
+                if (hitParticles != null) hitParticles.Play();
+                StartCoroutine(FlashRedRoutine());
+
                 _hitReaction.ReactOnly(knockbackDir);
-                TriggerHitVisualClientRpc(knockbackDir); // Chớp trắng trên máy Client
+                TriggerHitVisualClientRpc(knockbackDir); 
             }
 
             _currentHp -= amount;
@@ -140,7 +150,23 @@ namespace Scripts.Floor3.AI
         [ClientRpc]
         private void TriggerHitVisualClientRpc(Vector2 dir)
         {
-            if (!IsServer && _hitReaction != null) _hitReaction.ReactOnly(dir);
+            if (!IsServer)
+            {
+                // Hiệu ứng trên Client
+                if (hitParticles != null) hitParticles.Play();
+                StartCoroutine(FlashRedRoutine());
+                if (_hitReaction != null) _hitReaction.ReactOnly(dir);
+            }
+        }
+
+        // --- COROUTINE CHỚP ĐỎ ---
+        private IEnumerator FlashRedRoutine()
+        {
+            if (sr == null) yield break;
+            Color originalColor = Color.white;
+            sr.color = Color.red;
+            yield return new WaitForSeconds(0.15f);
+            sr.color = originalColor;
         }
 
         private void Die()

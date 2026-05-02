@@ -51,14 +51,27 @@ public class PlayerCombat : NetworkBehaviour
         if (netAnim != null) netAnim.SetTrigger("isAttacking");
         else if (animator != null) animator.SetTrigger("isAttacking");
 
-        // --- GỌI ÂM THANH CHÉM KIẾM TẠI ĐÂY (Ngay khi vung tay) ---
+        // --- GỌI ÂM THANH VUNG KIẾM LÊN MẠNG ---
+        PlaySwingSoundServerRpc();
+
+        yield return new WaitForSeconds(attackDelay);
+        PerformDamage();
+    }
+
+    // --- LOA PHƯỜNG: BÁO CHO MỌI NGƯỜI NGHE TIẾNG VUNG KIẾM ---
+    [Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Everyone)]
+    private void PlaySwingSoundServerRpc()
+    {
+        PlaySwingSoundClientRpc();
+    }
+
+    [ClientRpc]
+    private void PlaySwingSoundClientRpc()
+    {
         if (audioSource != null && swingSound != null)
         {
             audioSource.PlayOneShot(swingSound);
         }
-
-        yield return new WaitForSeconds(attackDelay);
-        PerformDamage();
     }
 
     void PerformDamage()
@@ -86,8 +99,24 @@ public class PlayerCombat : NetworkBehaviour
             }
         }
 
-        // --- GỌI ÂM THANH TRÚNG ĐÍCH TẠI ĐÂY ---
-        if (hasHitSomething && audioSource != null && hitSound != null)
+        // --- BÁO CHO MỌI NGƯỜI NGHE TIẾNG TRÚNG ĐÍCH ---
+        if (hasHitSomething)
+        {
+            PlayHitSoundServerRpc();
+        }
+    }
+
+    // --- LOA PHƯỜNG: BÁO CHO MỌI NGƯỜI NGHE TIẾNG CHÉM TRÚNG ---
+    [Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Everyone)]
+    private void PlayHitSoundServerRpc()
+    {
+        PlayHitSoundClientRpc();
+    }
+
+    [ClientRpc]
+    private void PlayHitSoundClientRpc()
+    {
+        if (audioSource != null && hitSound != null)
         {
             audioSource.PlayOneShot(hitSound);
         }

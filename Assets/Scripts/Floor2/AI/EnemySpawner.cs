@@ -10,9 +10,9 @@ public class EnemySpawner : NetworkBehaviour
 
     [Header("Spawn Rate (càng lớn = càng chậm)")]
     public float rateTutorial = 4.5f; 
-    public float rateEasy = 4.0f;     
-    public float rateHard = 3.5f;     
-    public float rateInsane = 3.0f;   
+    public float rateEasy = 4.0f;    
+    public float rateHard = 3.5f;    
+    public float rateInsane = 3.0f;  
 
     [Header("Giới hạn số lượng")]
     public int maxEnemies = 3; 
@@ -107,16 +107,17 @@ public class EnemySpawner : NetworkBehaviour
         // 1. GỌI LỆNH SPAWN LÊN MẠNG ĐỂ CLIENT THẤY QUÁI
         newEnemy.GetComponent<NetworkObject>().Spawn(true);
 
-        // 2. BÁO CHO MỌI NGƯỜI ĐỔI MÀU QUÁI THEO GIAI ĐOẠN (Gọi Rpc trên con quái)
+        // 2. BÁO CHO MỌI NGƯỜI ĐỔI MÀU QUÁI THEO GIAI ĐOẠN 
+        // (Đã thay SetColorClientRpc thành SetColor để đồng bộ BaseColor)
         if (boid != null)
         {
             if (currentDamageMultiplier > 1.5f)
             {
-                boid.SetColorClientRpc(Color.red); // phút 2
+                boid.SetColor(Color.red); // phút 2
             }
             else if (currentSpeedMultiplier > 1.05f)
             {
-                boid.SetColorClientRpc(Color.yellow); // phút 3
+                boid.SetColor(Color.yellow); // phút 3
             }
         }
     }

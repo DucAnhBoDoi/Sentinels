@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections.Generic;
+using System.Collections;
 using Unity.Netcode; // THÊM THƯ VIỆN MẠNG
 
 [RequireComponent(typeof(SpriteRenderer))]
@@ -34,6 +35,10 @@ public class UtilityRobotAI_Floor3 : NetworkBehaviour, IDamagable
     public float attackDamage = 1f;
     public float attackCooldown = 1.5f;
 
+    // ── THÊM CẤU HÌNH HIỆU ỨNG ──
+    [Header("Hiệu ứng")]
+    public ParticleSystem hitParticles;
+
     public static List<UtilityRobotAI_Floor3> allRobots = new List<UtilityRobotAI_Floor3>();
 
     private SpriteRenderer sr;
@@ -62,16 +67,14 @@ public class UtilityRobotAI_Floor3 : NetworkBehaviour, IDamagable
         _hitReaction = GetComponent<HitReactionController>();
     }
 
-    // ĐÃ SỬA LỖI CẢNH BÁO CS0114 Ở ĐÂY
     public override void OnDestroy()
     {
-        base.OnDestroy(); // Gọi hàm dọn dẹp mạng của NetworkBehaviour
+        base.OnDestroy(); 
         allRobots.Remove(this);
     }
 
     void FixedUpdate()
     {
-        // CHỈ SERVER MỚI ĐƯỢC CHẠY AI TÌM ĐƯỜNG VÀ CẮN
         if (!IsServer) return;
 
         if (!Scripts.Floor3.UI.TopicSelectionUI.hasStartedMission) return;
@@ -179,7 +182,6 @@ public class UtilityRobotAI_Floor3 : NetworkBehaviour, IDamagable
         else
             rb.linearVelocity = Vector2.zero;
 
-        // XỬ LÝ LẬT MẶT (GỌI CLIENT RPC ĐỂ MỌI NGƯỜI CÙNG THẤY)
         bool shouldFlip = sr.flipX;
         if (target != null)
         {
@@ -214,7 +216,6 @@ public class UtilityRobotAI_Floor3 : NetworkBehaviour, IDamagable
 
     public void TakeDamage(float amount)
     {
-        // CHỈ SERVER MỚI ĐƯỢC XỬ LÝ SÁT THƯƠNG QUÁI
         if (!IsServer) return;
         if (_hitReaction == null) { DespawnVirus(); return; }
 
@@ -223,7 +224,11 @@ public class UtilityRobotAI_Floor3 : NetworkBehaviour, IDamagable
         if (attacker != null)
             knockbackDir = ((Vector2)transform.position - (Vector2)attacker.position).normalized;
 
-        // Gọi ClientRpc để chạy hiệu ứng chớp trắng trên mọi màn hình
+        // Bật hiệu ứng trên Server (Host)
+        if (hitParticles != null) hitParticles.Play();
+        StartCoroutine(FlashRedRoutine());
+
+        // Kêu Client bật hiệu ứng
         TriggerHitVisualClientRpc(knockbackDir);
 
         bool died = _hitReaction.ReactToHit(knockbackDir, amount);
@@ -233,8 +238,23 @@ public class UtilityRobotAI_Floor3 : NetworkBehaviour, IDamagable
     [ClientRpc]
     private void TriggerHitVisualClientRpc(Vector2 dir)
     {
-        // Client chỉ chạy hiệu ứng Flash (không trừ HP)
-        if (!IsServer && _hitReaction != null) _hitReaction.ReactOnly(dir);
+        if (!IsServer)
+        {
+            // Bật hiệu ứng trên Client
+            if (hitParticles != null) hitParticles.Play();
+            StartCoroutine(FlashRedRoutine());
+            if (_hitReaction != null) _hitReaction.ReactOnly(dir);
+        }
+    }
+
+    // --- COROUTINE CHỚP ĐỎ ---
+    private IEnumerator FlashRedRoutine()
+    {
+        if (sr == null) yield break;
+        Color originalColor = Color.white;
+        sr.color = Color.red;
+        yield return new WaitForSeconds(0.15f);
+        sr.color = originalColor;
     }
 
     private void DespawnVirus()

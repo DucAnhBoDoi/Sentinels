@@ -145,7 +145,20 @@ public class PlayerMovement : NetworkBehaviour
         if (NetworkManager && NetworkManager.IsClient && netAnim) netAnim.SetTrigger("isAttacking");
         else if (anim) anim.SetTrigger("isAttacking");
 
-        // --- GỌI ÂM THANH CHÉM KIẾM TẠI ĐÂY ---
+        // --- GỌI ÂM THANH QUA MẠNG ---
+        PlaySwingSoundServerRpc();
+    }
+
+    // --- LOA PHƯỜNG: BÁO CHO MỌI NGƯỜI NGHE TIẾNG VUNG KIẾM ---
+    [Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Everyone)]
+    private void PlaySwingSoundServerRpc()
+    {
+        PlaySwingSoundClientRpc();
+    }
+
+    [ClientRpc]
+    private void PlaySwingSoundClientRpc()
+    {
         if (audioSource != null && swingSound != null)
         {
             audioSource.PlayOneShot(swingSound);
@@ -172,7 +185,24 @@ public class PlayerMovement : NetworkBehaviour
             }
         }
 
-        if (hasHitSomething && audioSource != null && hitSound != null)
+        // --- BÁO CHO MỌI NGƯỜI NGHE TIẾNG TRÚNG ĐÍCH ---
+        if (hasHitSomething)
+        {
+            PlayHitSoundServerRpc();
+        }
+    }
+
+    // --- LOA PHƯỜNG: BÁO CHO MỌI NGƯỜI NGHE TIẾNG CHÉM TRÚNG ---
+    [Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Everyone)]
+    private void PlayHitSoundServerRpc()
+    {
+        PlayHitSoundClientRpc();
+    }
+
+    [ClientRpc]
+    private void PlayHitSoundClientRpc()
+    {
+        if (audioSource != null && hitSound != null)
         {
             audioSource.PlayOneShot(hitSound);
         }

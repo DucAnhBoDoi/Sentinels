@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections.Generic;
+using System.Collections;
 using Unity.Netcode; // BẮT BUỘC CÓ
 
 [RequireComponent(typeof(SpriteRenderer), typeof(Rigidbody2D), typeof(Animator))]
@@ -25,6 +26,13 @@ public class BoidEnemy : NetworkBehaviour, IDamagable
     public NetworkVariable<int> currentHealth = new NetworkVariable<int>(3, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
     private bool isDead = false;
 
+    // --- THÊM: CẤU HÌNH HIỆU ỨNG VÀ KNOCKBACK TẠI ĐÂY ---
+    [Header("Hiệu ứng & Knockback")]
+    public ParticleSystem hitParticles;
+    public float knockbackForce = 5f;
+    public float knockbackDuration = 0.2f;
+    private bool isKnockedBack = false;
+
     [Header("Cấu hình tấn công")]
     public float attackDistance = 1.2f; 
     public Vector2 attackOffset;
@@ -42,6 +50,9 @@ public class BoidEnemy : NetworkBehaviour, IDamagable
     private Vector2 currentVelocity;
     private static List<BoidEnemy> allBoids = new List<BoidEnemy>();
 
+    // BIẾN LƯU MÀU GỐC ĐỂ KHÔNG BỊ MẤT MÀU
+    private Color baseColor = Color.white;
+
     // BIẾN MẠNG ĐỂ LẬT MẶT QUÁI CHO CLIENT THẤY
     private NetworkVariable<bool> isFlipped = new NetworkVariable<bool>(false, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
 
@@ -51,6 +62,9 @@ public class BoidEnemy : NetworkBehaviour, IDamagable
         sr = GetComponent<SpriteRenderer>();
         rb = GetComponent<Rigidbody2D>();
         netAnim = GetComponent<Unity.Netcode.Components.NetworkAnimator>();
+
+        // LƯU LẠI MÀU GỐC LÚC MỚI ĐẺ RA
+        if (sr != null) baseColor = sr.color;
 
         GameObject core = GameObject.FindGameObjectWithTag("TheCore");
         if (core != null) target = core.transform;
@@ -82,7 +96,21 @@ public class BoidEnemy : NetworkBehaviour, IDamagable
         {
             if (netAnim) netAnim.SetTrigger("isHurt");
             else if (anim) anim.SetTrigger("isHurt");
+
+            // --- CHẠY HIỆU ỨNG CHỚP ĐỎ VÀ HẠT NỔ ---
+            StartCoroutine(FlashRedRoutine());
+            if (hitParticles != null) hitParticles.Play();
         }
+    }
+
+    // --- COROUTINE CHỚP ĐỎ (ĐÃ SỬA ĐỂ TRẢ VỀ BASE COLOR) ---
+    private IEnumerator FlashRedRoutine()
+    {
+        if (sr == null) yield break;
+        
+        sr.color = Color.red;
+        yield return new WaitForSeconds(0.15f);
+        sr.color = baseColor; // Trả về màu gốc (Vàng, Đỏ hoặc Trắng)
     }
 
     private void OnFlipChanged(bool prev, bool current)
@@ -101,6 +129,34 @@ public class BoidEnemy : NetworkBehaviour, IDamagable
     {
         if (isDead) return;
         currentHealth.Value--;
+
+        // --- GỌI XỬ LÝ KNOCKBACK TRÊN SERVER ---
+        StartCoroutine(KnockbackRoutine());
+    }
+
+    // --- COROUTINE ĐẨY LÙI ---
+    private IEnumerator KnockbackRoutine()
+    {
+        isKnockedBack = true;
+
+        // Boid Enemy đẩy ngược lại hướng The Core (hoặc lùi lại sau lưng nếu không có core)
+        Vector2 knockbackDir = Vector2.zero;
+        if (target != null)
+        {
+            knockbackDir = (transform.position - target.position).normalized;
+        }
+        else
+        {
+            float facingDir = sr.flipX ? 1f : -1f;
+            knockbackDir = new Vector2(facingDir, 0);
+        }
+
+        // Tạm thời đè lên vận tốc hiện tại để nó văng ra
+        currentVelocity = knockbackDir * knockbackForce;
+
+        yield return new WaitForSeconds(knockbackDuration);
+
+        isKnockedBack = false;
     }
 
     void Die()
@@ -139,6 +195,9 @@ public class BoidEnemy : NetworkBehaviour, IDamagable
 
         // CHỈ SERVER MỚI TÍNH TOÁN AI DI CHUYỂN
         if (!IsServer) return;
+
+        // --- NẾU ĐANG BỊ VĂNG THÌ KHÔNG TÍNH TOÁN FLOCKING ---
+        if (isKnockedBack) return;
 
         float distToTarget = Vector2.Distance(transform.position, target.position);
         Collider2D targetCol = target.GetComponent<Collider2D>();
@@ -268,10 +327,29 @@ public class BoidEnemy : NetworkBehaviour, IDamagable
     void OnEnable() { if(!allBoids.Contains(this)) allBoids.Add(this); }
     void OnDisable() { allBoids.Remove(this); }
 
+    // --- ĐÃ ĐỔI CẤU TRÚC HÀM SETCOLOR ĐỂ KHÔNG BỊ LỖI QUÊN MÀU ---
+    public void SetColor(Color newColor)
+    {
+        ApplyColor(newColor);
+        SetColorClientRpc(newColor);
+    }
+
     [ClientRpc]
     public void SetColorClientRpc(Color newColor)
     {
+        if (!IsServer) 
+        {
+            ApplyColor(newColor);
+        }
+    }
+
+    private void ApplyColor(Color newColor)
+    {
         if (sr == null) sr = GetComponent<SpriteRenderer>();
-        if (sr != null) sr.color = newColor;
+        if (sr != null) 
+        {
+            sr.color = newColor;
+            baseColor = newColor; // Cập nhật màu gốc vĩnh viễn
+        }
     }
 }
