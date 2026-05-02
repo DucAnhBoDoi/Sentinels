@@ -1,5 +1,6 @@
 using UnityEngine;
 using Unity.Netcode;
+using System.Collections;
 
 public class PlayerHP : NetworkBehaviour
 {
@@ -23,12 +24,17 @@ public class PlayerHP : NetworkBehaviour
     private PlayerMovement movementScript;
     private Unity.Netcode.Components.NetworkAnimator netAnim;
 
+    private SpriteRenderer sr; // BIẾN CHỨA HÌNH ẢNH NHÂN VẬT
+
     void Start()
     {
         anim = GetComponent<Animator>();
         rb = GetComponent<Rigidbody2D>();
         movementScript = GetComponent<PlayerMovement>();
         netAnim = GetComponent<Unity.Netcode.Components.NetworkAnimator>();
+
+        // Lấy SpriteRenderer để tí nữa đổi màu
+        sr = GetComponent<SpriteRenderer>();
     }
 
     public override void OnNetworkSpawn()
@@ -57,6 +63,9 @@ public class PlayerHP : NetworkBehaviour
         if (newValue < previousValue && newValue > 0)
         {
             Debug.Log($"<color=red>{gameObject.name} trúng đòn!</color> HP còn: {newValue}");
+
+            // --- GỌI HIỆU ỨNG CHỚP ĐỎ TẠI ĐÂY ---
+            StartCoroutine(FlashRedRoutine());
         }
 
         // Nếu máu <= 0 và chưa chết -> Gọi hàm Die() trên CẢ 2 MÁY
@@ -64,6 +73,23 @@ public class PlayerHP : NetworkBehaviour
         {
             Die();
         }
+    }
+
+    // --- COROUTINE CHỚP ĐỎ CỦA PLAYER ---
+    private IEnumerator FlashRedRoutine()
+    {
+        if (sr == null) yield break;
+
+        Color originalColor = Color.white; // Màu gốc
+
+        // Đổi toàn bộ màu nhân vật thành Đỏ
+        sr.color = Color.red;
+
+        // Khựng lại 0.15 giây (bằng đúng thời gian chớp của con quái)
+        yield return new WaitForSeconds(0.15f);
+
+        // Trả màu về bình thường
+        sr.color = originalColor;
     }
 
     // Bất kỳ ai (Client hay Quái) gọi hàm này đều sẽ gửi thư lên Server

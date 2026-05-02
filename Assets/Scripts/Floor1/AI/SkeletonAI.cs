@@ -37,6 +37,13 @@ public class SkeletonAI : NetworkBehaviour, IDamagable
     private bool isAggroed = false;
     public bool isPlayerBRepairing = false;
 
+    // --- THÊM CẤU HÌNH PARTICLE VÀ KNOCKBACK TẠI ĐÂY ---
+    [Header("Hiệu ứng & Knockback")]
+    public ParticleSystem hitParticles; // Hạt xịt máu / tia lửa
+    public float knockbackForce = 5f;   // Lực đẩy văng ra
+    public float knockbackDuration = 0.2f; // Thời gian bị choáng/văng
+    private bool isKnockedBack = false;    // Cờ hiệu đánh dấu đang bị văng
+
     [Header("Steering")]
     public float patrolRadius = 4f;
     public LayerMask obstacleLayer;
@@ -97,7 +104,27 @@ public class SkeletonAI : NetworkBehaviour, IDamagable
         {
             if (netAnim) netAnim.SetTrigger("isHurt");
             else anim.SetTrigger("isHurt");
+
+            StartCoroutine(FlashRedRoutine());
+
+            // --- CHẠY HIỆU ỨNG HẠT (PARTICLE) KHI BỊ CHÉM TRÚNG ---
+            if (hitParticles != null)
+            {
+                hitParticles.Play();
+            }
         }
+    }
+
+    private IEnumerator FlashRedRoutine()
+    {
+        if (sr == null) yield break;
+        
+        Color originalColor = Color.white; 
+        sr.color = Color.red;              
+        
+        yield return new WaitForSeconds(0.15f); 
+        
+        sr.color = originalColor;          
     }
 
     private void OnFlipChanged(bool previous, bool current)
@@ -110,6 +137,9 @@ public class SkeletonAI : NetworkBehaviour, IDamagable
         if (isDead) return;
 
         if (!IsServer) return;
+
+        // --- NẾU ĐANG BỊ KNOCKBACK THÌ TẠM DỪNG ĐUỔI THEO PLAYER ---
+        if (isKnockedBack) return; 
 
         Transform target = DecideTarget();
 
@@ -248,6 +278,40 @@ public class SkeletonAI : NetworkBehaviour, IDamagable
     {
         if (isDead) return;
         currentHealth.Value -= damage;
+
+        // --- GỌI XỬ LÝ KNOCKBACK TẠI ĐÂY (Server xử lý vật lý) ---
+        StartCoroutine(KnockbackRoutine());
+    }
+
+    // --- COROUTINE ĐẨY LÙI QUÁI ---
+    private IEnumerator KnockbackRoutine()
+    {
+        isKnockedBack = true; // Bật cờ hiệu để hàm Update không can thiệp vào di chuyển nữa
+
+        // Tính toán hướng đẩy lùi (Đẩy ra xa khỏi Player gần nhất)
+        Transform target = DecideTarget();
+        Vector2 knockbackDir = Vector2.zero;
+
+        if (target != null)
+        {
+            knockbackDir = (transform.position - target.position).normalized;
+        }
+        else
+        {
+            // Nếu xui xẻo không tìm thấy Player, đẩy ngược về phía sau lưng nó
+            float facingDir = sr.flipX ? 1f : -1f; 
+            knockbackDir = new Vector2(facingDir, 0);
+        }
+
+        // Tác dụng lực đẩy
+        rb.linearVelocity = knockbackDir * knockbackForce;
+
+        // Chờ 0.2 giây (cho nó văng đủ xa)
+        yield return new WaitForSeconds(knockbackDuration);
+
+        // Hồi phục lại trạng thái bình thường để nó dí Player tiếp
+        rb.linearVelocity = Vector2.zero;
+        isKnockedBack = false;
     }
 
     IEnumerator DieRoutine()
