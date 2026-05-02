@@ -106789,6 +106789,18 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 1807938695}
     m_Modifications:
+    - target: {fileID: 3207705342381422007, guid: 06437eea732de2147a538e706834aff5, type: 3}
+      propertyPath: m_Color.b
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3207705342381422007, guid: 06437eea732de2147a538e706834aff5, type: 3}
+      propertyPath: m_Color.g
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3207705342381422007, guid: 06437eea732de2147a538e706834aff5, type: 3}
+      propertyPath: m_Color.r
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 7014896533251624883, guid: 06437eea732de2147a538e706834aff5, type: 3}
       propertyPath: m_Name
       value: LargeVirus
@@ -141721,6 +141733,7 @@ GameObject:
   - component: {fileID: 1954845583}
   - component: {fileID: 1954845581}
   - component: {fileID: 1954845584}
+  - component: {fileID: 1954845585}
   m_Layer: 0
   m_Name: Mechanical_Soul_Robot
   m_TagString: Untagged
@@ -141739,8 +141752,9 @@ Transform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: -16, y: -6, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
+  m_ConstrainProportionsScale: 1
+  m_Children:
+  - {fileID: 2028329432}
   m_Father: {fileID: 144580824}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1954845576
@@ -142056,6 +142070,20 @@ BoxCollider2D:
   m_AutoTiling: 0
   m_Size: {x: 2.3877678, y: 1.5857832}
   m_EdgeRadius: 0
+--- !u!114 &1954845585
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1954845574}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1f77b2a37e6458e4aa69b2924c9eda57, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Game::Scripts.Floor3.Gameplay.RobotAnimatorController
+  _animator: {fileID: 1954845581}
+  _stateMachine: {fileID: 1954845577}
 --- !u!1 &1978293514
 GameObject:
   m_ObjectHideFlags: 0
@@ -142344,6 +142372,62 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 8891588931429743710, guid: 06437eea732de2147a538e706834aff5, type: 3}
   m_PrefabInstance: {fileID: 2009586079}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &2028329431
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2028329432}
+  - component: {fileID: 2028329433}
+  m_Layer: 0
+  m_Name: RobotAura
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2028329432
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2028329431}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1954845575}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &2028329433
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2028329431}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5e388aa9ab17d1948b76646108cdd6db, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Game::Scripts.Floor3.UI.RobotAuraRenderer
+  _escortDistance: 7
+  _warnDistance: 8
+  _safeColor: {r: 0, g: 1, b: 0.2, a: 0.078431375}
+  _warnColor: {r: 1, g: 0.9, b: 0, a: 0.09803922}
+  _dangerColor: {r: 1, g: 0.15, b: 0.1, a: 0.11764706}
+  _pulseOnDanger: 1
+  _pulseSpeed: 2.5
+  _pulseAlphaMin: 0.02
+  _pulseAlphaMax: 0.25
+  _colorLerpSpeed: 6
+  _sortingOrder: -1
+  _sortingLayerName: RobotEscort
 --- !u!1 &2099517637
 GameObject:
   m_ObjectHideFlags: 0

@@ -2,6 +2,7 @@ using UnityEngine;
 using System.Collections.Generic;
 using System.Collections;
 using Unity.Netcode; // THÊM THƯ VIỆN MẠNG
+using Scripts.Floor3.Gameplay;
 
 [RequireComponent(typeof(SpriteRenderer))]
 [RequireComponent(typeof(Rigidbody2D))]
@@ -244,6 +245,9 @@ public class UtilityRobotAI_Floor3 : NetworkBehaviour, IDamagable
             if (hitParticles != null) hitParticles.Play();
             StartCoroutine(FlashRedRoutine());
             if (_hitReaction != null) _hitReaction.ReactOnly(dir);
+    
+        // Gọi hàm TriggerHurt trên Virus2AnimatorController để chạy animation Hurt
+        GetComponent<Virus2AnimatorController>()?.TriggerHurt();
         }
     }
 
@@ -259,6 +263,19 @@ public class UtilityRobotAI_Floor3 : NetworkBehaviour, IDamagable
 
     private void DespawnVirus()
     {
+        // THÊM DÒNG NÀY TRƯỚC KHI DESPAWN:
+        GetComponent<Virus2AnimatorController>()?.TriggerDeath();
+    
+        // Delay nhỏ để Death animation kịp play
+        StartCoroutine(DelayedDespawn());
+        
+        if (NetworkObject.IsSpawned) NetworkObject.Despawn(true);
+        else Destroy(gameObject);
+    }
+
+    private System.Collections.IEnumerator DelayedDespawn()
+    {
+        yield return new WaitForSeconds(0.5f); // khớp với độ dài clip Death
         if (NetworkObject.IsSpawned) NetworkObject.Despawn(true);
         else Destroy(gameObject);
     }
