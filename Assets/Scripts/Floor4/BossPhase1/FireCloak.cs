@@ -1,8 +1,9 @@
 using System;
+using Unity.Netcode;
 using UnityEngine;
 
 [RequireComponent(typeof(ParticleSystem), typeof(Collider2D))]
-public class FireCloak : MonoBehaviour
+public class FireCloak : NetworkBehaviour
 {
     [SerializeField, HideInInspector] private ParticleSystem _ps;
     [SerializeField, HideInInspector] private Collider2D _collider;

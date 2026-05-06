@@ -40,9 +40,11 @@ public class BossPhase1 : NetworkBehaviour, IDamagable
     private bool _isHurt;
     private float _hurtTimer;
     private float _hitBoxXPos;
+    private Transform _bossTransform;
 
     private void Awake()
     {
+        _bossTransform = transform.parent;
         _tree = new BehaviorTreeBuilder(gameObject)
             .Selector()
             .Sequence()
@@ -98,7 +100,7 @@ public class BossPhase1 : NetworkBehaviour, IDamagable
             }
         }
 
-        transform.position = closest.position;
+        _bossTransform.position = closest.position;
 
         return TaskStatus.Success;
     }
@@ -127,13 +129,16 @@ public class BossPhase1 : NetworkBehaviour, IDamagable
             return;
         }
 
+        _bossTransform.position = transform.position;
+        transform.localPosition = Vector2.zero;
+
         _rb.linearVelocity = Vector2.zero;
 
         foreach (var player in _players)
         {
             if (_targetedPlayer == null ||
-                Vector2.Distance(player.transform.position, transform.position) <
-                Vector2.Distance(_targetedPlayer.transform.position, transform.position))
+                Vector2.Distance(player.transform.position, _bossTransform.position) <
+                Vector2.Distance(_targetedPlayer.transform.position, _bossTransform.position))
             {
                 _targetedPlayer = player;
             }
@@ -202,12 +207,12 @@ public class BossPhase1 : NetworkBehaviour, IDamagable
     private TaskStatus MoveTowardPlayerBehavior()
     {
         Vector3 targetPosition = Vector2.MoveTowards(
-            transform.position,
+            _bossTransform.position,
             _targetedPlayer.transform.position,
             _movementSpeed * Time.deltaTime);
 
-        float offsetX = targetPosition.x - transform.position.x;
-        float offsetY = targetPosition.y - transform.position.y;
+        float offsetX = targetPosition.x - _bossTransform.position.x;
+        float offsetY = targetPosition.y - _bossTransform.position.y;
 
         float moveThreshold = offsetX;
         if (moveThreshold == 0)
@@ -222,27 +227,46 @@ public class BossPhase1 : NetworkBehaviour, IDamagable
         float checkHitableX = _checkHitable.transform.localPosition.x;
         float checkHitableY = _checkHitable.transform.localPosition.y;
 
-        if (offsetX > 0)
+        if (NetworkManager && NetworkManager.IsServer || !NetworkManager)
         {
-            _sr.flipX = !_spriteFacingRight;
-            _atkHitBox.transform.localPosition = new Vector3(Mathf.Abs(atkHitBoxX), atkHitBoxY);
-            _checkHitable.transform.localPosition = new Vector3(Mathf.Abs(checkHitableX), checkHitableY);
-        }
-        else if (offsetX < 0)
-        {
-            _sr.flipX = _spriteFacingRight;
-            _atkHitBox.transform.localPosition = new Vector3(-Mathf.Abs(atkHitBoxX), atkHitBoxY);
-            _checkHitable.transform.localPosition = new Vector3(-Mathf.Abs(checkHitableX), checkHitableY);
+            if (offsetX > 0)
+            {
+                _atkHitBox.transform.localPosition = new Vector3(Mathf.Abs(atkHitBoxX), atkHitBoxY);
+                _checkHitable.transform.localPosition = new Vector3(Mathf.Abs(checkHitableX), checkHitableY);
+            }
+            else if (offsetX < 0)
+            {
+                _atkHitBox.transform.localPosition = new Vector3(-Mathf.Abs(atkHitBoxX), atkHitBoxY);
+                _checkHitable.transform.localPosition = new Vector3(-Mathf.Abs(checkHitableX), checkHitableY);
+            }
         }
 
-        if (Vector2.Distance(transform.position, _targetedPlayer.transform.position) <= _hitDistance)
+        if (IsSpawned)
+        {
+            FlipBossClientRpc(offsetX);
+        }
+
+        if (Vector2.Distance(_bossTransform.position, _targetedPlayer.transform.position) <= _hitDistance)
         {
             return TaskStatus.Success;
         }
 
-        transform.position = targetPosition;
+        _bossTransform.position = targetPosition;
 
         return TaskStatus.Continue;
+    }
+
+    [ClientRpc]
+    private void FlipBossClientRpc(float offsetX)
+    {
+        if (offsetX > 0)
+        {
+            _sr.flipX = !_spriteFacingRight;
+        }
+        else if (offsetX < 0)
+        {
+            _sr.flipX = _spriteFacingRight;
+        }
     }
 
     private TaskStatus SpawnProjectileBehavior()
@@ -255,14 +279,14 @@ public class BossPhase1 : NetworkBehaviour, IDamagable
         if (!NetworkManager)
         {
             BossProjectile projectile = Instantiate(_projectile);
-            projectile.transform.position = transform.position;
+            projectile.transform.position = _bossTransform.position;
             projectile.Target = _targetedPlayer.transform;
         }
         else if (NetworkManager.IsServer)
         {
             BossProjectile projectile = Instantiate(_projectile);
             projectile.NetworkObject.Spawn(true);
-            projectile.transform.position = transform.position;
+            projectile.transform.position = _bossTransform.position;
             projectile.Target = _targetedPlayer.transform;
         }
 

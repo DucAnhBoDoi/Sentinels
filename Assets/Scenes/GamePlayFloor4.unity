@@ -4820,28 +4820,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1511694289}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &545783850 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 1419086237231763110, guid: f68534cd9e2461742b9c9dfb2a8e2e4f, type: 3}
-  m_PrefabInstance: {fileID: 852722653}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f485dc775121ed74b8be4f385b8d475b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Game::BossPhase1
---- !u!114 &592979369 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 2962936462559722468, guid: f91ffd9ccc4a12f4da61706e85c8d8f2, type: 3}
-  m_PrefabInstance: {fileID: 1735357656}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f485dc775121ed74b8be4f385b8d475b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Game::BossPhase1
 --- !u!1 &593972984
 GameObject:
   m_ObjectHideFlags: 0
@@ -56429,6 +56407,7 @@ GameObject:
   - component: {fileID: 731646540}
   - component: {fileID: 731646539}
   - component: {fileID: 731646538}
+  - component: {fileID: 731646541}
   m_Layer: 5
   m_Name: Win_Popup
   m_TagString: Untagged
@@ -56506,6 +56485,31 @@ CanvasGroup:
   m_Interactable: 1
   m_BlocksRaycasts: 1
   m_IgnoreParentGroups: 0
+--- !u!114 &731646541
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 731646536}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.Netcode.Runtime::Unity.Netcode.NetworkObject
+  GlobalObjectIdHash: 818446173
+  InScenePlacedSourceGlobalObjectIdHash: 0
+  DeferredDespawnTick: 0
+  Ownership: 1
+  AlwaysReplicateAsRoot: 0
+  SynchronizeTransform: 1
+  ActiveSceneSynchronization: 0
+  SceneMigrationSynchronization: 0
+  SpawnWithObservers: 1
+  DontDestroyWithOwner: 0
+  AutoObjectParentSync: 1
+  SyncOwnerTransformWhenParented: 1
+  AllowOwnerToParent: 0
 --- !u!1 &824955290
 GameObject:
   m_ObjectHideFlags: 0
@@ -56656,6 +56660,34 @@ PrefabInstance:
     - target: {fileID: 4717875625688379640, guid: f68534cd9e2461742b9c9dfb2a8e2e4f, type: 3}
       propertyPath: m_IsActive
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5237870877369707030, guid: f68534cd9e2461742b9c9dfb2a8e2e4f, type: 3}
+      propertyPath: _teleportPool
+      value: 
+      objectReference: {fileID: 1511694289}
+    - target: {fileID: 5795371984383793902, guid: f68534cd9e2461742b9c9dfb2a8e2e4f, type: 3}
+      propertyPath: GlobalObjectIdHash
+      value: 3997477056
+      objectReference: {fileID: 0}
+    - target: {fileID: 5795371984383793902, guid: f68534cd9e2461742b9c9dfb2a8e2e4f, type: 3}
+      propertyPath: SceneMigrationSynchronization
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5795371984383793902, guid: f68534cd9e2461742b9c9dfb2a8e2e4f, type: 3}
+      propertyPath: InScenePlacedSourceGlobalObjectIdHash
+      value: 4236622574
+      objectReference: {fileID: 0}
+    - target: {fileID: 9113473277008715619, guid: f68534cd9e2461742b9c9dfb2a8e2e4f, type: 3}
+      propertyPath: GlobalObjectIdHash
+      value: 3891420286
+      objectReference: {fileID: 0}
+    - target: {fileID: 9113473277008715619, guid: f68534cd9e2461742b9c9dfb2a8e2e4f, type: 3}
+      propertyPath: SceneMigrationSynchronization
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 9113473277008715619, guid: f68534cd9e2461742b9c9dfb2a8e2e4f, type: 3}
+      propertyPath: InScenePlacedSourceGlobalObjectIdHash
+      value: 4236622574
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -77135,8 +77167,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Game::BossRoomEnterTrigger
   ShowTopMostFoldoutHeaderGroup: 1
   _gate: {fileID: 136549196}
-  _bossPhase1: {fileID: 592979369}
-  _bossPhase2: {fileID: 545783850}
+  _bossPhase1: {fileID: 1868882727}
+  _bossPhase2: {fileID: 2078135443}
   _bossPhase1DeathDuration: 3
 --- !u!114 &1033643767
 MonoBehaviour:
@@ -102289,6 +102321,18 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 1100188769469353717, guid: f91ffd9ccc4a12f4da61706e85c8d8f2, type: 3}
+      propertyPath: GlobalObjectIdHash
+      value: 1968428003
+      objectReference: {fileID: 0}
+    - target: {fileID: 1100188769469353717, guid: f91ffd9ccc4a12f4da61706e85c8d8f2, type: 3}
+      propertyPath: SceneMigrationSynchronization
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1100188769469353717, guid: f91ffd9ccc4a12f4da61706e85c8d8f2, type: 3}
+      propertyPath: InScenePlacedSourceGlobalObjectIdHash
+      value: 4071258280
+      objectReference: {fileID: 0}
     - target: {fileID: 3206034486964519443, guid: f91ffd9ccc4a12f4da61706e85c8d8f2, type: 3}
       propertyPath: GlobalObjectIdHash
       value: 2305147087
@@ -102298,6 +102342,18 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 3206034486964519443, guid: f91ffd9ccc4a12f4da61706e85c8d8f2, type: 3}
+      propertyPath: InScenePlacedSourceGlobalObjectIdHash
+      value: 4071258280
+      objectReference: {fileID: 0}
+    - target: {fileID: 3446632025905435350, guid: f91ffd9ccc4a12f4da61706e85c8d8f2, type: 3}
+      propertyPath: GlobalObjectIdHash
+      value: 1224546681
+      objectReference: {fileID: 0}
+    - target: {fileID: 3446632025905435350, guid: f91ffd9ccc4a12f4da61706e85c8d8f2, type: 3}
+      propertyPath: SceneMigrationSynchronization
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3446632025905435350, guid: f91ffd9ccc4a12f4da61706e85c8d8f2, type: 3}
       propertyPath: InScenePlacedSourceGlobalObjectIdHash
       value: 4071258280
       objectReference: {fileID: 0}
@@ -102686,6 +102742,17 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 6668333041797721317, guid: a5cc1c8b543582042a872634b80a8451, type: 3}
   m_PrefabInstance: {fileID: 1787539546}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &1868882727 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 6516996623352095521, guid: f91ffd9ccc4a12f4da61706e85c8d8f2, type: 3}
+  m_PrefabInstance: {fileID: 1735357656}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f485dc775121ed74b8be4f385b8d475b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Game::BossPhase1
 --- !u!1 &1982505763
 GameObject:
   m_ObjectHideFlags: 0
@@ -102989,7 +103056,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Game::WinPopupManager
   _popup: {fileID: 731646537}
-  _bossPhase2: {fileID: 545783850}
+  _bossPhase2: {fileID: 2078135443}
   _btnBackToMenu: {fileID: 1982505765}
 --- !u!1001 &2029910289
 PrefabInstance:
@@ -103076,6 +103143,17 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: d6cff015914d52d42b2689beb0821397, type: 3}
+--- !u!114 &2078135443 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 5237870877369707030, guid: f68534cd9e2461742b9c9dfb2a8e2e4f, type: 3}
+  m_PrefabInstance: {fileID: 852722653}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f485dc775121ed74b8be4f385b8d475b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Game::BossPhase1
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

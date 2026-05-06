@@ -3,7 +3,7 @@ using Unity.Netcode.Components;
 using UnityEngine;
 
 [RequireComponent(typeof(ParticleSystem), typeof(Collider2D), typeof(NetworkAnimator))]
-public class ElectricWall : MonoBehaviour
+public class ElectricWall : NetworkBehaviour
 {
     [SerializeField, HideInInspector] private ParticleSystem _ps;
     [SerializeField, HideInInspector] private Collider2D _collider;

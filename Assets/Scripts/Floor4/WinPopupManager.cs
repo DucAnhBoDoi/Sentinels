@@ -1,4 +1,5 @@
 using System;
+using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
@@ -17,6 +18,7 @@ public class WinPopupManager : MonoBehaviour
 
     private void OnBtnBackToMenuClicked()
     {
+        NetworkManager.Singleton.Shutdown();
         SceneManager.LoadScene("MenuScene");
     }
 

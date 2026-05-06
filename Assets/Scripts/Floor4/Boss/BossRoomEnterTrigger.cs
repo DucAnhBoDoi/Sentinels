@@ -19,7 +19,7 @@ public class BossRoomEnterTrigger : NetworkBehaviour
     {
         _bossPhase1.enabled = false;
         _bossPhase1.OnDeath += OnBossPhase1Death;
-        _bossPhase2.gameObject.SetActive(false);
+        _bossPhase2.transform.parent.gameObject.SetActive(false);
     }
 
     private void OnTriggerEnter2D(Collider2D other)
@@ -56,13 +56,13 @@ public class BossRoomEnterTrigger : NetworkBehaviour
             {
                 if (!NetworkManager)
                 {
-                    Destroy(_bossPhase1.gameObject);
-                    _bossPhase2.gameObject.SetActive(true);
+                    Destroy(_bossPhase1.transform.parent.gameObject);
+                    _bossPhase2.transform.parent.gameObject.SetActive(true);
                 }
                 else if (NetworkManager && NetworkManager.IsServer)
                 {
-                    _bossPhase1.NetworkObject.Despawn();
-                    _bossPhase2.gameObject.SetActive(true);
+                    _bossPhase1.transform.parent.GetComponent<NetworkObject>().Despawn();
+                    _bossPhase2.transform.parent.gameObject.SetActive(true);
                 }
             });
     }
