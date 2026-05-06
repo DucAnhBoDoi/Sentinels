@@ -144,6 +144,9 @@ MonoBehaviour:
         byte0029: 0
   _txtPlayerName: {fileID: 6856652942349986306}
   _btnPlayerReady: {fileID: 3609470898955266593}
+  _imgPlayerAvatar: {fileID: 4989940051585729957}
+  _avatarPlayerA: {fileID: 3204480812468917802, guid: e2faa1bb77871014fb8113338cf59693, type: 3}
+  _avatarPlayerB: {fileID: 3204480812468917802, guid: f2d3ad2ff1e1bcf4597c903c9ca39cb4, type: 3}
 --- !u!1 &3333234506008548267
 GameObject:
   m_ObjectHideFlags: 0
