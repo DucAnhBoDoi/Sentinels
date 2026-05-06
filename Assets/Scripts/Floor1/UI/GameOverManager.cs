@@ -51,7 +51,7 @@ public class GameOverManager : NetworkBehaviour
         if (Floor1Manager.Instance != null) Floor1Manager.Instance.RestartLevelWithFade();
         else if (Floor2Manager.Instance != null) Floor2Manager.Instance.RestartLevelWithFade();
         else if (Floor3Manager.Instance != null) Floor3Manager.Instance.RestartLevelWithFade();
-        else SceneManager.LoadScene(SceneManager.GetActiveScene().name); // THÊM DÒNG 3: Tự reset Tầng 3
+        else NetworkManager.SceneManager.LoadScene(SceneManager.GetActiveScene().name,LoadSceneMode.Single);
     }
 
     public void QuitToMenu()
