@@ -20,6 +20,12 @@ public class LobbyPlayer : NetworkBehaviour
     [SerializeField] private Button _btnPlayerReady;
     private Image _imgBtnPlayerReady;
 
+    // --- CẤU HÌNH AVATAR (Đã đổi tên cho chuẩn với Logic Swap của bạn) ---
+    [Header("Cấu hình Avatar Nhân vật")]
+    [SerializeField] private Image _imgPlayerAvatar; 
+    [SerializeField] private Sprite _avatarPlayerA; // Kéo hình NV thứ 1 (Mặc định bên Trái)
+    [SerializeField] private Sprite _avatarPlayerB; // Kéo hình NV thứ 2 (Mặc định bên Phải)
+
     private Color _colorReady;
     private Color _colorNotReady;
 
@@ -75,6 +81,7 @@ public class LobbyPlayer : NetworkBehaviour
 
     private void Update()
     {
+        // 1. Logic nút Ready của bạn
         if (NetIsReady.Value && _imgBtnPlayerReady.color != _colorReady)
         {
             _imgBtnPlayerReady.color = _colorReady;
@@ -82,6 +89,23 @@ public class LobbyPlayer : NetworkBehaviour
         else if (!NetIsReady.Value && _imgBtnPlayerReady.color != _colorNotReady)
         {
             _imgBtnPlayerReady.color = _colorNotReady;
+        }
+
+        // 2. LOGIC TỰ ĐỘNG ĐỔI HÌNH AVATAR DỰA VÀO NÚT SWAP
+        if (_imgPlayerAvatar != null)
+        {
+            if (OwnerClientId == NetworkManager.ServerClientId)
+            {
+                // Nếu mình là Host: Hình phụ thuộc vào biến hostPlaysPlayerA
+                _imgPlayerAvatar.sprite = LobbySwapButton.hostPlaysPlayerA ? _avatarPlayerA : _avatarPlayerB;
+            }
+            else
+            {
+                // Nếu mình là Client: Sẽ luôn lấy hình ngược lại với Host
+                _imgPlayerAvatar.sprite = LobbySwapButton.hostPlaysPlayerA ? _avatarPlayerB : _avatarPlayerA;
+            }
+            
+            _imgPlayerAvatar.preserveAspect = true;
         }
     }
 

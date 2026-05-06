@@ -290,10 +290,16 @@ public class PopupRoomController : MonoBehaviour
                 joinAlloc.HostConnectionData
             );
 
-            // 4. Mở cửa sổ sảnh chờ, code cũ của bạn sẽ tự gọi NetworkManager.StartClient()
+            // 4. Mở cửa sổ sảnh chờ
             ClosePopup();
             _utils.ShowLobbyCoop();
             _utils.LobbyCoopSetCoopModeOnline();
+
+            LobbyCoop coopUI = Object.FindAnyObjectByType<LobbyCoop>(FindObjectsInactive.Include);
+            if (coopUI != null)
+            {
+                coopUI.SetOnlineLobbyId(room.OnlineLobbyId);
+            }
         }
         catch (System.Exception e)
         {

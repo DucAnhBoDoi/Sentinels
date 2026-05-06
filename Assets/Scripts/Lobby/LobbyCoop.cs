@@ -10,6 +10,7 @@ using Unity.Services.Relay;
 using Unity.Services.Relay.Models;
 using Unity.Services.Lobbies;
 using Unity.Services.Lobbies.Models;
+using Unity.Services.Authentication; // THÊM ĐỂ ĐỌC ID CỦA CLIENT
 
 public class LobbyCoop : MonoBehaviour
 {
@@ -42,6 +43,12 @@ public class LobbyCoop : MonoBehaviour
         _btnStartGame.onClick.AddListener(OnBtnStartGameClick);
     }
 
+    // --- HÀM MỚI ĐỂ LƯU ID PHÒNG ONLINE MÀ CLIENT VỪA VÀO ---
+    public void SetOnlineLobbyId(string lobbyId)
+    {
+        _currentLobbyId = lobbyId;
+    }
+
     private void Update()
     {
         if ((NetworkManager.Singleton != null && !NetworkManager.Singleton.IsHost) ||
@@ -68,7 +75,6 @@ public class LobbyCoop : MonoBehaviour
         }
 
         // --- NHỊP ĐẬP TIM (HEARTBEAT) CHO PHÒNG ONLINE ---
-        // Giữ cho phòng không bị Unity xóa do "đứng hình" quá lâu (15 giây gửi 1 lần)
         if (NetworkManager.Singleton != null && NetworkManager.Singleton.IsHost && _coopMode == CoopMode.Online && !string.IsNullOrEmpty(_currentLobbyId))
         {
             _heartbeatTimer += Time.deltaTime;
@@ -83,14 +89,18 @@ public class LobbyCoop : MonoBehaviour
     private async void OnEnable()
     {
         CleanUpLobby();
-        _currentLobbyId = "";
+        
+        // CHỈ XÓA ID NẾU ĐANG TẠO PHÒNG MỚI (Tránh xóa nhầm ID do Client Join truyền sang)
+        if (_lobbyAction == LobbyAction.Create) 
+        {
+            _currentLobbyId = "";
+        }
 
         if (_lobbyAction == LobbyAction.Join)
         {
             NetworkManager.Singleton.StartClient();
         }
 
-        // LUÔN LUÔN lắng nghe sự kiện Player tham gia (cả Local và Online)
         NetworkManager.Singleton.OnClientConnectedCallback += OnLocalClientConnected;
         NetworkManager.Singleton.OnClientDisconnectCallback += OnLocalClientDisconnect;
 
@@ -98,29 +108,24 @@ public class LobbyCoop : MonoBehaviour
         {
             if (_coopMode == CoopMode.Local)
             {
-                // LOGIC CŨ CỦA BẠN (LOCAL)
                 UnityTransport transport = (UnityTransport)NetworkManager.Singleton.NetworkConfig.NetworkTransport;
                 transport.SetConnectionData("127.0.0.1", transport.ConnectionData.Port, "0.0.0.0");
                 NetworkManager.Singleton.StartHost();
             }
             else if (_coopMode == CoopMode.Online)
             {
-                // LOGIC MỚI CHO ONLINE
                 await CreateOnlineRoomAsync();
             }
         }
     }
 
-    // --- LOGIC HOST TẠO PHÒNG ONLINE ---
     private async Task CreateOnlineRoomAsync()
     {
         try
         {
-            // 1. Xin Relay đường hầm (Sức chứa trừ đi 1 vì Host đã chiếm 1 chỗ)
             Allocation alloc = await RelayService.Instance.CreateAllocationAsync(GameNetworkManager.MAX_PLAYER_COUNT - 1);
             string joinCode = await RelayService.Instance.GetJoinCodeAsync(alloc.AllocationId);
 
-            // 2. Đẩy cấu hình Relay vào NetworkManager
             UnityTransport transport = (UnityTransport)NetworkManager.Singleton.NetworkConfig.NetworkTransport;
             transport.SetHostRelayData(
                 alloc.RelayServer.IpV4, 
@@ -130,13 +135,12 @@ public class LobbyCoop : MonoBehaviour
                 alloc.ConnectionData
             );
 
-            // 3. Treo bảng tên phòng lên Unity Lobby
             string playerName = PlayerPrefs.HasKey(nameof(PlayerPrefsKeys.S_UserName)) ? PlayerPrefs.GetString(nameof(PlayerPrefsKeys.S_UserName)) : "Default Player";
             
             CreateLobbyOptions options = new CreateLobbyOptions {
                 IsPrivate = false,
                 Data = new Dictionary<string, DataObject> {
-                    { "JoinCode", new DataObject(DataObject.VisibilityOptions.Public, joinCode) } // Giấu mã JoinCode ở đây!
+                    { "JoinCode", new DataObject(DataObject.VisibilityOptions.Public, joinCode) }
                 }
             };
 
@@ -145,7 +149,6 @@ public class LobbyCoop : MonoBehaviour
 
             Debug.Log($"<color=green>[Online] Tạo phòng thành công! Tên: {lobby.Name} | JoinCode: {joinCode}</color>");
 
-            // 4. Mở cửa
             NetworkManager.Singleton.StartHost();
         }
         catch (System.Exception e)
@@ -163,12 +166,21 @@ public class LobbyCoop : MonoBehaviour
         }
         CleanUpLobby();
 
-        // Xóa phòng trên Server Unity khi Host thoát
-        if (NetworkManager.Singleton != null && NetworkManager.Singleton.IsHost && _coopMode == CoopMode.Online && !string.IsNullOrEmpty(_currentLobbyId))
+        // --- XỬ LÝ LÚC HOST XÓA PHÒNG HOẶC CLIENT THOÁT PHÒNG ---
+        if (_coopMode == CoopMode.Online && !string.IsNullOrEmpty(_currentLobbyId))
         {
             try 
             { 
-                await LobbyService.Instance.DeleteLobbyAsync(_currentLobbyId); 
+                if (NetworkManager.Singleton != null && NetworkManager.Singleton.IsHost)
+                {
+                    await LobbyService.Instance.DeleteLobbyAsync(_currentLobbyId); 
+                }
+                else if (AuthenticationService.Instance.IsSignedIn)
+                {
+                    // Lệnh báo cho máy chủ Unity Lobby trả lại Slot trống
+                    await LobbyService.Instance.RemovePlayerAsync(_currentLobbyId, AuthenticationService.Instance.PlayerId);
+                    Debug.Log("<color=yellow>[Online] Client đã rời đi và trả lại chỗ trống!</color>");
+                }
                 _currentLobbyId = ""; 
             } 
             catch { }
