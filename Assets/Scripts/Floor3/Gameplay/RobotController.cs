@@ -40,6 +40,9 @@ namespace Scripts.Floor3.Gameplay
         // BIẾN ĐỒNG BỘ MÁU: Tự động cập nhật giao diện khi máu thay đổi
         public NetworkVariable<float> currentHp = new NetworkVariable<float>(0f);
 
+        private SpriteRenderer _sr;
+        private bool _defaultFlipX;
+
         private int _currentWaypointIndex = 0;
         private float _currentSpeed;
         private bool _isEscortComplete = false;
@@ -56,7 +59,9 @@ namespace Scripts.Floor3.Gameplay
         private void Awake()
         {
             _stateMachine = GetComponent<RobotStateMachine>();
+            _sr = GetComponent<SpriteRenderer>();
             var rb = GetComponent<Rigidbody2D>();
+            _defaultFlipX = _sr != null ? _sr.flipX : false;
             if (rb != null)
             {
                 rb.bodyType = RigidbodyType2D.Kinematic;
@@ -135,9 +140,26 @@ namespace Scripts.Floor3.Gameplay
             Vector3 direction = (target.position - transform.position).normalized;
             transform.position += direction * _currentSpeed * Time.deltaTime;
 
+            // THÊM ĐOẠN NÀY: Flip sprite theo hướng di chuyển
+            if (_sr != null && Mathf.Abs(direction.x) > 0.1f)
+            {
+                bool shouldFlip = direction.x < 0 ? _defaultFlipX : !_defaultFlipX;
+                if (_sr.flipX != shouldFlip)
+                {
+                    _sr.flipX = shouldFlip;
+                    SyncFlipClientRpc(shouldFlip); // Đồng bộ sang Client
+                }
+            }
+
             float dist = Vector2.Distance(transform.position, target.position);
             if (dist <= _waypointReachThreshold)
                 OnWaypointReached(_currentWaypointIndex);
+        }
+
+        [ClientRpc]
+        private void SyncFlipClientRpc(bool flip)
+        {
+            if (!IsServer && _sr != null) _sr.flipX = flip;
         }
 
         private void OnWaypointReached(int index)
