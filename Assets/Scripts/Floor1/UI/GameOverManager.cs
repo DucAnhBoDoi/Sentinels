@@ -51,7 +51,17 @@ public class GameOverManager : NetworkBehaviour
         if (Floor1Manager.Instance != null) Floor1Manager.Instance.RestartLevelWithFade();
         else if (Floor2Manager.Instance != null) Floor2Manager.Instance.RestartLevelWithFade();
         else if (Floor3Manager.Instance != null) Floor3Manager.Instance.RestartLevelWithFade();
-        else NetworkManager.SceneManager.LoadScene(SceneManager.GetActiveScene().name,LoadSceneMode.Single);
+        else RestartLevelClientRpc();
+    }
+
+    [ClientRpc]
+    private void RestartLevelClientRpc()
+    {
+        Time.timeScale = 1f;
+        if (IsServer)
+        {
+            NetworkManager.Singleton.SceneManager.LoadScene(SceneManager.GetActiveScene().name, LoadSceneMode.Single);
+        }
     }
 
     public void QuitToMenu()
