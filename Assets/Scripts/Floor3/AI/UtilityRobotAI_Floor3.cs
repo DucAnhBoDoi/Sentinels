@@ -47,6 +47,7 @@ public class UtilityRobotAI_Floor3 : NetworkBehaviour, IDamagable
     private HitReactionController _hitReaction;
     private Vector2 startPos;
     private Vector2 patrolTarget;
+    private bool defaultFlipX;
 
     private float stuckTimer = 0f;
     private float currentCooldown = 0f;
@@ -56,9 +57,11 @@ public class UtilityRobotAI_Floor3 : NetworkBehaviour, IDamagable
         sr = GetComponent<SpriteRenderer>();
         rb = GetComponent<Rigidbody2D>();
         rb.freezeRotation = true;
+        
 
         allRobots.Add(this);
 
+        defaultFlipX = sr.flipX;
         startPos = transform.position;
         PickNewPatrolPoint();
 
@@ -183,21 +186,22 @@ public class UtilityRobotAI_Floor3 : NetworkBehaviour, IDamagable
         else
             rb.linearVelocity = Vector2.zero;
 
-        bool shouldFlip = sr.flipX;
+        bool shouldFlip = defaultFlipX;
+
         if (target != null)
         {
-            if (target.position.x < transform.position.x - 0.1f) shouldFlip = true;
-            else if (target.position.x > transform.position.x + 0.1f) shouldFlip = false;
+            if (target.position.x < transform.position.x - 0.1f) shouldFlip = !defaultFlipX;
+            else if (target.position.x > transform.position.x + 0.1f) shouldFlip = defaultFlipX;
         }
         else if (Mathf.Abs(bestDir.x) > 0.1f)
         {
-            shouldFlip = bestDir.x < 0;
+            shouldFlip = (bestDir.x < 0) ? defaultFlipX : !defaultFlipX;
         }
 
         if (sr.flipX != shouldFlip)
         {
             sr.flipX = shouldFlip;
-            SyncFlipClientRpc(shouldFlip);
+            SyncFlipClientRpc(shouldFlip); // Giữ nguyên sync mạng
         }
     }
 

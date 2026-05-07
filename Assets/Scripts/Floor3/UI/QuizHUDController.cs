@@ -144,15 +144,21 @@ namespace Scripts.Floor3.UI
         {
             SetConflictActive(false);
 
+            // ── Bôi xanh câu đúng trực tiếp lên Image (không dùng Button.colors) ──
             if (correctIndex >= 0 && correctIndex < _answerButtons.Length)
             {
-                var btnColors = _answerButtons[correctIndex].colors;
-                btnColors.normalColor = _correctColor;
-                _answerButtons[correctIndex].colors = btnColors;
+                // Lấy Image component trên button (background của button)
+                Image btnImage = _answerButtons[correctIndex].GetComponent<Image>();
+                if (btnImage != null)
+                    btnImage.color = _correctColor;
             }
 
-            string msg   = isCorrect ? "CORRECT!" : "WRONG!";
-            Color  color = isCorrect ? _correctColor : _wrongColor;
+            // ── Nếu đúng: giữ lại highlight của player đã chọn ──────────────────
+            // Nếu sai: highlight vẫn hiện (đã set trong HandlePlayerConfirmed)
+            // Không clear highlights ở đây — để player thấy họ đã chọn gì
+
+            string msg = isCorrect ? "CORRECT!" : "WRONG!";
+            Color color = isCorrect ? _correctColor : _wrongColor;
             SetResultText(msg, color);
 
             StartCoroutine(HidePanelAfterDelay(_resultDisplayDuration));
@@ -160,9 +166,23 @@ namespace Scripts.Floor3.UI
 
         private IEnumerator HidePanelAfterDelay(float delay)
         {
-            yield return new WaitForSeconds(delay);
+            // Dùng unscaled time vì timeScale có thể = 0
+            yield return new WaitForSecondsRealtime(delay);
             SetPanelActive(false);
             ClearHighlights();
+            // Reset màu buttons về mặc định
+            ResetButtonColors();
+        }
+
+        private void ResetButtonColors()
+        {
+            foreach (var btn in _answerButtons)
+            {
+                if (btn == null) continue;
+                Image btnImage = btn.GetComponent<Image>();
+                if (btnImage != null)
+                    btnImage.color = _defaultBtnColor;
+            }
         }
 
         // =========================================================
