@@ -57,7 +57,16 @@ public class Floor3Manager : NetworkBehaviour
         if (IsServer)
         {
             isLevelComplete.Value = true;
-            Debug.Log("<color=green>ĐÃ HỘ TỐNG THÀNH CÔNG! BẤM PHÍM [4] ĐỂ QUA TẦNG 4!</color>");
+            // SỬA: Báo log phím ENTER
+            Debug.Log("<color=green>ĐÃ HỘ TỐNG THÀNH CÔNG! BẤM PHÍM [ENTER] ĐỂ QUA TẦNG 4!</color>");
+
+            // ==========================================
+            // THÊM: GỌI HIỆU ỨNG UI QUEST COMPLETE ĐỒNG BỘ MẠNG
+            // ==========================================
+            if (QuestUIManager.Instance != null)
+            {
+                QuestUIManager.Instance.TriggerQuestCompleteNetwork();
+            }
         }
     }
 
@@ -69,7 +78,8 @@ public class Floor3Manager : NetworkBehaviour
         var keyboard = Keyboard.current;
         if (keyboard == null) return;
 
-        if (keyboard.digit4Key.wasPressedThisFrame)
+        // SỬA: Đổi từ digit4Key sang enterKey
+        if (keyboard.enterKey.wasPressedThisFrame)
         {
             if (elevatorDoor == null) return;
 
@@ -93,13 +103,40 @@ public class Floor3Manager : NetworkBehaviour
     IEnumerator TransitionToNextFloor()
     {
         isTransitioning = true;
+
+        // --- THÊM: TÌM NHẠC NỀN ĐỂ CHUẨN BỊ LÀM NHỎ ---
+        AudioSource bgmSource = null;
+        float startVol = 0f;
+        GameObject bgmManager = GameObject.Find("BGM_Manager");
+        if (bgmManager != null)
+        {
+            bgmSource = bgmManager.GetComponent<AudioSource>();
+            if (bgmSource != null) startVol = bgmSource.volume;
+        }
+
         if (fadeImage != null)
         {
             fadeImage.gameObject.SetActive(true);
             float elapsed = 0f; Color c = fadeImage.color;
-            while (elapsed < fadeDuration) { elapsed += Time.deltaTime; c.a = Mathf.Clamp01(elapsed / fadeDuration); fadeImage.color = c; yield return null; }
+            while (elapsed < fadeDuration) 
+            { 
+                elapsed += Time.deltaTime; 
+                c.a = Mathf.Clamp01(elapsed / fadeDuration); 
+                fadeImage.color = c; 
+
+                // --- THÊM: ÉP NHẠC NỀN NHỎ DẦN ---
+                if (bgmSource != null)
+                {
+                    bgmSource.volume = Mathf.Lerp(startVol, 0f, elapsed / fadeDuration);
+                }
+
+                yield return null; 
+            }
         }
         
+        // Đảm bảo nhạc tắt hẳn khi màn đen xì
+        if (bgmSource != null) bgmSource.volume = 0f;
+
         if (IsServer) NetworkManager.Singleton.SceneManager.LoadScene("GamePlayFloor4", LoadSceneMode.Single);
     }
 
