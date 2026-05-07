@@ -49,7 +49,8 @@ public class Floor1Manager : NetworkBehaviour
     public void LevelCompleteServerRpc()
     {
         isLevelComplete.Value = true;
-        Debug.Log("<color=green>ĐIỆN ĐÃ CÓ! CẢ 2 NGƯỜI CHƠI HÃY LẠI GẦN CỬA VÀ BẤM PHÍM [2] ĐỂ QUA TẦNG!</color>");
+        // SỬA CHỮ [2] THÀNH [ENTER] TRONG LOG
+        Debug.Log("<color=green>ĐIỆN ĐÃ CÓ! CẢ 2 NGƯỜI CHƠI HÃY LẠI GẦN CỬA VÀ BẤM PHÍM [ENTER] ĐỂ QUA TẦNG!</color>");
     }
 
     // ========================================================
@@ -57,21 +58,18 @@ public class Floor1Manager : NetworkBehaviour
     // ========================================================
     public void QuitToMenuWithFade(string menuSceneName)
     {
-        // Gửi lệnh lên Server xin phép Quit
         QuitToMenuServerRpc(menuSceneName);
     }
 
     [Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Everyone)]
     private void QuitToMenuServerRpc(string menuSceneName)
     {
-        // Server ra lệnh cho toàn bộ Client cùng Quit
         QuitToMenuClientRpc(menuSceneName);
     }
 
     [ClientRpc]
     private void QuitToMenuClientRpc(string menuSceneName)
     {
-        // Chạy Coroutine cũ của anh trên mọi máy
         StartCoroutine(TransitionToMenuSequence(menuSceneName));
     }
 
@@ -98,13 +96,13 @@ public class Floor1Manager : NetworkBehaviour
     // ========================================================
     void Update()
     {
-        // Thêm IsServer để ép chỉ máy Host mới được phép kiểm tra qua màn
         if (!IsServer || !isLevelComplete.Value || isTransitioning) return;
 
         var keyboard = Keyboard.current;
         if (keyboard == null) return;
 
-        if (keyboard.digit2Key.wasPressedThisFrame)
+        // --- ĐÃ ĐỔI TỪ digit2Key SANG enterKey ---
+        if (keyboard.enterKey.wasPressedThisFrame)
         {
             if (elevatorDoor == null) return;
 
@@ -114,7 +112,6 @@ public class Floor1Manager : NetworkBehaviour
             if (distA <= interactDistance && distB <= interactDistance)
             {
                 Debug.Log("Cả 2 đã ở cửa! Đang tải Tầng 2...");
-                // Báo cho mọi máy bắt đầu chạy hiệu ứng Fade qua màn
                 StartNextFloorSequenceClientRpc();
             }
             else
@@ -139,6 +136,16 @@ public class Floor1Manager : NetworkBehaviour
     {
         isTransitioning = true;
 
+        // --- TÌM NHẠC NỀN ĐỂ CHUẨN BỊ LÀM NHỎ ---
+        AudioSource bgmSource = null;
+        float startVol = 0f;
+        GameObject bgmManager = GameObject.Find("BGM_Manager");
+        if (bgmManager != null)
+        {
+            bgmSource = bgmManager.GetComponent<AudioSource>();
+            if (bgmSource != null) startVol = bgmSource.volume;
+        }
+
         if (fadeImage != null)
         {
             fadeImage.gameObject.SetActive(true);
@@ -150,10 +157,20 @@ public class Floor1Manager : NetworkBehaviour
                 elapsed += Time.deltaTime;
                 c.a = Mathf.Clamp01(elapsed / fadeDuration);
                 fadeImage.color = c;
+
+                // --- ÉP NHẠC NỀN NHỎ DẦN THEO TỐC ĐỘ TỐI CỦA MÀN HÌNH ---
+                if (bgmSource != null)
+                {
+                    bgmSource.volume = Mathf.Lerp(startVol, 0f, elapsed / fadeDuration);
+                }
+
                 yield return null;
             }
         }
         
+        // Đảm bảo nhạc tắt hẳn khi màn hình đã đen xì
+        if (bgmSource != null) bgmSource.volume = 0f;
+
         // QUAN TRỌNG: Chỉ Server mới gọi lệnh LoadScene mạng
         if (IsServer)
         {
@@ -183,7 +200,6 @@ public class Floor1Manager : NetworkBehaviour
 
     IEnumerator TransitionToMenuSequence(string sceneName)
     {
-        // Quan trọng: Phải dùng unscaledDeltaTime vì có thể game đang bị dừng (Time.timeScale = 0)
         if (fadeImage != null)
         {
             fadeImage.gameObject.SetActive(true);
@@ -192,7 +208,6 @@ public class Floor1Manager : NetworkBehaviour
 
             while (elapsed < fadeDuration)
             {
-                // Dùng unscaledDeltaTime để bỏ qua việc dừng thời gian
                 elapsed += Time.unscaledDeltaTime;
                 c.a = Mathf.Clamp01(elapsed / fadeDuration);
                 fadeImage.color = c;
@@ -200,11 +215,9 @@ public class Floor1Manager : NetworkBehaviour
             }
         }
 
-        // Trả lại thời gian về 1 để Scene Menu chạy bình thường
         Time.timeScale = 1f;
         QuestPopupManager.hasAcceptedOnce = false;
 
-        // TẮT KẾT NỐI MẠNG TRƯỚC KHI VỀ MENU OFFLINE
         if (NetworkManager.Singleton != null)
         {
             NetworkManager.Singleton.Shutdown();
@@ -221,7 +234,6 @@ public class Floor1Manager : NetworkBehaviour
             float elapsed = 0f;
             Color c = fadeImage.color;
 
-            // Tối dần màn hình (Dùng unscaledDeltaTime vì game đang dừng)
             while (elapsed < fadeDuration)
             {
                 elapsed += Time.unscaledDeltaTime;
@@ -231,10 +243,8 @@ public class Floor1Manager : NetworkBehaviour
             }
         }
 
-        // QUAN TRỌNG: Trả lại thời gian về 1 để Scene mới chạy được
         Time.timeScale = 1f;
 
-        // Tải lại Scene hiện tại qua Mạng
         if (IsServer)
         {
             NetworkManager.Singleton.SceneManager.LoadScene(SceneManager.GetActiveScene().name, LoadSceneMode.Single);
