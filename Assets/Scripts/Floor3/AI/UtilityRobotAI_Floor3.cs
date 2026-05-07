@@ -225,35 +225,22 @@ public class UtilityRobotAI_Floor3 : NetworkBehaviour, IDamagable
         if (attacker != null)
             knockbackDir = ((Vector2)transform.position - (Vector2)attacker.position).normalized;
 
-        // Bật hiệu ứng trên Server (Host)
-        if (hitParticles != null) hitParticles.Play();
-        StartCoroutine(FlashRedRoutine());
+        bool died = _hitReaction.ReactToHit(knockbackDir, amount);
 
-        // Kêu Client bật hiệu ứng
+        // Gọi visual trên tất cả clients (bao gồm cả Host)
         TriggerHitVisualClientRpc(knockbackDir);
 
-        bool died = _hitReaction.ReactToHit(knockbackDir, amount);
         if (died) DespawnVirus();
     }
 
     [ClientRpc]
     private void TriggerHitVisualClientRpc(Vector2 dir)
     {
-        if (IsServer)
-        {
-            // Server xử lý chính
-            hitParticles?.Play();
-            StartCoroutine(FlashRedRoutine());
-
-            _hitReaction?.ReactOnly(dir);
-            GetComponent<Virus2AnimatorController>()?.TriggerHurt();
-        }
-        else
-        {
-            // Client chỉ hiển thị hiệu ứng (không logic)
-            _hitReaction?.ReactOnly(dir);
-            GetComponent<Virus2AnimatorController>()?.TriggerHurt();
-        }
+        // Chạy trên tất cả clients — chỉ visual, không có logic
+        if (hitParticles != null) hitParticles.Play();
+        StartCoroutine(FlashRedRoutine());
+        _hitReaction?.ReactOnly(dir);
+        GetComponent<Virus2AnimatorController>()?.TriggerHurt();
     }
 
     // --- COROUTINE CHỚP ĐỎ ---
@@ -268,21 +255,52 @@ public class UtilityRobotAI_Floor3 : NetworkBehaviour, IDamagable
 
     private void DespawnVirus()
     {
-        // THÊM DÒNG NÀY TRƯỚC KHI DESPAWN:
-        GetComponent<Virus2AnimatorController>()?.TriggerDeath();
-
-        // Delay nhỏ để Death animation kịp play
-        StartCoroutine(DelayedDespawn());
-
-        if (NetworkObject.IsSpawned) NetworkObject.Despawn(true);
-        else Destroy(gameObject);
+        StartCoroutine(DeathSequence());
     }
 
-    private System.Collections.IEnumerator DelayedDespawn()
+    private IEnumerator DeathSequence()
     {
-        yield return new WaitForSeconds(0.5f); // khớp với độ dài clip Death
-        if (NetworkObject.IsSpawned) NetworkObject.Despawn(true);
-        else Destroy(gameObject);
+        // 1. Tắt collider + AI ngay lập tức
+        GetComponent<Collider2D>().enabled = false;
+        rb.linearVelocity = Vector2.zero;
+        enabled = false;
+
+        // 2. Báo Client: tắt collider + trigger animation + tự destroy sau delay
+        PlayDeathAndDestroyClientRpc();
+
+        // 3. Host tự trigger animation
+        GetComponent<Virus2AnimatorController>()?.TriggerDeath();
+
+        // 4. Chờ animation xong
+        yield return new WaitForSeconds(1f);
+
+        // 5. Despawn(false) để không force-destroy bên Client
+        // (Client đã tự destroy trước đó qua ClientRpc)
+        if (NetworkObject != null && NetworkObject.IsSpawned)
+            NetworkObject.Despawn(false);
+
+        Destroy(gameObject);
+    }
+
+    [ClientRpc]
+    private void PlayDeathAndDestroyClientRpc()
+    {
+        if (IsServer) return; // Host xử lý trong DeathSequence
+
+        GetComponent<Collider2D>().enabled = false;
+        rb.linearVelocity = Vector2.zero;
+
+        // Client trigger animation
+        GetComponent<Virus2AnimatorController>()?.TriggerDeath();
+
+        // Client tự destroy sau khi animation xong
+        StartCoroutine(ClientSideDestroy());
+    }
+
+    private IEnumerator ClientSideDestroy()
+    {
+        yield return new WaitForSeconds(1f);
+        Destroy(gameObject);
     }
 
     private void OnDrawGizmosSelected()
