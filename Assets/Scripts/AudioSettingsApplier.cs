@@ -1,8 +1,8 @@
 using UnityEngine;
 using UnityEngine.Audio;
-using System.Collections; // Bắt buộc phải có thư viện này để chạy Coroutine (Fade-in)
+using System.Collections; 
 
-[RequireComponent(typeof(AudioSource))] // Đảm bảo script này luôn đi kèm với AudioSource
+[RequireComponent(typeof(AudioSource))] 
 public class AudioSettingsApplier : MonoBehaviour
 {
     [Header("Cấu hình Mixer")]
@@ -12,15 +12,16 @@ public class AudioSettingsApplier : MonoBehaviour
     private const string MUSIC_KEY = "BGMVolume";
     private const string SFX_KEY = "SFXVolume";
 
+    // --- THÊM MỚI: CÔNG TẮC ĐỂ CHỌN PHÁT LUÔN HAY CHỜ ĐỢI ---
+    [Header("Cài đặt Phát Nhạc")]
+    public bool playOnStart = true; 
+
     [Header("Hiệu ứng Fade-In (To dần)")]
-    [Tooltip("Thời gian để nhạc to từ 0 lên mức tối đa (tính bằng giây)")]
     public float fadeInDuration = 2.5f; 
 
     [Header("Cắt nhạc lặp liền mạch (Seamless Loop)")]
     public bool useCustomLoop = true;
-    [Tooltip("Thời điểm lặp lại (giây). Thường là 0")]
     public float loopStartTime = 0f;
-    [Tooltip("Thời điểm ngắt nhạc trước khi nó bị nhỏ dần (giây)")]
     public float loopEndTime = 60f; 
 
     private AudioSource _audioSource;
@@ -28,12 +29,19 @@ public class AudioSettingsApplier : MonoBehaviour
     void Start()
     {
         _audioSource = GetComponent<AudioSource>();
-
-        // 1. Áp dụng mức âm lượng từ Menu (ổ cứng) vào Mixer
         ApplyMixerSettings();
 
-        // 2. Chạy hiệu ứng nhạc to dần
-        StartCoroutine(FadeInMusicRoutine());
+        // NẾU BẬT TỰ ĐỘNG PHÁT (NHƯ TẦNG 1) THÌ CHẠY LUÔN
+        if (playOnStart)
+        {
+            StartCoroutine(FadeInMusicRoutine());
+        }
+    }
+
+    // --- THÊM MỚI: HÀM NÀY ĐỂ TẦNG 2 GỌI KHI ĐẾM NGƯỢC XONG ---
+    public void PlayAndFadeIn()
+    {
+        if (_audioSource != null) StartCoroutine(FadeInMusicRoutine());
     }
 
     void ApplyMixerSettings()
@@ -52,34 +60,25 @@ public class AudioSettingsApplier : MonoBehaviour
 
     private IEnumerator FadeInMusicRoutine()
     {
-        // Ép âm lượng của AudioSource về 0 trước khi phát
         _audioSource.volume = 0f;
-        
-        // Tắt tính năng Loop mặc định của Unity (vì mình sẽ tự code Loop)
         if (useCustomLoop) _audioSource.loop = false; 
         
         _audioSource.Play();
-
         float currentTime = 0f;
 
-        // Từ từ tăng Volume từ 0 lên 1 trong khoảng thời gian fadeInDuration
         while (currentTime < fadeInDuration)
         {
             currentTime += Time.deltaTime;
             _audioSource.volume = Mathf.Lerp(0f, 1f, currentTime / fadeInDuration);
             yield return null;
         }
-
-        // Đảm bảo kết thúc hiệu ứng thì volume đạt mức 100% (của AudioSource)
         _audioSource.volume = 1f;
     }
 
     void Update()
     {
-        // 3. LOGIC LẶP NHẠC LIỀN MẠCH
         if (useCustomLoop && _audioSource.isPlaying)
         {
-            // Nếu thời gian bài hát chạm đến điểm "cắt" -> Ép nó tua lại về điểm bắt đầu
             if (_audioSource.time >= loopEndTime)
             {
                 _audioSource.time = loopStartTime;

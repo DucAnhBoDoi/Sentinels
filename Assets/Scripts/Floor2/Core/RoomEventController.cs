@@ -55,6 +55,17 @@ public class RoomEventController : NetworkBehaviour
 
         if (coreHealthBar != null) coreHealthBar.SetActive(true);
         
+        // ==========================================================
+        // --- THÊM LỆNH GỌI NHẠC NỀN DÂNG LÊN SAU KHI ĐẾM NGƯỢC ---
+        GameObject bgmManager = GameObject.Find("BGM_Manager");
+        if (bgmManager != null)
+        {
+            AudioSettingsApplier audioApplier = bgmManager.GetComponent<AudioSettingsApplier>();
+            // Kích hoạt nhạc (cả Host và Client cùng chạy lệnh này vì đang ở trong ClientRpc)
+            if (audioApplier != null) audioApplier.PlayAndFadeIn();
+        }
+        // ==========================================================
+
         // CHỈ ĐỂ SERVER BẬT SPAWNER (Để Client không tự đẻ quái)
         if (IsServer && spawner != null) spawner.enabled = true;
 
