@@ -45,6 +45,9 @@ public class Floor2Manager : NetworkBehaviour
 
     private bool isTransitioning = false;
     private bool hasDroppedShard = false;
+    
+    // BIẾN LƯU TRỮ NHẠC NỀN
+    private AudioSource bgmSource;
 
     void Awake() { if (Instance == null) Instance = this; }
 
@@ -106,7 +109,37 @@ public class Floor2Manager : NetworkBehaviour
                 timerIsRunning.Value = false;
                 isGameOver.Value = true;
                 WinGameClientRpc(); // Hết giờ -> Lõi còn sống -> Thắng
+
+                if (QuestUIManager.Instance != null)
+                {
+                    QuestUIManager.Instance.TriggerQuestCompleteNetwork();
+                }
             }
+        }
+
+        // --- LOGIC MỚI: TẤT CẢ CÁC MÁY CÙNG KIỂM TRA ĐỂ LÀM NHỎ NHẠC TRONG 5 GIÂY CUỐI ---
+        if (timerIsRunning.Value && !isGameOver.Value)
+        {
+            if (timeRemaining.Value <= 5f && timeRemaining.Value > 0f)
+            {
+                if (bgmSource == null)
+                {
+                    GameObject bgmManager = GameObject.Find("BGM_Manager");
+                    if (bgmManager != null) bgmSource = bgmManager.GetComponent<AudioSource>();
+                }
+
+                if (bgmSource != null)
+                {
+                    // Lấy tỷ lệ thời gian còn lại chia cho 5 (từ 1.0 giảm dần về 0.0)
+                    bgmSource.volume = timeRemaining.Value / 5f;
+                }
+            }
+        }
+        
+        // Đảm bảo nhạc tắt hẳn khi hết giờ (hoặc thắng/thua)
+        if (!timerIsRunning.Value && bgmSource != null && bgmSource.volume > 0)
+        {
+            bgmSource.volume = 0f;
         }
 
         // 2. SERVER CHECK ĐIỀU KIỆN QUA MÀN
@@ -115,7 +148,7 @@ public class Floor2Manager : NetworkBehaviour
         var keyboard = Keyboard.current;
         if (keyboard == null) return;
 
-        if (keyboard.digit3Key.wasPressedThisFrame)
+        if (keyboard.enterKey.wasPressedThisFrame)
         {
             if (elevatorDoor == null) return;
 
@@ -216,12 +249,20 @@ public class Floor2Manager : NetworkBehaviour
     IEnumerator TransitionToNextFloor()
     {
         isTransitioning = true;
+
         if (fadeImage != null)
         {
             fadeImage.gameObject.SetActive(true);
             float elapsed = 0f; Color c = fadeImage.color;
-            while (elapsed < fadeDuration) { elapsed += Time.deltaTime; c.a = Mathf.Clamp01(elapsed / fadeDuration); fadeImage.color = c; yield return null; }
+            while (elapsed < fadeDuration) 
+            { 
+                elapsed += Time.deltaTime; 
+                c.a = Mathf.Clamp01(elapsed / fadeDuration); 
+                fadeImage.color = c; 
+                yield return null; 
+            }
         }
+
         if (IsServer) NetworkManager.Singleton.SceneManager.LoadScene("GamePlayFloor3", LoadSceneMode.Single);
     }
 
@@ -251,7 +292,7 @@ public class Floor2Manager : NetworkBehaviour
     IEnumerator TransitionToRestartSequence()
     {
         isTransitioning = true;
-        Time.timeScale = 0f; // SỬA Ở ĐÂY: Khóa chặt thời gian ngay lập tức để quái vật không nhúc nhích được
+        Time.timeScale = 0f; // Khóa chặt thời gian ngay lập tức để quái vật không nhúc nhích được
         
         if (fadeImage != null)
         {
@@ -266,7 +307,7 @@ public class Floor2Manager : NetworkBehaviour
     IEnumerator TransitionToMenuSequence(string sceneName)
     {
         isTransitioning = true;
-        Time.timeScale = 0f; // SỬA Ở ĐÂY: Khóa chặt thời gian
+        Time.timeScale = 0f; // Khóa chặt thời gian
 
         if (fadeImage != null)
         {
