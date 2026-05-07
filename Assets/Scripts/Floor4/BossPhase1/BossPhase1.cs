@@ -206,6 +206,11 @@ public class BossPhase1 : NetworkBehaviour, IDamagable
 
     private TaskStatus MoveTowardPlayerBehavior()
     {
+        if (_targetedPlayer == null)
+        {
+            return TaskStatus.Failure;
+        }
+
         Vector3 targetPosition = Vector2.MoveTowards(
             _bossTransform.position,
             _targetedPlayer.transform.position,
@@ -239,11 +244,11 @@ public class BossPhase1 : NetworkBehaviour, IDamagable
                 _atkHitBox.transform.localPosition = new Vector3(-Mathf.Abs(atkHitBoxX), atkHitBoxY);
                 _checkHitable.transform.localPosition = new Vector3(-Mathf.Abs(checkHitableX), checkHitableY);
             }
-        }
 
-        if (IsSpawned)
-        {
-            FlipBossClientRpc(offsetX);
+            if (IsSpawned)
+            {
+                FlipBossClientRpc(offsetX);
+            }
         }
 
         if (Vector2.Distance(_bossTransform.position, _targetedPlayer.transform.position) <= _hitDistance)

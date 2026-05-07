@@ -1,13 +1,15 @@
 using System;
+using DG.Tweening;
 using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
-public class WinPopupManager : MonoBehaviour
+public class WinPopupManager : NetworkBehaviour
 {
     [SerializeField] private RectTransform _popup;
     [SerializeField] private BossPhase1 _bossPhase2;
+    [SerializeField] private float _bossPhase2DeathDuration;
     [SerializeField] private Button _btnBackToMenu;
 
     private void Start()
@@ -18,12 +20,18 @@ public class WinPopupManager : MonoBehaviour
 
     private void OnBtnBackToMenuClicked()
     {
-        NetworkManager.Singleton.Shutdown();
-        SceneManager.LoadScene("MenuScene");
+        NetworkManager.Shutdown();
+        Time.timeScale = 1;
     }
 
     private void OnBossPhase2Death()
     {
-        _popup.gameObject.SetActive(true);
+        DOTween.Sequence()
+            .AppendInterval(_bossPhase2DeathDuration)
+            .OnComplete(() =>
+            {
+                _popup.gameObject.SetActive(true);
+                Time.timeScale = 0;
+            });
     }
 }

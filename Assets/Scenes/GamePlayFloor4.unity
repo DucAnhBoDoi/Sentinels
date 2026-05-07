@@ -299,6 +299,7 @@ GameObject:
   - component: {fileID: 136549200}
   - component: {fileID: 136549199}
   - component: {fileID: 136549198}
+  - component: {fileID: 136549201}
   m_Layer: 7
   m_Name: Gate
   m_TagString: Untagged
@@ -4141,6 +4142,31 @@ Tilemap:
     e31: 0
     e32: 0
     e33: 1
+--- !u!114 &136549201
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 136549196}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.Netcode.Runtime::Unity.Netcode.NetworkObject
+  GlobalObjectIdHash: 3170951646
+  InScenePlacedSourceGlobalObjectIdHash: 0
+  DeferredDespawnTick: 0
+  Ownership: 1
+  AlwaysReplicateAsRoot: 0
+  SynchronizeTransform: 1
+  ActiveSceneSynchronization: 0
+  SceneMigrationSynchronization: 0
+  SpawnWithObservers: 1
+  DontDestroyWithOwner: 0
+  AutoObjectParentSync: 1
+  SyncOwnerTransformWhenParented: 1
+  AllowOwnerToParent: 0
 --- !u!1 &143430593
 GameObject:
   m_ObjectHideFlags: 0
@@ -102538,10 +102564,6 @@ PrefabInstance:
       propertyPath: m_IsActive
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 6668333041797721317, guid: a5cc1c8b543582042a872634b80a8451, type: 3}
-      propertyPath: m_IsActive
-      value: 0
-      objectReference: {fileID: 0}
     - target: {fileID: 6768521983317457098, guid: a5cc1c8b543582042a872634b80a8451, type: 3}
       propertyPath: m_AnchorMax.y
       value: 0
@@ -102560,23 +102582,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7000227155509413365, guid: a5cc1c8b543582042a872634b80a8451, type: 3}
       propertyPath: m_text
-      value: 'The power system is down. Restore the circuits to advance to the next
-        floor.
+      value: 'This is your final destination. Defeat the Sentinels and save humanity
 
 
-        <b>WASD</b>: Move  |  <b>Mouse Left</b>: Attack  |  <b>Space</b>:
-        Roll
-
-
-        <b><color=#FFD700>Player 1:</color></b> Press <b>[F]</b> to
-        use the flashlight and reveal hidden circuits.
-
-        <b><color=#FFA500>Player
-        2:</color></b> Press <b>[E]</b> to repair the circuits and defeat the <b>Skeletons</b>.
+        <b>WASD</b>:
+        Move  |  <b>Mouse Left</b>: Attack  |  <b>Space</b>: Roll
 
 
         <i>Work
-        closely together. Light is your only chance of survival!</i>'
+        together to defeat the bosses</i>'
       objectReference: {fileID: 0}
     - target: {fileID: 7000227155509413365, guid: a5cc1c8b543582042a872634b80a8451, type: 3}
       propertyPath: m_sharedMaterial
@@ -102608,11 +102622,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7711122386710702378, guid: a5cc1c8b543582042a872634b80a8451, type: 3}
       propertyPath: m_AnchorMax.y
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7711122386710702378, guid: a5cc1c8b543582042a872634b80a8451, type: 3}
       propertyPath: m_AnchorMin.y
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7711122386710702378, guid: a5cc1c8b543582042a872634b80a8451, type: 3}
       propertyPath: m_AnchoredPosition.x
@@ -102620,7 +102634,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7711122386710702378, guid: a5cc1c8b543582042a872634b80a8451, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: -303.3136
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7804720771912441833, guid: a5cc1c8b543582042a872634b80a8451, type: 3}
       propertyPath: m_sharedMaterial
@@ -102648,11 +102662,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8149811093272142265, guid: a5cc1c8b543582042a872634b80a8451, type: 3}
       propertyPath: m_AnchorMax.y
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8149811093272142265, guid: a5cc1c8b543582042a872634b80a8451, type: 3}
       propertyPath: m_AnchorMin.y
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8149811093272142265, guid: a5cc1c8b543582042a872634b80a8451, type: 3}
       propertyPath: m_AnchoredPosition.x
@@ -102672,11 +102686,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 9213734937109196856, guid: a5cc1c8b543582042a872634b80a8451, type: 3}
       propertyPath: m_AnchorMax.y
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 9213734937109196856, guid: a5cc1c8b543582042a872634b80a8451, type: 3}
       propertyPath: m_AnchorMin.y
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 9213734937109196856, guid: a5cc1c8b543582042a872634b80a8451, type: 3}
       propertyPath: m_AnchoredPosition.x
@@ -103021,6 +103035,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2000607111}
   - component: {fileID: 2000607112}
+  - component: {fileID: 2000607113}
   m_Layer: 0
   m_Name: WinPopupManager
   m_TagString: Untagged
@@ -103055,9 +103070,36 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: afb33c911681eaa43babf4a11d6237b2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Game::WinPopupManager
+  ShowTopMostFoldoutHeaderGroup: 1
   _popup: {fileID: 731646537}
   _bossPhase2: {fileID: 2078135443}
+  _bossPhase2DeathDuration: 3
   _btnBackToMenu: {fileID: 1982505765}
+--- !u!114 &2000607113
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2000607110}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.Netcode.Runtime::Unity.Netcode.NetworkObject
+  GlobalObjectIdHash: 1422088020
+  InScenePlacedSourceGlobalObjectIdHash: 0
+  DeferredDespawnTick: 0
+  Ownership: 1
+  AlwaysReplicateAsRoot: 0
+  SynchronizeTransform: 1
+  ActiveSceneSynchronization: 0
+  SceneMigrationSynchronization: 0
+  SpawnWithObservers: 1
+  DontDestroyWithOwner: 0
+  AutoObjectParentSync: 1
+  SyncOwnerTransformWhenParented: 1
+  AllowOwnerToParent: 0
 --- !u!1001 &2029910289
 PrefabInstance:
   m_ObjectHideFlags: 0

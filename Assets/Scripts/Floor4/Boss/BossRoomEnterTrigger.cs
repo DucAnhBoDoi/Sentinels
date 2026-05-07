@@ -33,18 +33,27 @@ public class BossRoomEnterTrigger : NetworkBehaviour
         // _boss.gameObject.SetActive(true);
         // Destroy(_bossAvatar);
         _bossPhase1.enabled = true;
-        if (NetworkManager && NetworkManager.IsServer)
+
+        if (NetworkManager && NetworkManager.IsClient)
         {
+            foreach (GameObject player in GameObject.FindGameObjectsWithTag("Player"))
+            {
+                if (player.TryGetComponent(out NetworkObject nObj) && nObj.IsOwner)
+                {
+                    player.transform.position = transform.position;
+                }
+            }
+
             NetworkObject.Despawn();
         }
         else
         {
-            Destroy(gameObject);
-        }
+            foreach (GameObject player in GameObject.FindGameObjectsWithTag("Player"))
+            {
+                player.transform.position = transform.position;
+            }
 
-        foreach (GameObject player in GameObject.FindGameObjectsWithTag("Player"))
-        {
-            player.transform.position = transform.position;
+            Destroy(gameObject);
         }
     }
 
@@ -54,16 +63,19 @@ public class BossRoomEnterTrigger : NetworkBehaviour
             .AppendInterval(_bossPhase1DeathDuration)
             .OnComplete(() =>
             {
-                if (!NetworkManager)
+                if (NetworkManager && NetworkManager.IsClient)
+                {
+                    if (_bossPhase1.transform.parent.TryGetComponent(out NetworkObject nObj))
+                    {
+                        nObj.Despawn();
+                    }
+                }
+                else
                 {
                     Destroy(_bossPhase1.transform.parent.gameObject);
-                    _bossPhase2.transform.parent.gameObject.SetActive(true);
                 }
-                else if (NetworkManager && NetworkManager.IsServer)
-                {
-                    _bossPhase1.transform.parent.GetComponent<NetworkObject>().Despawn();
-                    _bossPhase2.transform.parent.gameObject.SetActive(true);
-                }
+
+                _bossPhase2.transform.parent.gameObject.SetActive(true);
             });
     }
 }

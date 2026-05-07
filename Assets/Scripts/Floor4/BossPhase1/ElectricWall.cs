@@ -35,7 +35,7 @@ public class ElectricWall : NetworkBehaviour
             else
             {
                 _ps.Play();
-                if (NetworkManager.Singleton && NetworkManager.Singleton.IsClient)
+                if (NetworkManager.Singleton && NetworkManager.Singleton.IsClient && IsSpawned)
                 {
                     _anim.SetTrigger("T_ElectricWall");
                 }
