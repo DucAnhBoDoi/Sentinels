@@ -1,7 +1,7 @@
 // ============================================================
 // FILE: Assets/Scripts/Floor3/AI/QuizDataParser.cs
 // Namespace: Scripts.Floor3.AI
-// ── STEP 2 ─────────────────────────────────────────────────
+// ───────────────────────────────────────────────────
 // Parses the JSON response from the Vercel backend into
 // a List<QuizQuestion> that QuizManager can use directly.
 //

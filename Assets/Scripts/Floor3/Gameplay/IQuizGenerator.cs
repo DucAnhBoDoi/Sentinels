@@ -5,8 +5,6 @@
 // Strategy Pattern interface for quiz generation.
 //
 // WHY AN INTERFACE?
-//   Day 2 = MockQuizGenerator (instant, offline)
-//   Day 6 = LLMQuizGenerator  (async, calls Ollama)
 //   QuizManager never changes — only the generator swaps.
 //   This is the Open/Closed Principle in practice.
 //

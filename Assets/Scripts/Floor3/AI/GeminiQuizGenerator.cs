@@ -1,7 +1,7 @@
 // ============================================================
 // FILE: Assets/Scripts/Floor3/AI/GeminiQuizGenerator.cs
 // Namespace: Scripts.Floor3.AI
-// ── STEP 2 ─────────────────────────────────────────────────
+// ───────────────────────────────────────────────────
 // Implements IQuizGenerator using a PRELOADED question queue.
 //
 // KEY DESIGN DECISION — Generate Once, Not Per Checkpoint:

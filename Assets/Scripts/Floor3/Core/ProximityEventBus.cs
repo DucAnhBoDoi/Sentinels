@@ -1,7 +1,7 @@
 // ============================================================
 // FILE: Assets/Scripts/Floor3/Core/ProximityEventBus.cs
 // Namespace: Scripts.Floor3.Core
-// ── DAY 4 ──────────────────────────────────────────────────
+// ────────────────────────────────────────────────────
 // Event bus for proximity data → UI warning system.
 // ProximityDetector raises → ProximityHUDController listens.
 // Same pattern as RobotEventBus and QuizEventBus.

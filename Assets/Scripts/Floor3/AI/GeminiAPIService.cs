@@ -1,19 +1,19 @@
 // ============================================================
 // FILE: Assets/Scripts/Floor3/AI/GeminiAPIService.cs
 // Namespace: Scripts.Floor3.AI
-// ── STEP 2 ─────────────────────────────────────────────────
+// ───────────────────────────────────────────────────
 // Responsible for ONE thing: HTTP POST to the Vercel backend.
 //
 // FLOW:
 //   1. Send POST /api/quiz with { "topic": "technology" }
-//   2. Wait max 3 seconds (Unity fallback timeout)
+//   2. Wait max 15 seconds (Unity fallback timeout)
 //   3. If response OK → parse JSON → return List<QuizQuestion>
 //   4. If timeout or error → return null (caller uses Mock)
 //
-// WHY 3s TIMEOUT IN UNITY (backend already has 8s)?
+// WHY 15s TIMEOUT IN UNITY (backend already has 8s)?
 //   Backend timeout = protects Vercel from hanging.
 //   Unity timeout   = protects the PLAYER from waiting too long.
-//   If Unity fallback fires at 3s, the game starts immediately
+//   If Unity fallback fires at 15s, the game starts immediately
 //   with MockQuizGenerator questions. No player ever waits.
 //
 // ARCHITECTURE NOTE:
@@ -44,7 +44,7 @@ namespace Scripts.Floor3.AI
         [SerializeField] private string _backendUrl = "https://your-backend.vercel.app/api/quiz";
 
         [Tooltip("Seconds before Unity gives up and uses fallback.")]
-        [SerializeField] private float _timeoutSeconds = 3f;
+        [SerializeField] private float _timeoutSeconds = 15f;
 
         [Header("Debug")]
         [SerializeField] private bool _logRequests = true;
