@@ -48,6 +48,9 @@ public class Floor2Manager : NetworkBehaviour
     
     // BIẾN LƯU TRỮ NHẠC NỀN
     private AudioSource bgmSource;
+    
+    // THÊM BIẾN NÀY ĐỂ NHỚ ÂM LƯỢNG GỐC TRƯỚC KHI FADE-OUT
+    private float initialBgmVolume = -1f;
 
     void Awake() { if (Instance == null) Instance = this; }
 
@@ -130,8 +133,14 @@ public class Floor2Manager : NetworkBehaviour
 
                 if (bgmSource != null)
                 {
-                    // Lấy tỷ lệ thời gian còn lại chia cho 5 (từ 1.0 giảm dần về 0.0)
-                    bgmSource.volume = timeRemaining.Value / 5f;
+                    // Ghi nhớ âm lượng hiện tại (vd: 0.135) đúng một lần duy nhất lúc bắt đầu 5s cuối
+                    if (initialBgmVolume < 0f)
+                    {
+                        initialBgmVolume = bgmSource.volume;
+                    }
+
+                    // Lấy âm lượng gốc nhân với tỷ lệ thời gian để nhỏ dần đều
+                    bgmSource.volume = initialBgmVolume * (timeRemaining.Value / 5f);
                 }
             }
         }
