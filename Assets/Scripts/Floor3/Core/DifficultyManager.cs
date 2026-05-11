@@ -1,7 +1,7 @@
 // ============================================================
 // FILE: Assets/Scripts/Floor3/Core/DifficultyManager.cs
 // Namespace: Scripts.Floor3.Core
-// ── DAY 4 ──────────────────────────────────────────────────
+// ────────────────────────────────────────────────────
 // Central authority for all difficulty decisions in Floor3.
 //
 // WHAT IT TRACKS:

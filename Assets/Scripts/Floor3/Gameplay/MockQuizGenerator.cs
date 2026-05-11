@@ -7,7 +7,6 @@
 //
 // WHY NOT ScriptableObject for the question bank?
 //   These mock questions are TEMPORARY scaffolding.
-//   They will be replaced entirely by LLM on Day 6.
 //   Putting temp data in ScriptableObjects clutters the project.
 //   Keep it here until the real generator exists.
 //

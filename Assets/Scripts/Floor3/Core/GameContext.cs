@@ -1,12 +1,11 @@
 // ============================================================
 // FILE: Assets/Scripts/Floor3/Core/GameContext.cs
 // Namespace: Scripts.Floor3.Core
-// ── DAY 5 ──────────────────────────────────────────────────
+// ────────────────────────────────────────────────────
 // Runtime snapshot of everything happening in Floor 3.
 // Used by:
 //   - Floor3Brain: update values on events
 //   - DifficultyManager: read context to tune difficulty
-//   - Day 6 LLMQuizGenerator: build AI prompt from context
 //   - GameOverController: display final stats
 //
 // PATTERN: Simple data container + events.

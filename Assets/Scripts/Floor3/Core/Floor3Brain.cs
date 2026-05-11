@@ -1,9 +1,9 @@
 // ============================================================
 // FILE: Assets/Scripts/Floor3/Core/Floor3Brain.cs
 // Namespace: Scripts.Floor3.Core
-// ── UPDATED DAY 5 ──────────────────────────────────────────
+// ────────────────────────────────────────────
 // Changes:
-//   - GameContext fully wired in (all DAY 5 hooks filled)
+//   - GameContext fully wired into track all relevant state:
 //   - OnCorrectAnswer / OnWrongAnswer update GameContext
 //   - HandleRobotDied → GameContext.TriggerGameOver()
 //   - HandleEscortComplete → GameContext.TriggerLevelComplete()

@@ -1,7 +1,7 @@
 // ============================================================
 // FILE: Assets/Scripts/Floor3/UI/GameOverController.cs
 // Namespace: Scripts.Floor3.UI
-// ── DAY 5 ──────────────────────────────────────────────────
+// ────────────────────────────────────────────────────
 // Listens to GameContext events and shows Win / Lose screens.
 // Also displays final stats (time, wrong answers, accuracy).
 //

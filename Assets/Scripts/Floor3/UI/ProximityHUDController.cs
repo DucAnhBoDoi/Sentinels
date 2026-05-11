@@ -1,7 +1,7 @@
 // ============================================================
 // FILE: Assets/Scripts/Floor3/UI/ProximityHUDController.cs
 // Namespace: Scripts.Floor3.UI
-// ── DAY 5 ──────────────────────────────────────────────────
+// ────────────────────────────────────────────────────
 // Shows visual warnings when players are too far from robot.
 //
 // UI STRUCTURE:
