@@ -34,8 +34,8 @@ public class BossPhase1 : NetworkBehaviour, IDamagable
     [SerializeField] private Transform _teleportPool;
     [SerializeField] private BehaviorTree _tree;
 
-    private GameObject[] _players;
-    private GameObject _targetedPlayer;
+    private static GameObject[] _players;
+    private static GameObject _targetedPlayer;
     private bool _isDead;
     private bool _isHurt;
     private float _hurtTimer;
@@ -232,7 +232,7 @@ public class BossPhase1 : NetworkBehaviour, IDamagable
         float checkHitableX = _checkHitable.transform.localPosition.x;
         float checkHitableY = _checkHitable.transform.localPosition.y;
 
-        if (NetworkManager && NetworkManager.IsServer || !NetworkManager)
+        if (NetworkManager && NetworkManager.IsServer)
         {
             if (offsetX > 0)
             {
@@ -256,6 +256,7 @@ public class BossPhase1 : NetworkBehaviour, IDamagable
             return TaskStatus.Success;
         }
 
+        Debug.Log(_targetedPlayer.transform.position);
         _bossTransform.position = targetPosition;
 
         return TaskStatus.Continue;
@@ -266,10 +267,12 @@ public class BossPhase1 : NetworkBehaviour, IDamagable
     {
         if (offsetX > 0)
         {
+            Debug.Log("flip");
             _sr.flipX = !_spriteFacingRight;
         }
         else if (offsetX < 0)
         {
+            Debug.Log("no flip");
             _sr.flipX = _spriteFacingRight;
         }
     }

@@ -36,14 +36,7 @@ public class BossRoomEnterTrigger : NetworkBehaviour
 
         if (NetworkManager && NetworkManager.IsClient)
         {
-            foreach (GameObject player in GameObject.FindGameObjectsWithTag("Player"))
-            {
-                if (player.TryGetComponent(out NetworkObject nObj) && nObj.IsOwner)
-                {
-                    player.transform.position = transform.position;
-                }
-            }
-
+            TeleportPlayersClientRpc();
             NetworkObject.Despawn();
         }
         else
@@ -63,19 +56,24 @@ public class BossRoomEnterTrigger : NetworkBehaviour
             .AppendInterval(_bossPhase1DeathDuration)
             .OnComplete(() =>
             {
-                if (NetworkManager && NetworkManager.IsClient)
-                {
-                    if (_bossPhase1.transform.parent.TryGetComponent(out NetworkObject nObj))
-                    {
-                        nObj.Despawn();
-                    }
-                }
-                else
-                {
-                    Destroy(_bossPhase1.transform.parent.gameObject);
-                }
-
+                _bossPhase1.transform.parent.gameObject.SetActive(false);
                 _bossPhase2.transform.parent.gameObject.SetActive(true);
+                if (_bossPhase2.transform.parent.TryGetComponent(out NetworkObject nObj))
+                {
+                    nObj.Spawn(true);
+                    _bossPhase2.NetworkObject.Spawn(true);
+                    _bossPhase2.NetworkObject.TrySetParent(nObj);
+                }
             });
+        _bossPhase1.OnDeath = null;
+    }
+
+    [ClientRpc]
+    private void TeleportPlayersClientRpc()
+    {
+        foreach (GameObject player in GameObject.FindGameObjectsWithTag("Player"))
+        {
+            player.transform.position = transform.position;
+        }
     }
 }

@@ -102,9 +102,9 @@ public class GameOverManager : NetworkBehaviour
         }
 
         // 2. NHẠC ĐÃ TẮT -> CHẠY CODE RESTART GỐC CỦA BẠN (CHỈ HOST ĐƯỢC CHẠY LỆNH NÀY)
+        Time.timeScale = 1f;
         if (IsServer)
         {
-            Time.timeScale = 1f;
             if (Floor1Manager.Instance != null) Floor1Manager.Instance.RestartLevelWithFade();
             else if (Floor2Manager.Instance != null) Floor2Manager.Instance.RestartLevelWithFade();
             else if (Floor3Manager.Instance != null) Floor3Manager.Instance.RestartLevelWithFade();
@@ -148,9 +148,9 @@ public class GameOverManager : NetworkBehaviour
         }
 
         // 2. CHẠY CODE QUIT GỐC CỦA BẠN (CHỈ HOST ĐƯỢC GỌI)
+        Time.timeScale = 1f;
         if (IsServer)
         {
-            Time.timeScale = 1f;
             if (Floor1Manager.Instance != null) Floor1Manager.Instance.QuitToMenuWithFade("MenuScene");
             else if (Floor2Manager.Instance != null) Floor2Manager.Instance.QuitToMenuWithFade("MenuScene");
             else if (Floor3Manager.Instance != null) Floor3Manager.Instance.QuitToMenuWithFade("MenuScene");

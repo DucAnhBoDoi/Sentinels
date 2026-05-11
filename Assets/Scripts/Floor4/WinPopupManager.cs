@@ -18,6 +18,13 @@ public class WinPopupManager : NetworkBehaviour
         _btnBackToMenu.onClick.AddListener(OnBtnBackToMenuClicked);
     }
 
+    public override void OnDestroy()
+    {
+        base.OnDestroy();
+        _bossPhase2.OnDeath = null;
+        _btnBackToMenu.onClick.RemoveAllListeners();
+    }
+
     private void OnBtnBackToMenuClicked()
     {
         NetworkManager.Shutdown();
@@ -28,10 +35,13 @@ public class WinPopupManager : NetworkBehaviour
     {
         DOTween.Sequence()
             .AppendInterval(_bossPhase2DeathDuration)
-            .OnComplete(() =>
-            {
-                _popup.gameObject.SetActive(true);
-                Time.timeScale = 0;
-            });
+            .OnComplete(ShowPopupClientRpc);
+    }
+
+    [ClientRpc]
+    private void ShowPopupClientRpc()
+    {
+        _popup.gameObject.SetActive(true);
+        Time.timeScale = 0;
     }
 }
