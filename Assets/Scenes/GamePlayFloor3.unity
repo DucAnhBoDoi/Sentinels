@@ -2485,7 +2485,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3eb80e4cf5fd6074f853443756520621, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Game::Scripts.Floor3.AI.GeminiAPIService
-  _backendUrl: https://floor3-quiz-backend-mhoang-dev-sows-projects-4b881ae1.vercel.app/api/quiz
+  _backendUrl: https://floor3-quiz-backend-sows-projects-4b881ae1.vercel.app/api/quiz
   _timeoutSeconds: 10
   _logRequests: 1
 --- !u!114 &339713292
@@ -140106,7 +140106,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Both players must agree on a topic
+  m_text: Waiting for the Host to choose a topic...
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: cdd6ff1867aa98e48b631efce41a66a2, type: 2}
   m_sharedMaterial: {fileID: -6155794773443140859, guid: cdd6ff1867aa98e48b631efce41a66a2, type: 2}
