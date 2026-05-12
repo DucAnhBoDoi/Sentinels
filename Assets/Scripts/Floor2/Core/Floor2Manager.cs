@@ -33,6 +33,18 @@ public class Floor2Manager : NetworkBehaviour
     public Transform coreTransform;
     public Vector3 shardOffset = new Vector3(0, -3f, 0);
 
+    // --- THÊM ĐẠO CỤ CUTSCENE VÀO ĐÂY ---
+    [Header("Cutscene Phim Trường")]
+    public UnityEngine.Playables.PlayableDirector winDirector; 
+    public GameObject fakeKeyVisual; 
+    public GameObject waypointIcon; 
+    
+    [Tooltip("Thời gian chờ bảng Quest Complete tắt đi (giây)")]
+    public float delayBeforeCutscene = 3f; // CHỜ 3 GIÂY ĐỂ BẢNG COMPLETE CHẠY XONG
+    
+    [HideInInspector] 
+    public bool isCutscenePlaying = false; // BIẾN NÀY ĐỂ BẠN KHÓA DI CHUYỂN BÊN SCRIPT PLAYER
+
     [Header("Tham chiếu Chuyển Màn")]
     public Transform elevatorDoor;
     public float interactDistance = 3f;
@@ -70,6 +82,10 @@ public class Floor2Manager : NetworkBehaviour
         Time.timeScale = 1f;
 
         if (timeText != null) timeText.gameObject.SetActive(false);
+
+        // ĐẢM BẢO ĐẠO CỤ CUTSCENE BỊ TẮT LÚC MỚI VÀO GAME
+        if (fakeKeyVisual != null) fakeKeyVisual.SetActive(false);
+        if (waypointIcon != null) waypointIcon.SetActive(false);
 
         if (fadeImage != null)
         {
@@ -236,7 +252,32 @@ public class Floor2Manager : NetworkBehaviour
             Destroy(enemy, 1.5f);
         }
 
-        // CHỈ SERVER ĐƯỢC ĐẺ VẬT PHẨM (SHARD) MẠNG
+        // --- GỌI COROUTINE CHẠY CUTSCENE RỒI MỚI ĐẺ ITEM THẬT ---
+        StartCoroutine(PlayWinCutsceneRoutine());
+    }
+
+    private IEnumerator PlayWinCutsceneRoutine()
+    {
+        // 0. CHỜ BẢNG QUEST COMPLETE HIỆN XONG (3 GIÂY) MỚI CHẠY PHIM
+        yield return new WaitForSeconds(delayBeforeCutscene);
+
+        // --- BẮT ĐẦU CHIẾU PHIM: KHÓA DI CHUYỂN NGƯỜI CHƠI ---
+        isCutscenePlaying = true;
+        if (playerA != null) playerA.GetComponent<Rigidbody2D>().linearVelocity = Vector2.zero;
+        if (playerB != null) playerB.GetComponent<Rigidbody2D>().linearVelocity = Vector2.zero;
+
+        // 1. Chạy phim (Cả Server và Client đều chạy)
+        if (winDirector != null)
+        {
+            winDirector.Play();
+            // Đợi phim chạy xong
+            yield return new WaitForSeconds((float)winDirector.duration); 
+        }
+
+        // 2. Phim kết thúc: Giấu cục Key diễn viên đóng thế đi
+        if (fakeKeyVisual != null) fakeKeyVisual.SetActive(false);
+
+        // 3. CHỈ SERVER ĐƯỢC ĐẺ VẬT PHẨM (SHARD) MẠNG ĐỂ ĐỒNG BỘ
         if (IsServer && shardPrefab != null && coreTransform != null && !hasDroppedShard)
         {
             hasDroppedShard = true;
@@ -244,6 +285,12 @@ public class Floor2Manager : NetworkBehaviour
             GameObject spawnedShard = Instantiate(shardPrefab, spawnPosition, Quaternion.identity);
             spawnedShard.GetComponent<NetworkObject>().Spawn(); // Khai sinh mạng cho cục Shard
         }
+
+        // 4. HIỆN WAYPOINTS LÊN SAU KHI PHIM ĐÃ CHIẾU XONG XUÔI VÀ ITEM ĐÃ ĐẺ RA
+        if (waypointIcon != null) waypointIcon.SetActive(true);
+
+        // --- PHIM XONG, MỞ KHÓA DI CHUYỂN CHO NGƯỜI CHƠI ĐI NHẶT ĐỒ ---
+        isCutscenePlaying = false;
     }
 
     public void LevelComplete()
@@ -251,7 +298,7 @@ public class Floor2Manager : NetworkBehaviour
         if (IsServer) isLevelComplete.Value = true;
     }
 
-    // --- CÁC HÀM HIỆU ỨNG VÀ CHUYỂN MÀN ---
+    // --- CÁC HÀM HIỆU ỨNG VÀ CHUYỂN MÀN (GIỮ NGUYÊN GỐC CỦA BẠN) ---
     [ClientRpc]
     private void StartNextFloorSequenceClientRpc() { StartCoroutine(TransitionToNextFloor()); }
 
@@ -289,7 +336,7 @@ public class Floor2Manager : NetworkBehaviour
         fadeImage.gameObject.SetActive(false);
     }
 
-    // HỆ THỐNG RESTART & QUIT Y HỆT TẦNG 1
+    // HỆ THỐNG RESTART & QUIT Y HỆT GỐC CỦA BẠN
     public void RestartLevelWithFade() { RestartLevelServerRpc(); }
     [Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Everyone)] private void RestartLevelServerRpc() { RestartLevelClientRpc(); }
     [ClientRpc] private void RestartLevelClientRpc() { StartCoroutine(TransitionToRestartSequence()); }
@@ -325,7 +372,7 @@ public class Floor2Manager : NetworkBehaviour
         }
         
         Time.timeScale = 1f; 
-        QuestPopupManager.ResetQuestState();
+        QuestPopupManager.ResetQuestState(); // Đây là hàm gốc có sẵn của bạn
         if (NetworkManager.Singleton != null) NetworkManager.Singleton.Shutdown();
         SceneManager.LoadScene(sceneName);
     }
