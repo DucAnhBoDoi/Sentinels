@@ -45,7 +45,17 @@ public class QuestUIManager : NetworkBehaviour
         // 3. Tắt Popup đi
         if (completePopup != null) completePopup.SetActive(false);
 
-        // 4. Bật Dấu chấm than lên chỉ đường
-        if (waypointIcon != null) waypointIcon.SetActive(true);
+        // 4. BẬT DẤU CHẤM THAN LÊN CHỈ ĐƯỜNG
+        if (waypointIcon != null) 
+        {
+            if (Floor2Manager.Instance != null)
+            {
+                
+            }
+            else 
+            {
+                waypointIcon.SetActive(true);
+            }
+        }
     }
 }

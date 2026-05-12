@@ -41,6 +41,9 @@ public class PlayerCombat : NetworkBehaviour
     {
         if (!IsOwner) return;
 
+        // --- LOGIC MỚI: KHÓA CHÉM KHI ĐANG XEM CUTSCENE ---
+        if (Floor2Manager.Instance != null && Floor2Manager.Instance.isCutscenePlaying) return;
+
         if (!QuestPopupManager.isGameStarted) return;
         if (Input.GetKeyDown(attackKey)) StartCoroutine(AttackWithDelay());
     }
