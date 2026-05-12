@@ -25,10 +25,17 @@ public class AudioSettingsApplier : MonoBehaviour
     public float loopEndTime = 60f; 
 
     private AudioSource _audioSource;
+    
+    // BIẾN THÊM VÀO ĐỂ GHI NHỚ MỨC ÂM LƯỢNG BẠN SET NGOÀI INSPECTOR
+    private float _targetVolume; 
 
     void Start()
     {
         _audioSource = GetComponent<AudioSource>();
+        
+        // Ghi nhớ mức volume bạn chỉnh ở ngoài (VD: 0.135) trước khi nó bị ép về 0 để Fade-in
+        _targetVolume = _audioSource.volume; 
+        
         ApplyMixerSettings();
 
         // NẾU BẬT TỰ ĐỘNG PHÁT (NHƯ TẦNG 1) THÌ CHẠY LUÔN
@@ -69,10 +76,13 @@ public class AudioSettingsApplier : MonoBehaviour
         while (currentTime < fadeInDuration)
         {
             currentTime += Time.deltaTime;
-            _audioSource.volume = Mathf.Lerp(0f, 1f, currentTime / fadeInDuration);
+            // SỬA CHỖ NÀY: Fade lên đúng cái số _targetVolume (0.135) chứ không ép lên 1 nữa
+            _audioSource.volume = Mathf.Lerp(0f, _targetVolume, currentTime / fadeInDuration);
             yield return null;
         }
-        _audioSource.volume = 1f;
+        
+        // Chốt lại đúng mức âm lượng bạn muốn
+        _audioSource.volume = _targetVolume;
     }
 
     void Update()

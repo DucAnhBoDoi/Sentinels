@@ -7,6 +7,10 @@ public class MenuPopupOptionsController : MonoBehaviour
     [SerializeField]
     private MenuSceneUtils _utils;
 
+    [Header("Kéo UI PopupOptions vào đây (Chỉ dùng cho màn Gameplay)")]
+    [SerializeField]
+    private GameObject _uiPanel; 
+
     // THÊM: Ô để kéo thả file Audio Mixer vào
     [SerializeField]
     private AudioMixer _audioMixer;
@@ -62,17 +66,20 @@ public class MenuPopupOptionsController : MonoBehaviour
     // --- THÊM: CÁC HÀM XỬ LÝ TOÁN HỌC ĐỂ CHUYỂN SLIDER SANG DECIBEL ---
     private void SetMasterVolume(float value)
     {
-        _audioMixer.SetFloat("MasterVol", Mathf.Log10(Mathf.Max(value, 0.0001f)) * 20);
+        if (_audioMixer != null) 
+            _audioMixer.SetFloat("MasterVol", Mathf.Log10(Mathf.Max(value, 0.0001f)) * 20);
     }
 
     private void SetMusicVolume(float value)
     {
-        _audioMixer.SetFloat("BGMVol", Mathf.Log10(Mathf.Max(value, 0.0001f)) * 20);
+        if (_audioMixer != null) 
+            _audioMixer.SetFloat("BGMVol", Mathf.Log10(Mathf.Max(value, 0.0001f)) * 20);
     }
 
     private void SetSFXVolume(float value)
     {
-        _audioMixer.SetFloat("SFXVol", Mathf.Log10(Mathf.Max(value, 0.0001f)) * 20);
+        if (_audioMixer != null) 
+            _audioMixer.SetFloat("SFXVol", Mathf.Log10(Mathf.Max(value, 0.0001f)) * 20);
     }
 
     private void OnBtnSaveClick()
@@ -85,11 +92,26 @@ public class MenuPopupOptionsController : MonoBehaviour
 
         Debug.Log("<color=green>[Options] Đã lưu thiết lập âm thanh thành công!</color>");
 
-        _utils.HidePopup();
+        CloseOptions();
     }
 
     private void OnBtnBackClick()
     {
-        _utils.HidePopup();
+        CloseOptions();
+    }
+
+    // SỬA: Hàm này không làm thay đổi MenuScene, chỉ bổ sung logic cho Gameplay
+    private void CloseOptions()
+    {
+        if (_utils != null)
+        {
+            // Nếu đang ở Menu (có Utils) thì xài hệ thống của bạn
+            _utils.HidePopup();
+        }
+        else if (_uiPanel != null)
+        {
+            // Nếu đang ở Gameplay (có khai báo UI Panel) thì tự tắt cái UI đó
+            _uiPanel.SetActive(false);
+        }
     }
 }

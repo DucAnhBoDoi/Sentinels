@@ -1,6 +1,8 @@
 using UnityEngine;
 using TMPro;
 using Unity.Netcode;
+using UnityEngine.Tilemaps; // THÊM ĐỂ XỬ LÝ TILEMAP
+using System.Collections;   // THÊM ĐỂ DÙNG COROUTINE (IEnumerator)
 
 public class LifeCore : NetworkBehaviour
 {
@@ -8,7 +10,6 @@ public class LifeCore : NetworkBehaviour
     public float maxEnergy = 100f;
     public float chargeSpeed = 20f;
 
-    // Khởi tạo 0f để tránh cảnh báo mạng, Server sẽ tự nạp maxEnergy
     public NetworkVariable<float> energy = new NetworkVariable<float>(0f);
     public NetworkVariable<int> playersOnPlatforms = new NetworkVariable<int>(0);
 
@@ -22,23 +23,32 @@ public class LifeCore : NetworkBehaviour
     [Header("Trạng thái")]
     public bool isUnderAttack = false;
 
+    // --- HIỆU ỨNG LÕI BỊ ĐÁNH ---
+    [Header("Hiệu ứng chớp trắng")]
+    public TilemapRenderer coreTopRenderer;    // Dành cho lớp WalkBehind
+    public TilemapRenderer coreBottomRenderer; // Dành cho lớp Collision
+    public Material whiteFlashMaterial;
+    
+    private Material originalMaterialTop;
+    private Material originalMaterialBottom;
+
     public override void OnNetworkSpawn()
     {
-        // Gán bằng maxEnergy
         if (IsServer) energy.Value = maxEnergy;
 
-        // Lắng nghe sự thay đổi máu để cập nhật UI
         energy.OnValueChanged += (prev, current) => UpdateUI(current);
 
         UpdateUI(energy.Value);
+
+        // Lưu lại màu gốc của 2 lớp Tilemap khi vừa vào game
+        if (coreTopRenderer != null) originalMaterialTop = coreTopRenderer.material;
+        if (coreBottomRenderer != null) originalMaterialBottom = coreBottomRenderer.material;
     }
 
     void Update()
     {
-        // CHỈ SERVER MỚI ĐƯỢC TÍNH TOÁN SẠC/TRỪ MÁU
         if (!IsServer) return;
 
-        // Thêm chốt chặn && energy.Value > 0 để lõi nổ rồi thì không trừ máu người chơi nữa
         if (playersOnPlatforms.Value >= requiredPlayersToCharge && energy.Value < maxEnergy && energy.Value > 0)
         {
             energy.Value += chargeSpeed * Time.deltaTime;
@@ -59,7 +69,6 @@ public class LifeCore : NetworkBehaviour
         if (energy.Value <= 0)
         {
             energy.Value = 0;
-            // Báo cho mọi người game over qua Floor2Manager (Dùng chung bảng Game Over)
             if (Floor2Manager.Instance != null)
             {
                 Floor2Manager.Instance.TriggerGameOverServerRpc();
@@ -75,7 +84,7 @@ public class LifeCore : NetworkBehaviour
 
     public void SetPlayerOnPlatform(bool isOnPlatform)
     {
-        if (!IsServer) return; // Chỉ Server đếm số người
+        if (!IsServer) return; 
         if (isOnPlatform) playersOnPlatforms.Value++;
         else playersOnPlatforms.Value--;
         playersOnPlatforms.Value = Mathf.Max(0, playersOnPlatforms.Value);
@@ -84,15 +93,37 @@ public class LifeCore : NetworkBehaviour
     public void TakeDirectDamage(float amount)
     {
         if (!IsServer) return;
-
-        // SỬA Ở ĐÂY: Nếu lõi đã nổ (máu <= 0) thì chặn đứng mọi luồng sát thương tới
         if (energy.Value <= 0) return; 
 
         energy.Value -= amount;
-
-        // SỬA Ở ĐÂY: Ép máu không bao giờ được tụt xuống dưới số 0
         if (energy.Value < 0) energy.Value = 0; 
 
         isUnderAttack = true;
+
+        // Bắn tín hiệu chớp trắng cho mọi máy
+        FlashCoreClientRpc();
+    }
+    
+    // --- XỬ LÝ NHÁY TRẮNG MÀN HÌNH ---
+    [ClientRpc]
+    private void FlashCoreClientRpc()
+    {
+        if (whiteFlashMaterial != null)
+        {
+            StartCoroutine(FlashWhiteRoutine());
+        }
+    }
+
+    private IEnumerator FlashWhiteRoutine()
+    {
+        // Đổi cả 2 phần của Lõi sang màu trắng
+        if (coreTopRenderer != null) coreTopRenderer.material = whiteFlashMaterial;
+        if (coreBottomRenderer != null) coreBottomRenderer.material = whiteFlashMaterial;
+        
+        yield return new WaitForSeconds(0.1f);
+        
+        // Trả lại màu gốc
+        if (coreTopRenderer != null) coreTopRenderer.material = originalMaterialTop;
+        if (coreBottomRenderer != null) coreBottomRenderer.material = originalMaterialBottom;
     }
 }

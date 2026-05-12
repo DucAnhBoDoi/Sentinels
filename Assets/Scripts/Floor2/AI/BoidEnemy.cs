@@ -297,13 +297,22 @@ public class BoidEnemy : NetworkBehaviour, IDamagable
         if (!isDead && IsServer) rb.linearVelocity = currentVelocity;
     }
 
+    // --- ĐÃ SỬA: HƯỚNG VÙNG SÁT THƯƠNG THẲNG VÀO TÂM MỤC TIÊU ---
     public void ExecuteBoidHit()
     {
-        // Chỉ Server mới được tính sát thương đập vào Lõi
         if (target == null || isDead || !IsServer) return;
 
-        float lookDir = sr.flipX ? 1f : -1f;
-        Vector2 attackCenter = (Vector2)transform.position + new Vector2(attackOffset.x * lookDir, attackOffset.y);
+        Vector2 targetCenter = target.position;
+        Collider2D targetCol = target.GetComponent<Collider2D>();
+        if (targetCol != null) targetCenter = targetCol.bounds.center;
+
+        // Tính hướng chỉ thẳng từ quái vật tới tâm mục tiêu (Lõi)
+        Vector2 dirToTarget = (targetCenter - (Vector2)transform.position).normalized;
+        
+        // Dùng giá trị x của offset làm khoảng cách đẩy hộp sát thương ra trước mặt
+        float reachDistance = Mathf.Abs(attackOffset.x); 
+        Vector2 attackCenter = (Vector2)transform.position + (dirToTarget * reachDistance);
+
         Collider2D[] hitObjects = Physics2D.OverlapBoxAll(attackCenter, damageRangeScale, 0f);
 
         foreach (Collider2D col in hitObjects)
@@ -316,10 +325,26 @@ public class BoidEnemy : NetworkBehaviour, IDamagable
         }
     }
 
+    // --- ĐÃ SỬA ĐỂ BẠN THẤY RÕ HỘP ĐỎ HƯỚNG VÀO LÕI TRONG EDITOR ---
     void OnDrawGizmosSelected()
     {
-        float lookDir = (sr != null && sr.flipX) ? 1f : -1f;
-        Vector2 attackCenter = (Vector2)transform.position + new Vector2(attackOffset.x * lookDir, attackOffset.y);
+        Vector2 attackCenter;
+
+        if (Application.isPlaying && target != null)
+        {
+            Vector2 targetCenter = target.position;
+            Collider2D targetCol = target.GetComponent<Collider2D>();
+            if (targetCol != null) targetCenter = targetCol.bounds.center;
+
+            Vector2 dirToTarget = (targetCenter - (Vector2)transform.position).normalized;
+            attackCenter = (Vector2)transform.position + (dirToTarget * Mathf.Abs(attackOffset.x));
+        }
+        else 
+        {
+            float lookDir = (sr != null && sr.flipX) ? 1f : -1f;
+            attackCenter = (Vector2)transform.position + new Vector2(attackOffset.x * lookDir, attackOffset.y);
+        }
+
         Gizmos.color = Color.red;
         Gizmos.DrawWireCube(attackCenter, damageRangeScale);
     }
@@ -327,7 +352,6 @@ public class BoidEnemy : NetworkBehaviour, IDamagable
     void OnEnable() { if(!allBoids.Contains(this)) allBoids.Add(this); }
     void OnDisable() { allBoids.Remove(this); }
 
-    // --- ĐÃ ĐỔI CẤU TRÚC HÀM SETCOLOR ĐỂ KHÔNG BỊ LỖI QUÊN MÀU ---
     public void SetColor(Color newColor)
     {
         ApplyColor(newColor);

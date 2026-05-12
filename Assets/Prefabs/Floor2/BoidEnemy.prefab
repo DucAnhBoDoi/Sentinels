@@ -142,12 +142,12 @@ MonoBehaviour:
   speed: 3
   neighborRadius: 5
   attackDamage: 2
-  separationWeight: 1.5
-  cohesionWeight: 4
+  separationWeight: 3
+  cohesionWeight: 1.5
   alignmentWeight: 1.5
-  targetWeight: 0.5
-  separationDistance: 1.3
-  extraSeparationForce: 6
+  targetWeight: 8
+  separationDistance: 0.7
+  extraSeparationForce: 3
   maxHealth: 3
   currentHealth:
     m_InternalValue: 3
@@ -155,6 +155,7 @@ MonoBehaviour:
   knockbackForce: 5
   knockbackDuration: 0.2
   attackDistance: 1
+  targetAimOffset: {x: 0, y: 1.5}
   attackOffset: {x: 1.2, y: 0.08}
   damageRangeScale: {x: 3, y: 3}
   attackCooldown: 1.5
@@ -237,7 +238,7 @@ MonoBehaviour:
   - {fileID: 7252815116489233781, guid: 2abc7825c5c7ba245b6d7da0694cac76, type: 3}
   - {fileID: 274306847520254977, guid: 2504845a699bca744a617a6ba8d0b04f, type: 3}
   - {fileID: 6616368918902532391, guid: f5007eb7da5abad42a9f39eece965ae3, type: 3}
-  dropChance: 25
+  dropChance: 15
 --- !u!95 &7574980937321648585
 Animator:
   serializedVersion: 7
