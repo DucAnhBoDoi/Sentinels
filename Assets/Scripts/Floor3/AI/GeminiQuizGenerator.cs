@@ -53,8 +53,8 @@ namespace Scripts.Floor3.AI
         // ── State ─────────────────────────────────────────────────────────
 
         private Queue<QuizQuestion> _questionQueue = new Queue<QuizQuestion>();
-        private bool                _isReady       = false;
-        private bool                _usingFallback = false;
+        private bool _isReady = false;
+        private bool _usingFallback = false;
 
         // ── Lifecycle ────────────────────────────────────────────────────
 
@@ -76,7 +76,7 @@ namespace Scripts.Floor3.AI
         /// </summary>
         public void FetchAndPreload(string topic, Action onReady)
         {
-            _isReady       = false;
+            _isReady = false;
             _usingFallback = false;
             _questionQueue.Clear();
 
@@ -112,7 +112,7 @@ namespace Scripts.Floor3.AI
         public void RequestQuestion(
             int waypointIndex,
             Action<QuizQuestion> onComplete,
-            Action<string>       onError)
+            Action<string> onError)
         {
             if (!_isReady)
             {
@@ -124,10 +124,11 @@ namespace Scripts.Floor3.AI
             if (_questionQueue.Count == 0)
             {
                 Log("Queue exhausted — refilling from fallback.");
-                LoadMockFallback("");
+                LoadMockFallback("technology");
             }
 
             var question = _questionQueue.Dequeue();
+
             Log($"Serving question {waypointIndex + 1}: \"{question.QuestionText}\"" +
                 (_usingFallback ? " [FALLBACK]" : " [GEMINI]"));
 
@@ -146,9 +147,12 @@ namespace Scripts.Floor3.AI
                 return;
             }
 
+            _mockFallback.SetTopic(topic);
+
             // Pull questions from Mock into our queue
             // We request 5 times to fill the queue
             int loaded = 0;
+
             for (int i = 0; i < 5; i++)
             {
                 _mockFallback.RequestQuestion(
@@ -167,13 +171,14 @@ namespace Scripts.Floor3.AI
 
         private void Log(string msg)
         {
-            if (_logFlow) Debug.Log($"[GeminiQuizGenerator] {msg}");
+            if (_logFlow)
+                Debug.Log($"[GeminiQuizGenerator] {msg}");
         }
 
         // ── Status Getters (for UI / debugging) ──────────────────────────
 
-        public bool   IsReady        => _isReady;
-        public bool   IsUsingFallback => _usingFallback;
-        public int    QueueCount     => _questionQueue.Count;
+        public bool IsReady => _isReady;
+        public bool IsUsingFallback => _usingFallback;
+        public int QueueCount => _questionQueue.Count;
     }
 }
