@@ -119,7 +119,7 @@ public class BossPhase1 : NetworkBehaviour, IDamagable
 
     private void Update()
     {
-        if (NetworkManager && !NetworkManager.IsServer)
+        if (NetworkManager && !IsServer)
         {
             return;
         }

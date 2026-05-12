@@ -1,4 +1,3 @@
-using System;
 using DG.Tweening;
 using Unity.Netcode;
 using UnityEngine;
@@ -19,7 +18,6 @@ public class BossRoomEnterTrigger : NetworkBehaviour
     {
         _bossPhase1.enabled = false;
         _bossPhase1.OnDeath += OnBossPhase1Death;
-        _bossPhase2.transform.parent.gameObject.SetActive(false);
     }
 
     private void OnTriggerEnter2D(Collider2D other)
@@ -37,7 +35,6 @@ public class BossRoomEnterTrigger : NetworkBehaviour
         if (NetworkManager && NetworkManager.IsClient)
         {
             TeleportPlayersClientRpc();
-            NetworkObject.Despawn();
         }
         else
         {
@@ -45,9 +42,9 @@ public class BossRoomEnterTrigger : NetworkBehaviour
             {
                 player.transform.position = transform.position;
             }
-
-            Destroy(gameObject);
         }
+
+        gameObject.SetActive(false);
     }
 
     private void OnBossPhase1Death()
@@ -57,13 +54,14 @@ public class BossRoomEnterTrigger : NetworkBehaviour
             .OnComplete(() =>
             {
                 _bossPhase1.transform.parent.gameObject.SetActive(false);
-                _bossPhase2.transform.parent.gameObject.SetActive(true);
-                if (_bossPhase2.transform.parent.TryGetComponent(out NetworkObject nObj))
+                if (NetworkManager.IsServer)
                 {
-                    nObj.Spawn(true);
-                    _bossPhase2.NetworkObject.Spawn(true);
-                    _bossPhase2.NetworkObject.TrySetParent(nObj);
+                    _bossPhase2.transform.parent.position = Vector2.zero;
+                    _bossPhase2.enabled = true;
                 }
+                // _bossPhase2Root.Spawn(true);
+                // _bossPhase2.NetworkObject.Spawn(true);
+                // _bossPhase2.NetworkObject.TrySetParent(_bossPhase2Root);
             });
         _bossPhase1.OnDeath = null;
     }
