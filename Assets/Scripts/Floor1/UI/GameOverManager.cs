@@ -18,6 +18,9 @@ public class GameOverManager : NetworkBehaviour
     public AudioSource gameOverAudio;
     public float fadeOutTime = 1.5f; 
     private bool isRestarting = false; // Khóa chống bấm đúp nút
+    
+    // --- THÊM BIẾN NÀY ĐỂ NHỚ ÂM LƯỢNG Ở INSPECTOR ---
+    private float initialGameOverVolume = 1f;
 
     void Awake() { if (Instance == null) Instance = this; }
 
@@ -31,6 +34,9 @@ public class GameOverManager : NetworkBehaviour
         if (gameOverPanel != null) gameOverPanel.SetActive(false);
         if (restartButton != null) restartButton.onClick.AddListener(RestartGame);
         if (quitButton != null) quitButton.onClick.AddListener(QuitToMenu);
+        
+        // Bắt đầu game, tự động ghi nhớ âm lượng bạn đã chỉnh (ví dụ: 0.135)
+        if (gameOverAudio != null) initialGameOverVolume = gameOverAudio.volume;
     }
 
     public void ShowGameOver()
@@ -60,7 +66,8 @@ public class GameOverManager : NetworkBehaviour
 
         if (gameOverAudio != null)
         {
-            gameOverAudio.volume = 1f; // Trả về max volume
+            // --- SỬA Ở ĐÂY: Trả về đúng mức âm lượng bạn đã chỉnh thay vì 1f ---
+            gameOverAudio.volume = initialGameOverVolume; 
             gameOverAudio.time = 1f;
             gameOverAudio.Play();
         }
