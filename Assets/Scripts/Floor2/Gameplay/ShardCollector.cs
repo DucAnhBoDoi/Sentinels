@@ -51,9 +51,14 @@ public class ShardCollector : NetworkBehaviour
         if (isCollected) return;
         isCollected = true;
 
+        // --- SỬA Ở ĐÂY: CHO PHÉP CỤC KEY TỰ NHẬN DIỆN ĐANG Ở TẦNG NÀO ---
         if (Floor2Manager.Instance != null)
         {
             Floor2Manager.Instance.LevelComplete();
+        }
+        else if (Floor3Manager.Instance != null) 
+        {
+            Floor3Manager.Instance.LevelComplete(); 
         }
 
         NetworkObject.Despawn(true); // Xóa mảnh vỡ trên toàn mạng

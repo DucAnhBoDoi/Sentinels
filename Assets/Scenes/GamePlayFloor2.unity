@@ -103409,7 +103409,7 @@ PrefabInstance:
       value: 'The system is failing! Defend the <b>Core of Life</b> to spawn the
         <b>Fragments of Compassion</b>.
 
-        
+
 
         <b><color=#FFD700>Combat:</color></b>
         Eliminate all incoming threats.
@@ -103417,7 +103417,7 @@ PrefabInstance:
         <b><color=#FFA500>Charging:</color></b>
         Sacrifice your HP in the charging area to keep the Core alive.
 
-        
+
 
         <i>Survive
         the countdown and press <b>[F]</b> to pick up items!</i>'

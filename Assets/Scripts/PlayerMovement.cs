@@ -50,18 +50,28 @@ public class PlayerMovement : NetworkBehaviour
     void Update()
     {
         if (NetworkManager && NetworkManager.IsClient && !IsOwner) return;
-        
+
         // --- LOGIC MỚI: KHÓA DI CHUYỂN & CHỐNG TRƯỢT KHI XEM CUTSCENE ---
         if (Floor2Manager.Instance != null && Floor2Manager.Instance.isCutscenePlaying)
         {
             movement = Vector2.zero; // Xóa sạch lực di chuyển cuối cùng
             rb.linearVelocity = Vector2.zero; // Thắng gấp nhân vật lại
-            
+
             // Tắt hiệu ứng chân chạy để nhân vật đứng im
             if (anim) anim.SetBool("isRunning", false);
             if (NetworkManager && NetworkManager.IsClient && netAnim) netAnim.Animator.SetBool("isRunning", false);
-            
+
             return; // Dừng ngay, không đọc phím nữa
+        }
+
+        // --- THÊM DÒNG NÀY ĐỂ KHÓA DI CHUYỂN KHI XEM CUTSCENE TẦNG 3 ---
+        if (Floor3Manager.Instance != null && Floor3Manager.Instance.isCutscenePlaying)
+        {
+            movement = Vector2.zero;
+            rb.linearVelocity = Vector2.zero;
+            if (anim) anim.SetBool("isRunning", false);
+            if (NetworkManager && NetworkManager.IsClient && netAnim) netAnim.Animator.SetBool("isRunning", false);
+            return;
         }
 
         // Kiểm tra xem có đang bị kẹt bởi bảng Quest không (chỉ dùng nếu useQuestSystem = true)

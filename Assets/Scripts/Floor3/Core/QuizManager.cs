@@ -218,8 +218,16 @@ namespace Scripts.Floor3.Core
             // Chấm điểm dựa trên câu hỏi gốc của Server
             bool isCorrect = (chosenIndex == _serverSideQuestion.CorrectAnswerIndex);
 
-            if (isCorrect) _floor3Brain.OnCorrectAnswer();
-            else _floor3Brain.OnWrongAnswer();
+            if (isCorrect) 
+            {
+                _floor3Brain.OnCorrectAnswer();
+                // --- THÊM: CỘNG 1 ĐIỂM VÀO BỘ ĐẾM CỦA TẦNG 3 ---
+                if (Floor3Manager.Instance != null) Floor3Manager.Instance.AddCorrectScoreServerRpc();
+            }
+            else 
+            {
+                _floor3Brain.OnWrongAnswer();
+            }
 
             // Báo kết quả cho mọi người
             QuizResolvedClientRpc(isCorrect, _serverSideQuestion.CorrectAnswerIndex);
