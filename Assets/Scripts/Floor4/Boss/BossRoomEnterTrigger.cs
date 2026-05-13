@@ -32,6 +32,9 @@ public class BossRoomEnterTrigger : NetworkBehaviour
         // Destroy(_bossAvatar);
         _bossPhase1.enabled = true;
 
+        // --- THÊM LỆNH: BẬT NHẠC BOSS KHI ĐÓNG CỬA ---
+        PlayBossMusic();
+
         if (NetworkManager && NetworkManager.IsClient)
         {
             TeleportPlayersClientRpc();
@@ -72,6 +75,23 @@ public class BossRoomEnterTrigger : NetworkBehaviour
         foreach (GameObject player in GameObject.FindGameObjectsWithTag("Player"))
         {
             player.transform.position = transform.position;
+        }
+
+        // --- ĐẢM BẢO CÁC MÁY BỊ DỊCH CHUYỂN VÀO CŨNG NGHE THẤY NHẠC ---
+        PlayBossMusic();
+    }
+
+    // --- HÀM TỰ VIẾT ĐỂ TÌM VÀ BẬT NHẠC (KHÔNG PHÁ CẤU TRÚC GỐC) ---
+    private void PlayBossMusic()
+    {
+        GameObject bgmManager = GameObject.Find("BGM_Manager");
+        if (bgmManager != null)
+        {
+            AudioSource bgmSource = bgmManager.GetComponent<AudioSource>();
+            if (bgmSource != null && !bgmSource.isPlaying)
+            {
+                bgmSource.Play();
+            }
         }
     }
 }

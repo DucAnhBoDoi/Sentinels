@@ -115,6 +115,8 @@ public class GameOverManager : NetworkBehaviour
             if (Floor1Manager.Instance != null) Floor1Manager.Instance.RestartLevelWithFade();
             else if (Floor2Manager.Instance != null) Floor2Manager.Instance.RestartLevelWithFade();
             else if (Floor3Manager.Instance != null) Floor3Manager.Instance.RestartLevelWithFade();
+            // --- THÊM DUY NHẤT DÒNG NÀY CHO TẦNG 4 ---
+            else if (Floor4Manager.Instance != null) Floor4Manager.Instance.RestartLevelWithFade();
             else NetworkManager.SceneManager.LoadScene(SceneManager.GetActiveScene().name,LoadSceneMode.Single);
         }
     }
@@ -161,6 +163,8 @@ public class GameOverManager : NetworkBehaviour
             if (Floor1Manager.Instance != null) Floor1Manager.Instance.QuitToMenuWithFade("MenuScene");
             else if (Floor2Manager.Instance != null) Floor2Manager.Instance.QuitToMenuWithFade("MenuScene");
             else if (Floor3Manager.Instance != null) Floor3Manager.Instance.QuitToMenuWithFade("MenuScene");
+            // --- THÊM DUY NHẤT DÒNG NÀY CHO TẦNG 4 ---
+            else if (Floor4Manager.Instance != null) Floor4Manager.Instance.QuitToMenuWithFade("MenuScene");
             else 
             {
                 if (NetworkManager.Singleton != null) NetworkManager.Singleton.Shutdown();
