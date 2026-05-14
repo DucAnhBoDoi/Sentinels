@@ -56906,7 +56906,7 @@ MonoBehaviour:
   m_fontMaterials: []
   m_fontColor32:
     serializedVersion: 2
-    rgba: 16777215
+    rgba: 4294967295
   m_fontColor: {r: 1, g: 1, b: 1, a: 1}
   m_enableVertexGradient: 0
   m_colorMode: 3
@@ -102904,10 +102904,10 @@ PlayableDirector:
     value: {fileID: 1860926673}
   - key: {fileID: 1007416955669723390, guid: b191c57e4d26a9a4d99a87d7742a8b95, type: 2}
     value: {fileID: 1282677566}
-  - key: {fileID: -7994231307161836374, guid: b191c57e4d26a9a4d99a87d7742a8b95, type: 2}
-    value: {fileID: 1633734229}
   - key: {fileID: 1821643232512290951, guid: b191c57e4d26a9a4d99a87d7742a8b95, type: 2}
     value: {fileID: 1013144813}
+  - key: {fileID: -4003503047434213286, guid: b191c57e4d26a9a4d99a87d7742a8b95, type: 2}
+    value: {fileID: 1633734229}
   m_ExposedReferences:
     m_References: []
 --- !u!1 &1633734225
@@ -102945,8 +102945,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: -2900}
-  m_SizeDelta: {x: 800, y: 4595.208}
+  m_AnchoredPosition: {x: 0, y: -3400}
+  m_SizeDelta: {x: 800, y: 5570.841}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1633734227
 MonoBehaviour:
@@ -102975,40 +102975,40 @@ MonoBehaviour:
     <size=80%><color=#AAAAAA>A
     GRADUATION PROJECT</color></size>
 
-    
+
 
     <line-height=200%>
 
     </line-height>
 
-    
+
 
     <size=110%><b><color=#FFD700>MENTOR</color></b></size>
 
     <size=100%><color=#FFFFFF>Dao
     Quoc Tuan</color></size>
 
-    
+
 
     <line-height=150%>
 
     </line-height>
 
-    
+
 
     <size=110%><b><color=#FFD700>PROJECT
     MANAGER & TECH LEAD</color></b></size>
 
-    <size=100%><color=#FFFFFF>Hoang
-    Duc Anh</color></size>
+    <size=100%><color=#FFFFFF>Hoang Duc
+    Anh</color></size>
 
-    
+
 
     <line-height=150%>
 
     </line-height>
 
-    
+
 
     <size=110%><b><color=#FFD700>MULTIPLAYER
     & SYSTEMS ENGINEERING</color></b></size>
@@ -103022,13 +103022,13 @@ MonoBehaviour:
 
     Tran Quang Thang</color></size>
 
-    
+
 
     <line-height=150%>
 
     </line-height>
 
-    
+
 
     <size=110%><b><color=#FFD700>GAMEPLAY
     & MECHANICS PROGRAMMING</color></b></size>
@@ -103042,13 +103042,13 @@ MonoBehaviour:
 
     Tran Quang Thang</color></size>
 
-    
+
 
     <line-height=150%>
 
     </line-height>
 
-    
+
 
     <size=110%><b><color=#FFD700>GAME
     DESIGN & LEVEL ARCHITECTURE</color></b></size>
@@ -103062,13 +103062,13 @@ MonoBehaviour:
 
     Tran Quang Thang</color></size>
 
-    
+
 
     <line-height=150%>
 
     </line-height>
 
-    
+
 
     <size=110%><b><color=#FFD700>PIXEL
     ART, ANIMATION & VFX</color></b></size>
@@ -103082,13 +103082,13 @@ MonoBehaviour:
 
     Tran Quang Thang</color></size>
 
-    
+
 
     <line-height=150%>
 
     </line-height>
 
-    
+
 
     <size=110%><b><color=#FFD700>UI/UX
     DESIGN & AUDIO INTEGRATION</color></b></size>
@@ -103102,13 +103102,13 @@ MonoBehaviour:
 
     Tran Quang Thang</color></size>
 
-    
+
 
     <line-height=150%>
 
     </line-height>
 
-    
+
 
     <size=110%><b><color=#FFD700>QUALITY
     ASSURANCE & PLAYTESTING</color></b></size>
@@ -103122,13 +103122,13 @@ MonoBehaviour:
 
     Tran Quang Thang</color></size>
 
-    
+
 
     <line-height=250%>
 
     </line-height>
 
-    
+
 
     <size=110%><b><color=#FFD700>SPECIAL
     THANKS</color></b></size>
