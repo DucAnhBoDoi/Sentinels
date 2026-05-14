@@ -37,6 +37,11 @@ public class Floor1Manager : NetworkBehaviour
         if (!playerA) playerA = GameObject.Find("Player_A_Navigator")?.transform;
         if (!playerB) playerB = GameObject.Find("Player_B_Mechanic")?.transform;
 
+        if (IsServer)
+        {
+            GameProgress.KeysCollected = 0; // Đặt lại số Key về 0 khi bắt đầu ván mới
+        }
+
         if (fadeImage != null)
         {
             fadeImage.gameObject.SetActive(true);

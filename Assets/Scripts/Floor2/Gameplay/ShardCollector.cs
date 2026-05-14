@@ -51,6 +51,9 @@ public class ShardCollector : NetworkBehaviour
         if (isCollected) return;
         isCollected = true;
 
+        GameProgress.KeysCollected++; 
+        Debug.Log("Tổng số Lõi hiện tại: " + GameProgress.KeysCollected);
+
         // --- SỬA Ở ĐÂY: CHO PHÉP CỤC KEY TỰ NHẬN DIỆN ĐANG Ở TẦNG NÀO ---
         if (Floor2Manager.Instance != null)
         {
